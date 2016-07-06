@@ -14,7 +14,7 @@ template to automatically generate Java classes that can serialize JSON instance
 
 The [core translation routines](https://github.com/metadatacenter/cadsr2cedar/blob/master/src/main/java/org/metadatacenter/ingestor/cadsr/CDEXMLInstances2CEDARCDEInstances.java)
 extract information from the JAXB-generated Java objects and insert the information into the jsonschema2pojo-generated Java objects.
-These later objects are then serialized into CEDAR-conformant JSON instances.
+These latter objects are then serialized into CEDAR-conformant JSON instances.
 
 Note that the [caDSR CDE XML Schema](https://github.com/metadatacenter/cadsr2cedar/blob/master/src/main/resources/xsd/DataElement_V4.0.xsd)
 was produced semi-automatically from the caDSR-supplied [DTD-encoded schema](https://github.com/metadatacenter/cadsr2cedar/blob/master/src/main/resources/dtd/DataElement_V4.0.dtd).
