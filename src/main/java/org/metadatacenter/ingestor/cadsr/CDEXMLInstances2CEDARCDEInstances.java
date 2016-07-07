@@ -31,7 +31,7 @@ public class CDEXMLInstances2CEDARCDEInstances
       System.out.println("Processing DataElement....");
 
       // Create a DataElement Java object (which we will serialize as a CEDAR template instance) for each DataElement
-      DataElement dateElement = new DataElement();
+      org.metadatacenter.ingestor.cedar.DataElement dateElement = new org.metadatacenter.ingestor.cedar.DataElement();
 
       // Transfer the content of each DataElement to a ElementData
 
