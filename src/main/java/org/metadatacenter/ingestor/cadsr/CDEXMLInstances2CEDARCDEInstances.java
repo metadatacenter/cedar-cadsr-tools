@@ -2,6 +2,8 @@ package org.metadatacenter.ingestor.cadsr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.ObjectUtils;
+import org.metadatacenter.ingestor.cedar.*;
+import org.metadatacenter.ingestor.cedar.ConceptDetails;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -9,6 +11,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CDEXMLInstances2CEDARCDEInstances
@@ -41,59 +44,232 @@ public class CDEXMLInstances2CEDARCDEInstances
       //data element details
       System.out.println("**Data Element Details**");
 
+      //wire data element from xml to json
+
+      //DE public ID
       String cadsrPublicID = cadsrDataElement.getPUBLICID().getContent();
       System.out.println(cadsrPublicID);
+      PublicID cedarPublicID = new org.metadatacenter.ingestor.cedar.PublicID();
+      cedarPublicID.setValue(cadsrPublicID);
+      cedarDataElement.setPublicID(cedarPublicID);
 
+      //DE Long Name
       String cadsrLongName = cadsrDataElement.getLONGNAME().getContent();
       System.out.println(cadsrLongName);
+      org.metadatacenter.ingestor.cedar.LongName cedarLongName = new org.metadatacenter.ingestor.cedar.LongName();
+      cedarLongName.setValue(cadsrLongName);
+      cedarDataElement.setLongName(cedarLongName);
 
+      //DE Preferred Name
       String cadsrPreferredName = cadsrDataElement.getPREFERREDNAME().getContent();
       System.out.println(cadsrPreferredName);
+      org.metadatacenter.ingestor.cedar.PreferredName cedarPreferredName = new org.metadatacenter.ingestor.cedar.PreferredName();
+      cedarPreferredName.setValue(cadsrPreferredName);
+      cedarDataElement.setPreferredName(cedarPreferredName);
 
+      //DE Preferred Definition
       String cadsrPreferredDefinition = cadsrDataElement.getPREFERREDDEFINITION().getContent();
       System.out.println(cadsrPreferredDefinition);
+      org.metadatacenter.ingestor.cedar.PreferredDefinition cedarPreferredDefinition = new org.metadatacenter.ingestor.cedar.PreferredDefinition();
+      cedarPreferredDefinition.setValue(cadsrPreferredDefinition);
+      cedarDataElement.setPreferredDefinition(cedarPreferredDefinition);
 
+      //DE Version
       String cadsrVersion = cadsrDataElement.getVERSION().getContent();
       System.out.println(cadsrVersion);
+      org.metadatacenter.ingestor.cedar.Version cedarVersion = new org.metadatacenter.ingestor.cedar.Version();
+      cedarVersion.setValue(cadsrVersion);
+      cedarDataElement.setVersion(cedarVersion);
 
-      //Data element concept
+      //DE Workflow Status
+      String cadsrWorkflowStatus = cadsrDataElement.getWORKFLOWSTATUS().getContent();
+      System.out.println(cadsrWorkflowStatus);
+      org.metadatacenter.ingestor.cedar.WorkflowStatus cedarWorkflowStatus = new org.metadatacenter.ingestor.cedar.WorkflowStatus();
+      cedarWorkflowStatus.setValue(cadsrWorkflowStatus);
+      cedarDataElement.setWorkflowStatus(cedarWorkflowStatus);
+
+      //DE Context Name
+      String cadsrContextName = cadsrDataElement.getCONTEXTNAME().getContent();
+      System.out.println(cadsrContextName);
+      org.metadatacenter.ingestor.cedar.ContextName cedarContextName = new org.metadatacenter.ingestor.cedar.ContextName();
+      cedarContextName.setValue(cadsrContextName);
+      cedarDataElement.setContextName(cedarContextName);
+
+      //DE Context Version
+      String cadsrContextVersion = cadsrDataElement.getCONTEXTVERSION().getContent();
+      System.out.println(cadsrContextVersion);
+      org.metadatacenter.ingestor.cedar.ContextVersion cedarContextVersion = new org.metadatacenter.ingestor.cedar.ContextVersion();
+      cedarContextVersion.setValue(cadsrContextVersion);
+      cedarDataElement.setContextVersion(cedarContextVersion);
+
+      //DE Origin
+      String cadsrOrigin = cadsrDataElement.getORIGIN().getContent();
+      System.out.println(cadsrOrigin);
+      org.metadatacenter.ingestor.cedar.Origin cedarOrigin = new org.metadatacenter.ingestor.cedar.Origin();
+      cedarOrigin.setValue(cadsrOrigin);
+      cedarDataElement.setOrigin(cedarOrigin);
+
+      //DE Registration Status
+      String cadsrRegistrationStatus = cadsrDataElement.getREGISTRATIONSTATUS().getContent();
+      System.out.println(cadsrRegistrationStatus);
+      org.metadatacenter.ingestor.cedar.RegistrationStatus cedarRegistrationStatus = new org.metadatacenter.ingestor.cedar.RegistrationStatus();
+      cedarRegistrationStatus.setValue(cadsrRegistrationStatus);
+      cedarDataElement.setRegistrationStatus(cedarRegistrationStatus);
+
+      /* ******************************************************* */
+      /* ******************************************************* */
+
+
+      // build Data element concept from xml to json
       System.out.println("**Data Element Concept**");
       DATAELEMENTCONCEPT cadsrDataElementDATAELEMENTCONCEPT = cadsrDataElement.getDATAELEMENTCONCEPT();
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPT.getPublicId().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPT.getPreferredName().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPT.getPreferredDefinition().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPT.getLongName().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPT.getVersion().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPT.getWorkflowStatus().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPT.getContextName().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPT.getContextVersion().getContent());
+      DataElementConcept cedarDataElementConcept = new DataElementConcept();
+
+      //DEC Public ID
+      String cadsrDECPublicID = cadsrDataElementDATAELEMENTCONCEPT.getPublicId().getContent();
+      System.out.println(cadsrDECPublicID);
+      PublicID_ cedarDECPublicID = new PublicID_();
+      cedarDECPublicID.setValue(cadsrDECPublicID);
+      cedarDataElementConcept.setPublicID(cedarDECPublicID);
+
+      //DEC Preferred Name
+      String cadsrDECPreferredName = cadsrDataElementDATAELEMENTCONCEPT.getPreferredName().getContent();
+      System.out.println(cadsrDECPreferredName);
+      org.metadatacenter.ingestor.cedar.PreferredName_ cedarDECPreferredName = new PreferredName_();
+      cedarDECPreferredName.setValue(cadsrDECPreferredName);
+      cedarDataElementConcept.setPreferredName(cedarDECPreferredName);
+
+
+      //DEC Preferred Definition
+      String cadsrDECPreferredDefinition = cadsrDataElementDATAELEMENTCONCEPT.getPreferredDefinition().getContent();
+      System.out.println(cadsrDECPreferredDefinition);
+      org.metadatacenter.ingestor.cedar.PreferredDefinition_ cedarDECPreferredDefinition = new PreferredDefinition_();
+      cedarDECPreferredDefinition.setValue(cadsrPreferredDefinition);
+      cedarDataElementConcept.setPreferredDefinition(cedarDECPreferredDefinition);
+
+      //DEC Long Name
+      String cadsrDECLongName = cadsrDataElementDATAELEMENTCONCEPT.getLongName().getContent();
+      System.out.println(cadsrDECLongName);
+      org.metadatacenter.ingestor.cedar.LongName_ cedarDECLongName = new LongName_();
+      cedarDECLongName.setValue(cadsrDECLongName);
+      cedarDataElementConcept.setLongName(cedarDECLongName);
+
+      //DEC Version
+      String cadsrDECVersion = cadsrDataElementDATAELEMENTCONCEPT.getVersion().getContent();
+      System.out.println(cadsrDECVersion);
+      org.metadatacenter.ingestor.cedar.Version_ cedarDECVersion = new Version_();
+      cedarDECVersion.setValue(cadsrDECVersion);
+      cedarDataElementConcept.setVersion(cedarDECVersion);
+
+      //DEC Workflow Status
+      String cadsrDECWorkflowStatus = cadsrDataElementDATAELEMENTCONCEPT.getWorkflowStatus().getContent();
+      System.out.println(cadsrDECWorkflowStatus);
+      org.metadatacenter.ingestor.cedar.WorkflowStatus_ cedarDECWorkflowStatus = new WorkflowStatus_();
+      cedarDECWorkflowStatus.setValue(cadsrDECWorkflowStatus);
+      cedarDataElementConcept.setWorkflowStatus(cedarDECWorkflowStatus);
+
+      //DEC Context Name
+      String cadsrDECContextName = cadsrDataElementDATAELEMENTCONCEPT.getContextName().getContent();
+      System.out.println(cadsrDECContextName);
+      org.metadatacenter.ingestor.cedar.ContextName_ cedarDECContextName = new ContextName_();
+      cedarDECContextName.setValue(cadsrContextName);
+      cedarDataElementConcept.setContextName(cedarDECContextName);
+
+      //DEC Context Version
+      String cadsrDECContextVersion = cadsrDataElementDATAELEMENTCONCEPT.getContextVersion().getContent();
+      System.out.println(cadsrDECContextVersion);
+      org.metadatacenter.ingestor.cedar.ContextVersion_ cedarDECContextVersion = new ContextVersion_();
+      cedarContextVersion.setValue(cadsrContextVersion);
+      cedarDataElementConcept.setContextVersion(cedarDECContextVersion);
+
+      /* ******************************************************* */
 
       //DEC conceptual domain
       System.out.println("**DEC Conceptual Domain**");
       ConceptualDomain cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain = cadsrDataElementDATAELEMENTCONCEPT.getConceptualDomain();
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getPublicId().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getContextName().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getContextVersion().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getPreferredName().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getVersion().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getLongName().getContent());
+      org.metadatacenter.ingestor.cedar.ConceptualDomain cedarDECConceptualDomain = new org.metadatacenter.ingestor.cedar.ConceptualDomain();
+
+      //DEC CD public id
+      String cadsrDECcdPublicID = cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getPublicId().getContent();
+      System.out.println(cadsrDECcdPublicID);
+
+      //DEC CD context name
+      String cadsrDECcdContextName = cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getContextName().getContent();
+      System.out.println(cadsrDECcdContextName);
+
+      //DEC CD context version
+      String cadsrDECcdContextVersion = cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getContextVersion().getContent();
+      System.out.println(cadsrDECcdContextVersion);
+
+      //DEC CD preferred name
+      String cadsrDECcdPreferredName = cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getPreferredName().getContent();
+      System.out.println(cadsrDECcdPreferredName);
+
+      //DEC CD version
+      String cadsrDECcdVersion = cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getVersion().getContent();
+      System.out.println(cadsrDECcdVersion);
+
+      //DEC CD long name
+      String cadsrDECcdLongName = cadsrDataElementDATAELEMENTCONCEPTDECConceptualDomain.getLongName().getContent();
+      System.out.println(cadsrDECcdLongName);
+
+
+      //wire DEC conceptual domain to DEC
+      cedarDataElementConcept.setConceptualDomain(cedarDECConceptualDomain);
+
+      /* ******************************************************* */
 
       //object class
       System.out.println("**ObjectClass**");
       ObjectClass cadsrDataElementDATAELEMENTCONCEPTObjectClass = cadsrDataElementDATAELEMENTCONCEPT.getObjectClass();
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTObjectClass.getPublicId().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTObjectClass.getContextName().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTObjectClass.getContextVersion().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTObjectClass.getPreferredName().getContent());
-      System.out.println(cadsrDataElementDATAELEMENTCONCEPTObjectClass.getVersion().getContent());
-      System.out.println("\t" + cadsrDataElementDATAELEMENTCONCEPTObjectClass.getLongName().getContent());
+      org.metadatacenter.ingestor.cedar.ObjectClass objectClass = new org.metadatacenter.ingestor.cedar.ObjectClass();
+
+      //object class public id
+      String cadsrObjClassPublicID = cadsrDataElementDATAELEMENTCONCEPTObjectClass.getPublicId().getContent();
+      System.out.println(cadsrObjClassPublicID);
+
+      //object class context name
+      String cadsrObjClassContextName = cadsrDataElementDATAELEMENTCONCEPTObjectClass.getContextName().getContent();
+      System.out.println(cadsrObjClassContextName);
+
+      //object class context version
+      String cadsrObjClassContextVersion = cadsrDataElementDATAELEMENTCONCEPTObjectClass.getContextVersion().getContent();
+      System.out.println(cadsrObjClassContextVersion);
+
+      //object class preferred name
+      String cadsrObjClassPreferredName = cadsrDataElementDATAELEMENTCONCEPTObjectClass.getPreferredName().getContent();
+      System.out.println(cadsrObjClassPreferredName);
+
+      //object class version
+      String cadsrObjClassVersion = cadsrDataElementDATAELEMENTCONCEPTObjectClass.getVersion().getContent();
+      System.out.println(cadsrObjClassVersion);
+
+      //object class long name
+      String cadsrObjClassLongName = cadsrDataElementDATAELEMENTCONCEPTObjectClass.getLongName().getContent();
+      System.out.println(cadsrObjClassLongName);
+
+      /* ******************************************************* */
 
       //object class concept details list
       List<ConceptDetailsITEM> cadsrDataElementDATAELEMENTCONCEPTObjectClassConceptDetailsITEM = cadsrDataElementDATAELEMENTCONCEPTObjectClass.getConceptDetails().getConceptDetailsITEM();
+      org.metadatacenter.ingestor.cedar.ConceptDetails cedarObjClassConceptDetails = new ConceptDetails();
+      List<ConceptDetailsItem> cedarConceptDetailsList = new ArrayList<ConceptDetailsItem>();
+
       if (!cadsrDataElementDATAELEMENTCONCEPTObjectClassConceptDetailsITEM.isEmpty()) {
         for (ConceptDetailsITEM val : cadsrDataElementDATAELEMENTCONCEPTObjectClassConceptDetailsITEM) {
+          org.metadatacenter.ingestor.cedar.ConceptDetailsItem cedarObjClassConceptDetailsItem = new ConceptDetailsItem();
+
           System.out.println("object class concept details list item: ");
-          System.out.println(val.getPREFERREDNAME().getContent());
+
+          String cadsrObjClassConceptDetailsItemPreferredName = val.getPREFERREDNAME().getContent();
+          System.out.println(cadsrObjClassConceptDetailsItemPreferredName);
+          org.metadatacenter.ingestor.cedar.PreferredName____ cedarObjClassConceptDetailsItemPreferredName = new PreferredName____();
+          cedarObjClassConceptDetailsItemPreferredName.setValue(cadsrObjClassConceptDetailsItemPreferredName);
+          cedarObjClassConceptDetailsItem.setPreferredName(cedarObjClassConceptDetailsItemPreferredName);
+
+
+          cedarConceptDetailsList.add(cedarObjClassConceptDetailsItem);
+
           System.out.println(val.getLONGNAME().getContent());
           System.out.println(val.getCONID().getContent());
           System.out.println(val.getDEFINITIONSOURCE().getContent());
@@ -104,6 +280,16 @@ public class CDEXMLInstances2CEDARCDEInstances
           System.out.println(val.getDISPLAYORDER().getContent());
         }
       }
+
+      cedarObjClassConceptDetails.setConceptDetailsItem(cedarConceptDetailsList);
+
+      objectClass.setConceptDetails(cedarObjClassConceptDetails);
+
+      //TODO wire the rest of object class concept details back together, figure out empty case (null?)
+
+      cedarDataElementConcept.setObjectClass(objectClass);
+
+      /* ******************************************************* */
 
       //property
       System.out.println("**Property**");
@@ -161,6 +347,16 @@ public class CDEXMLInstances2CEDARCDEInstances
         }
       }
       System.out.println(Origin);
+
+
+      // wire cedar DEC to data element
+      //TODO check DEC is complete
+      cedarDataElement.setDataElementConcept(cedarDataElementConcept);
+
+
+      /* ******************************************************* */
+      /* ******************************************************* */
+
 
       //value domain
       System.out.println("**Value Domain**");
@@ -272,10 +468,9 @@ public class CDEXMLInstances2CEDARCDEInstances
       System.out.println(cadsrDataElementVALUEDOMAINRepresentation.getVersion().getContent());
       System.out.println(cadsrDataElementVALUEDOMAINRepresentation.getLongName().getContent());
 
-      /* TODO: continue printing out the Data element, left off at representation concept details list
-       * use other concept domain again
+      /* TODO:
        * does every value have to be checked for null?
-       * next, will wire all these values to xml classes*/
+       * next, wire all these values to xml classes*/
 
       //representation concept details list
       List<ConceptDetailsITEM> cadsrDataElementVALUEDOMAINRepresentationConceptDetailsITEM = cadsrDataElementVALUEDOMAINRepresentation.getConceptDetails().getConceptDetailsITEM();
