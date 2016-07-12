@@ -3,7 +3,25 @@ package org.metadatacenter.ingestor.cadsr;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang.ObjectUtils;
 import org.metadatacenter.ingestor.cedar.*;
+import org.metadatacenter.ingestor.cedar.AlternateName;
+import org.metadatacenter.ingestor.cedar.AlternateNameType;
+import org.metadatacenter.ingestor.cedar.ClassificationSchemeItemName;
+import org.metadatacenter.ingestor.cedar.ClassificationSchemeItemType;
+import org.metadatacenter.ingestor.cedar.ComponentDataElementsList;
+import org.metadatacenter.ingestor.cedar.ConcatenationCharacter;
 import org.metadatacenter.ingestor.cedar.ConceptDetails;
+import org.metadatacenter.ingestor.cedar.DerivationType;
+import org.metadatacenter.ingestor.cedar.DerivationTypeDescription;
+import org.metadatacenter.ingestor.cedar.DocumentText;
+import org.metadatacenter.ingestor.cedar.DocumentType;
+import org.metadatacenter.ingestor.cedar.Language;
+import org.metadatacenter.ingestor.cedar.Methods;
+import org.metadatacenter.ingestor.cedar.Name;
+import org.metadatacenter.ingestor.cedar.OrganizationName;
+import org.metadatacenter.ingestor.cedar.PermissibleValues;
+import org.metadatacenter.ingestor.cedar.Rule;
+import org.metadatacenter.ingestor.cedar.URL;
+import org.metadatacenter.ingestor.cedar.ValueDomainConcepts;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -623,339 +641,887 @@ public class CDEXMLInstances2CEDARCDEInstances
       //value domain conceptual domain public id
       String cadsrVDConceptualDomainPublicID = cadsrVDConceptualDomain.getPublicId().getContent();
       System.out.println(cadsrVDConceptualDomainPublicID);
+      org.metadatacenter.ingestor.cedar.PublicID______ cedarVDConceptualDomainPublicID = new org.metadatacenter.ingestor.cedar.PublicID______();
+      cedarVDConceptualDomainPublicID.setValue(cadsrVDConceptualDomainPublicID);
+      cedarVDConceptualDomain.setPublicID(cedarVDConceptualDomainPublicID);
 
       //value domain conceptual domain context name
       String cadsrVDConceptualDomainContextName = cadsrVDConceptualDomain.getContextName().getContent();
       System.out.println(cadsrVDConceptualDomainContextName);
+      org.metadatacenter.ingestor.cedar.ContextName______ cedarVDConceptualDomainContextName = new org.metadatacenter.ingestor.cedar.ContextName______();
+      cedarVDConceptualDomainContextName.setValue(cadsrVDConceptualDomainContextName);
+      cedarVDConceptualDomain.setContextName(cedarVDConceptualDomainContextName);
 
       //value domain conceptual domain context version
       String cadsrVDConceptualDomainContextVersion = cadsrVDConceptualDomain.getContextVersion().getContent();
       System.out.println(cadsrVDConceptualDomainContextVersion);
+      org.metadatacenter.ingestor.cedar.ContextVersion______ cedarVDConceptualDomainContextVersion = new org.metadatacenter.ingestor.cedar.ContextVersion______();
+      cedarVDConceptualDomainContextVersion.setValue(cadsrValueDomainContextVersion);
+      cedarVDConceptualDomain.setContextVersion(cedarVDConceptualDomainContextVersion);
 
       //value domain conceptual domain preferred name
       String cadsrVDConceptualDomainPreferredName = cadsrVDConceptualDomain.getPreferredName().getContent();
       System.out.println(cadsrVDConceptualDomainPreferredName);
+      org.metadatacenter.ingestor.cedar.PreferredName________ cedarVDConceptualDomainPreferredName = new org.metadatacenter.ingestor.cedar.PreferredName________();
+      cedarVDConceptualDomainPreferredName.setValue(cadsrVDConceptualDomainPreferredName);
+      cedarVDConceptualDomain.setPreferredName(cedarVDConceptualDomainPreferredName);
 
       //value domain conceptual domain version
       String cadsrVDConceptualDomainVersion = cadsrVDConceptualDomain.getVersion().getContent();
       System.out.println(cadsrVDConceptualDomainVersion);
+      org.metadatacenter.ingestor.cedar.Version______ cedarVDConceptualDomainVersion = new org.metadatacenter.ingestor.cedar.Version______();
+      cedarVDConceptualDomainVersion.setValue(cadsrVDConceptualDomainVersion);
+      cedarVDConceptualDomain.setVersion(cedarVDConceptualDomainVersion);
 
       //value domain conceptual domain long name
       String cadsrVDConceptualDomainLongName = cadsrVDConceptualDomain.getLongName().getContent();
       System.out.println(cadsrVDConceptualDomainLongName);
-
-      //TODO return here
+      org.metadatacenter.ingestor.cedar.LongName________ cedarVDConceptualDomainLongName = new org.metadatacenter.ingestor.cedar.LongName________();
+      cedarVDConceptualDomainLongName.setValue(cadsrVDConceptualDomainLongName);
+      cedarVDConceptualDomain.setLongName(cedarVDConceptualDomainLongName);
 
       cedarValueDomain.setConceptualDomain(cedarVDConceptualDomain);
 
+      /* ******************************************************* */
+
+      //value domain attributes continued
       System.out.println("**Value Domain cont**");
-      System.out.println(cadsrVALUEDOMAIN.getDatatype().getContent());
-      System.out.println(cadsrVALUEDOMAIN.getValueDomainType().getContent());
+      
+      //value domain datatype
+      String cadsrValueDomainDatatype = cadsrVALUEDOMAIN.getDatatype().getContent();
+      System.out.println(cadsrValueDomainDatatype);
+      org.metadatacenter.ingestor.cedar.Datatype cedarValueDomainDatatype = new org.metadatacenter.ingestor.cedar.Datatype();
+      cedarValueDomainDatatype.setValue(cadsrValueDomainDatatype);
+      cedarValueDomain.setDatatype(cedarValueDomainDatatype);
+
+      String cadsrValueDomainType = cadsrVALUEDOMAIN.getValueDomainType().getContent();
+      System.out.println(cadsrValueDomainType);
+      org.metadatacenter.ingestor.cedar.ValueDomainType cedarValueDomainType = new org.metadatacenter.ingestor.cedar.ValueDomainType();
+      cedarValueDomainType.setValue(cadsrValueDomainType);
+      cedarValueDomain.setValueDomainType(cedarValueDomainType);
 
       //unit of measure
-      String unitOfMeasure = cadsrVALUEDOMAIN.getUnitOfMeasure().getContent();
-      if (unitOfMeasure.isEmpty()) {
-        unitOfMeasure = cadsrVALUEDOMAIN.getUnitOfMeasure().getNULL();
-        if (unitOfMeasure.equals("TRUE")) {
-          unitOfMeasure = "NULL";
+      String cadsrValueDomainUnitsOfMeasure = cadsrVALUEDOMAIN.getUnitOfMeasure().getContent();
+      org.metadatacenter.ingestor.cedar.UnitsOfMeasure cedarValueDomainUnitsOfMeasure = new org.metadatacenter.ingestor.cedar.UnitsOfMeasure();
+      if (cadsrValueDomainUnitsOfMeasure.isEmpty()) {
+        cadsrValueDomainUnitsOfMeasure = cadsrVALUEDOMAIN.getUnitOfMeasure().getNULL();
+        if (cadsrValueDomainUnitsOfMeasure.equals("TRUE")) {
+          cadsrValueDomainUnitsOfMeasure = "NULL";
         }
       }
-      System.out.println(unitOfMeasure);
+      System.out.println(cadsrValueDomainUnitsOfMeasure);
+      cedarValueDomainUnitsOfMeasure.setValue(cadsrValueDomainUnitsOfMeasure);
+      cedarValueDomain.setUnitsOfMeasure(cedarValueDomainUnitsOfMeasure);
 
       //display format
-      String displayFormat = cadsrVALUEDOMAIN.getDisplayFormat().getContent();
-      if (displayFormat.isEmpty()) {
-        displayFormat = cadsrVALUEDOMAIN.getDisplayFormat().getNULL();
-        if (displayFormat.equals("TRUE")) {
-          displayFormat = "NULL";
+      String cadsrValueDomainDisplayFormat = cadsrVALUEDOMAIN.getDisplayFormat().getContent();
+      org.metadatacenter.ingestor.cedar.DisplayFormat cedarValueDomainDisplayFormat = new org.metadatacenter.ingestor.cedar.DisplayFormat();
+      if (cadsrValueDomainDisplayFormat.isEmpty()) {
+        cadsrValueDomainDisplayFormat = cadsrVALUEDOMAIN.getDisplayFormat().getNULL();
+        if (cadsrValueDomainDisplayFormat.equals("TRUE")) {
+          cadsrValueDomainDisplayFormat = "NULL";
         }
       }
-      System.out.println(displayFormat);
+      System.out.println(cadsrValueDomainDisplayFormat);
+      cedarValueDomainDisplayFormat.setValue(cadsrValueDomainDisplayFormat);
+      cedarValueDomain.setDisplayFormat(cedarValueDomainDisplayFormat);
 
-      //max and min length
-      System.out.println(cadsrVALUEDOMAIN.getMaximumLength().getContent());
-      System.out.println(cadsrVALUEDOMAIN.getMinimumLength().getContent());
+      //value domain maximum length
+      String cadsrValueDomainMaximumLength = cadsrVALUEDOMAIN.getMaximumLength().getContent();
+      System.out.println(cadsrValueDomainMaximumLength);
+      org.metadatacenter.ingestor.cedar.MaximumLength cedarValueDomainMaximumLength = new org.metadatacenter.ingestor.cedar.MaximumLength();
+      cedarValueDomainMaximumLength.setValue(cadsrValueDomainMaximumLength);
+      cedarValueDomain.setMaximumLength(cedarValueDomainMaximumLength);
+
+      //value domain minimum length
+      String cadsrValueDomainMinimumLength = cadsrVALUEDOMAIN.getMinimumLength().getContent();
+      System.out.println(cadsrValueDomainMinimumLength);
+      org.metadatacenter.ingestor.cedar.MinimumLength cedarValueDomainMinimumLength = new org.metadatacenter.ingestor.cedar.MinimumLength();
+      cedarValueDomainMinimumLength.setValue(cadsrValueDomainMinimumLength);
+      cedarValueDomain.setMinimumLength(cedarValueDomainMinimumLength);
 
       //decimal place
-      String decimalPlace = cadsrVALUEDOMAIN.getDecimalPlace().getContent();
-      if (decimalPlace.isEmpty()) {
-        decimalPlace = cadsrVALUEDOMAIN.getDecimalPlace().getNULL();
-        if (decimalPlace.equals("TRUE")) {
-          decimalPlace = "NULL";
+      String cadsrValueDomainDecimalPlace = cadsrVALUEDOMAIN.getDecimalPlace().getContent();
+      org.metadatacenter.ingestor.cedar.DecimalPlace cedarValueDomainDecimalPlace = new org.metadatacenter.ingestor.cedar.DecimalPlace();
+      if (cadsrValueDomainDecimalPlace.isEmpty()) {
+        cadsrValueDomainDecimalPlace = cadsrVALUEDOMAIN.getDecimalPlace().getNULL();
+        if (cadsrValueDomainDecimalPlace.equals("TRUE")) {
+          cadsrValueDomainDecimalPlace = "NULL";
         }
       }
-      System.out.println(decimalPlace);
+      System.out.println(cadsrValueDomainDecimalPlace);
+      cedarValueDomainDecimalPlace.setValue(cadsrValueDomainDecimalPlace);
+      cedarValueDomain.setDecimalPlace(cedarValueDomainDecimalPlace);
 
       //character set name
-      String characterSetName = cadsrVALUEDOMAIN.getCharacterSetName().getContent();
-      if (characterSetName.isEmpty()) {
-        characterSetName = cadsrVALUEDOMAIN.getCharacterSetName().getNULL();
-        if (characterSetName.equals("TRUE")) {
-          characterSetName = "NULL";
+      String cadsrValueDomainCharacterSetName = cadsrVALUEDOMAIN.getCharacterSetName().getContent();
+      org.metadatacenter.ingestor.cedar.CharacterSetName cedarValueDomainCharacterSetName = new org.metadatacenter.ingestor.cedar.CharacterSetName();
+      if (cadsrValueDomainCharacterSetName.isEmpty()) {
+        cadsrValueDomainCharacterSetName = cadsrVALUEDOMAIN.getCharacterSetName().getNULL();
+        if (cadsrValueDomainCharacterSetName.equals("TRUE")) {
+          cadsrValueDomainCharacterSetName = "NULL";
         }
       }
-      System.out.println(characterSetName);
+      System.out.println(cadsrValueDomainCharacterSetName);
+      cedarValueDomainCharacterSetName.setValue(cadsrValueDomainCharacterSetName);
+      cedarValueDomain.setCharacterSetName(cedarValueDomainCharacterSetName);
 
       //max value
-      String maximumValue = cadsrVALUEDOMAIN.getMaximumValue().getContent();
-      if (maximumValue.isEmpty()) {
-        maximumValue = cadsrVALUEDOMAIN.getMaximumValue().getNULL();
-        if (maximumValue.equals("TRUE")) {
-          maximumValue = "NULL";
+      String cadsrValueDomainMaximumValue = cadsrVALUEDOMAIN.getMaximumValue().getContent();
+      org.metadatacenter.ingestor.cedar.MaximumValue cedarValueDomainMaximumValue = new org.metadatacenter.ingestor.cedar.MaximumValue();
+      if (cadsrValueDomainMaximumValue.isEmpty()) {
+        cadsrValueDomainMaximumValue = cadsrVALUEDOMAIN.getMaximumValue().getNULL();
+        if (cadsrValueDomainMaximumValue.equals("TRUE")) {
+          cadsrValueDomainMaximumValue = "NULL";
         }
       }
-      System.out.println(maximumValue);
+      System.out.println(cadsrValueDomainMaximumValue);
+      cedarValueDomainMaximumValue.setValue(cadsrValueDomainMaximumValue);
+      cedarValueDomain.setMaximumValue(cedarValueDomainMaximumValue);
 
       //min value
-      String minimumValue = cadsrVALUEDOMAIN.getMinimumValue().getContent();
-      if (minimumValue.isEmpty()) {
-        minimumValue = cadsrVALUEDOMAIN.getMinimumValue().getNULL();
-        if (minimumValue.equals("TRUE")) {
-          minimumValue = "NULL";
+      String cadsrValueDomainMinimumValue = cadsrVALUEDOMAIN.getMinimumValue().getContent();
+      org.metadatacenter.ingestor.cedar.MinimumValue cedarValueDomainMinimumValue = new org.metadatacenter.ingestor.cedar.MinimumValue();
+      if (cadsrValueDomainMinimumValue.isEmpty()) {
+        cadsrValueDomainMinimumValue = cadsrVALUEDOMAIN.getMinimumValue().getNULL();
+        if (cadsrValueDomainMinimumValue.equals("TRUE")) {
+          cadsrValueDomainMinimumValue = "NULL";
         }
       }
-      System.out.println(minimumValue);
+      System.out.println(cadsrValueDomainMinimumValue);
+      cedarValueDomainMinimumValue.setValue(cadsrValueDomainMinimumValue);
+      cedarValueDomain.setMinimumValue(cedarValueDomainMinimumValue);
 
       //origin
-      String origin = cadsrVALUEDOMAIN.getOrigin().getContent();
-      if (origin.isEmpty()) {
-        origin = cadsrVALUEDOMAIN.getOrigin().getNULL();
-        if (origin.equals("TRUE")) {
-          origin = "NULL";
+      String cadsrValueDomainOrigin = cadsrVALUEDOMAIN.getOrigin().getContent();
+      org.metadatacenter.ingestor.cedar.Origin____ cedarValueDomainOrigin = new org.metadatacenter.ingestor.cedar.Origin____();
+      if (cadsrValueDomainOrigin.isEmpty()) {
+        cadsrValueDomainOrigin = cadsrVALUEDOMAIN.getOrigin().getNULL();
+        if (cadsrValueDomainOrigin.equals("TRUE")) {
+          cadsrValueDomainOrigin = "NULL";
         }
       }
-      System.out.println(origin);
+      System.out.println(cadsrValueDomainOrigin);
+      cedarValueDomainOrigin.setValue(cadsrValueDomainOrigin);
+      cedarValueDomain.setOrigin(cedarValueDomainOrigin);
+
+      /* ******************************************************* */
 
       //representation
       System.out.println("**Representation**");
-      Representation cadsrVALUEDOMAINRepresentation = cadsrVALUEDOMAIN.getRepresentation();
-      System.out.println(cadsrVALUEDOMAINRepresentation.getPublicId().getContent());
-      System.out.println(cadsrVALUEDOMAINRepresentation.getContextName().getContent());
-      System.out.println(cadsrVALUEDOMAINRepresentation.getContextVersion().getContent());
-      System.out.println(cadsrVALUEDOMAINRepresentation.getPreferredName().getContent());
-      System.out.println(cadsrVALUEDOMAINRepresentation.getVersion().getContent());
-      System.out.println(cadsrVALUEDOMAINRepresentation.getLongName().getContent());
+      Representation cadsrValueDomainRepresentation = cadsrVALUEDOMAIN.getRepresentation();
+      org.metadatacenter.ingestor.cedar.Representation cedarValueDomainRepresentation = new org.metadatacenter.ingestor.cedar.Representation();
 
-      /* TODO:
-       * does every value have to be checked for null?
-       * next, wire all these values to xml classes*/
+      //representation public ID
+      String cadsrRepresentationPublicID = cadsrValueDomainRepresentation.getPublicId().getContent();
+      System.out.println(cadsrRepresentationPublicID);
+      PublicID_______ cedarRepresentationPublicID = new PublicID_______();
+      cedarRepresentationPublicID.setValue(cadsrRepresentationPublicID);
+      cedarValueDomainRepresentation.setPublicID(cedarRepresentationPublicID);
+
+      //representation context name
+      String cadsrRepresentationContextName = cadsrValueDomainRepresentation.getContextName().getContent();
+      System.out.println(cadsrRepresentationContextName);
+      Untitled cedarRepresentationContextName = new Untitled();
+      cedarRepresentationContextName.setValue(cadsrRepresentationContextName);
+      cedarValueDomainRepresentation.setUntitled(cedarRepresentationContextName);
+      //TODO find out why this is "untitled" rather than "context name" (reported to waffle as bug)
+
+      //representation context version
+      String cadsrRepresentationContextVersion = cadsrValueDomainRepresentation.getContextVersion().getContent();
+      System.out.println(cadsrRepresentationContextVersion);
+      ContextVersion_______ cedarRepresentationContextVersion = new ContextVersion_______();
+      cedarRepresentationContextVersion.setValue(cadsrRepresentationContextVersion);
+      cedarValueDomainRepresentation.setContextVersion(cedarRepresentationContextVersion);
+
+      //representation preferred name
+      String cadsrRepresentationPreferredName = cadsrValueDomainRepresentation.getPreferredName().getContent();
+      System.out.println(cadsrRepresentationPreferredName);
+      PreferredName_________ cedarRepresentationPreferredName = new PreferredName_________();
+      cedarRepresentationPreferredName.setValue(cadsrRepresentationPreferredName);
+      cedarValueDomainRepresentation.setPreferredName(cedarRepresentationPreferredName);
+
+      //representation version
+      String cadsrRepresentationVersion = cadsrValueDomainRepresentation.getVersion().getContent();
+      System.out.println(cadsrRepresentationVersion);
+      Version_______ cedarRepresentationVersion = new Version_______();
+      cedarRepresentationVersion.setValue(cadsrRepresentationVersion);
+      cedarValueDomainRepresentation.setVersion(cedarRepresentationVersion);
+
+      //representation long name
+      String cadsrRepresentationLongName = cadsrValueDomainRepresentation.getLongName().getContent();
+      System.out.println(cadsrRepresentationLongName);
+      LongName_________ cedarRepresentationLongName = new LongName_________();
+      cedarRepresentationVersion.setValue(cadsrRepresentationVersion);
+      cedarValueDomainRepresentation.setLongName(cedarRepresentationLongName);
+
 
       //representation concept details list
-      List<ConceptDetailsITEM> cadsrVALUEDOMAINRepresentationConceptDetailsITEM = cadsrVALUEDOMAINRepresentation.getConceptDetails().getConceptDetailsITEM();
-      if (!cadsrVALUEDOMAINRepresentationConceptDetailsITEM.isEmpty()) {
-        for (ConceptDetailsITEM val : cadsrVALUEDOMAINRepresentationConceptDetailsITEM) {
+      List<ConceptDetailsITEM> cadsrRepresentationConceptDetailsITEM = cadsrValueDomainRepresentation.getConceptDetails().getConceptDetailsITEM();
+      org.metadatacenter.ingestor.cedar.ConceptDetails__ cedarRepresentationConceptDetails = new ConceptDetails__();
+      List<ConceptDetailsItem__> cedarRepresentationConceptDetailsList = new ArrayList<ConceptDetailsItem__>();
+      if (!cadsrRepresentationConceptDetailsITEM.isEmpty()) {
+        for (ConceptDetailsITEM val : cadsrRepresentationConceptDetailsITEM) {
+
+          org.metadatacenter.ingestor.cedar.ConceptDetailsItem__ cedarRepresentationConceptDetailsItem = new ConceptDetailsItem__();
+
           System.out.println("representation concept details list item: ");
-          System.out.println(val.getPREFERREDNAME().getContent());
-          System.out.println(val.getLONGNAME().getContent());
-          System.out.println(val.getCONID().getContent());
-          System.out.println(val.getDEFINITIONSOURCE().getContent());
-          System.out.println(val.getDEFINITIONSOURCE().getContent());
-          System.out.println(val.getORIGIN().getContent());
-          System.out.println(val.getEVSSOURCE().getContent());
-          System.out.println(val.getPRIMARYFLAGIND().getContent());
-          System.out.println(val.getDISPLAYORDER().getContent());
+
+          //representation concept details preferred name
+          String cadsrRepresentationConceptDetailsItemPreferredName = val.getPREFERREDNAME().getContent();
+          System.out.println(cadsrRepresentationConceptDetailsItemPreferredName);
+          PreferredName__________ cedarRepresentationConceptDetailsItemPreferredName = new PreferredName__________();
+          cedarRepresentationConceptDetailsItemPreferredName.setValue(cadsrRepresentationConceptDetailsItemPreferredName);
+          cedarRepresentationConceptDetailsItem.setPreferredName(cedarRepresentationConceptDetailsItemPreferredName);
+
+          //representation concept details long name
+          String cadsrRepresentationConceptDetailsItemLongName = val.getLONGNAME().getContent();
+          System.out.println(cadsrRepresentationConceptDetailsItemLongName);
+          LongName__________ cedarRepresentationConceptDetailsItemLongName = new LongName__________();
+          cedarRepresentationConceptDetailsItemLongName.setValue(cadsrRepresentationConceptDetailsItemLongName);
+          cedarRepresentationConceptDetailsItem.setLongName(cedarRepresentationConceptDetailsItemLongName);
+
+          //representation concept details concept id
+          String cadsrRepresentationConceptDetailsItemConceptID = val.getCONID().getContent();
+          System.out.println(cadsrRepresentationConceptDetailsItemConceptID);
+          ConceptID__ cedarRepresentationConceptDetailsItemConceptID = new ConceptID__();
+          cedarRepresentationConceptDetailsItemConceptID.setValue(cadsrRepresentationConceptDetailsItemConceptID);
+          cedarRepresentationConceptDetailsItem.setConceptID(cedarRepresentationConceptDetailsItemConceptID);
+
+          //representation concept details definition source
+          String cadsrRepresentationConceptDetailsItemDefinitionSource = val.getDEFINITIONSOURCE().getContent();
+          System.out.println(cadsrRepresentationConceptDetailsItemDefinitionSource);
+          DefinitionSource__ cedarRepresentationConceptDetailsItemDefinitionSource = new DefinitionSource__();
+          cedarRepresentationConceptDetailsItemDefinitionSource.setValue(cadsrRepresentationConceptDetailsItemDefinitionSource);
+          cedarRepresentationConceptDetailsItem.setDefinitionSource(cedarRepresentationConceptDetailsItemDefinitionSource);
+
+          //representation concept details origin
+          String cadsrRepresentationConceptDetailsItemOrigin = val.getORIGIN().getContent();
+          System.out.println(cadsrRepresentationConceptDetailsItemOrigin);
+          Origin_____ cedarRepresentationConceptDetailsItemOrigin = new Origin_____();
+          cedarRepresentationConceptDetailsItemOrigin.setValue(cadsrRepresentationConceptDetailsItemOrigin);
+          cedarRepresentationConceptDetailsItem.setOrigin(cedarRepresentationConceptDetailsItemOrigin);
+
+          //representation concept details evs source
+          String cadsrRepresentationConceptDetailsItemEVS = val.getEVSSOURCE().getContent();
+          System.out.println(cadsrRepresentationConceptDetailsItemEVS);
+          EVSSource__ cedarRepresentationConceptDetailsItemEVS = new EVSSource__();
+          cedarRepresentationConceptDetailsItemEVS.setValue(cadsrRepresentationConceptDetailsItemEVS);
+          cedarRepresentationConceptDetailsItem.setEVSSource(cedarRepresentationConceptDetailsItemEVS);
+
+          //representation concept details primary flag indicator
+          String cadsrRepresentationConceptDetailsItemPrimaryFlag = val.getPRIMARYFLAGIND().getContent();
+          System.out.println(cadsrRepresentationConceptDetailsItemPrimaryFlag);
+          PrimaryFlag__ cedarRepresentationConceptDetailsItemPrimaryFlag = new PrimaryFlag__();
+          cedarRepresentationConceptDetailsItemPrimaryFlag.setValue(cadsrRepresentationConceptDetailsItemPrimaryFlag);
+          cedarRepresentationConceptDetailsItem.setPrimaryFlag(cedarRepresentationConceptDetailsItemPrimaryFlag);
+
+          //representation concept details display order
+          String cadsrRepresentationConceptDetailsItemDisplayOrder = val.getDISPLAYORDER().getContent();
+          System.out.println(cadsrRepresentationConceptDetailsItemDisplayOrder);
+          DisplayOrder__ cedarRepresentationConceptDetailsItemDisplayOrder = new DisplayOrder__();
+          cedarRepresentationConceptDetailsItemDisplayOrder.setValue(cadsrRepresentationConceptDetailsItemDisplayOrder);
+          cedarRepresentationConceptDetailsItem.setDisplayOrder(cedarRepresentationConceptDetailsItemDisplayOrder);
+
+          //add concept details item to list
+          cedarRepresentationConceptDetailsList.add(cedarRepresentationConceptDetailsItem);
         }
       }
+
+      cedarRepresentationConceptDetails.setConceptDetailsItem(cedarRepresentationConceptDetailsList);
+      cedarValueDomainRepresentation.setConceptDetails(cedarRepresentationConceptDetails);
+
+      cedarValueDomain.setRepresentation(cedarValueDomainRepresentation);
+
+      /* ******************************************************* */
 
       //permissible values
       System.out.println("**Permissible Values**");
       List<PermissibleValuesITEM> permissibleValuesITEMList = cadsrVALUEDOMAIN.getPermissibleValues().getPermissibleValuesITEM();
+      PermissibleValues cedarPermissibleValues = new PermissibleValues();
+      List<PermissibleValuesItem> cedarPermissibleValuesList = new ArrayList<PermissibleValuesItem>();
       if (!permissibleValuesITEMList.isEmpty()) {
         for (PermissibleValuesITEM val : permissibleValuesITEMList) {
-          System.out.println("permissible values list item: ");
-          System.out.println(val.getVALIDVALUE().getContent());
-          System.out.println(val.getVALUEMEANING().getContent());
-          System.out.println(val.getMEANINGDESCRIPTION().getContent());
-          System.out.println(val.getMEANINGCONCEPTS().getContent());
-          System.out.println(val.getPVBEGINDATE().getContent());
 
-          String pvEndDate = val.getPVENDDATE().getContent();
-          if (pvEndDate.isEmpty()) {
-            pvEndDate = val.getPVENDDATE().getNULL();
-            if (pvEndDate.equals("TRUE")) {
-              pvEndDate = "NULL";
+          PermissibleValuesItem cedarPermissibleValuesItem = new PermissibleValuesItem();
+
+          System.out.println("permissible values list item: ");
+
+          // permissible values item valid value
+          String cadsrPermissibleValuesItemValidValue = val.getVALIDVALUE().getContent();
+          System.out.println(cadsrPermissibleValuesItemValidValue);
+          ValidValue cedarPermissibleValuesItemValidValue = new ValidValue();
+          cedarPermissibleValuesItemValidValue.setValue(cadsrPermissibleValuesItemValidValue);
+          cedarPermissibleValuesItem.setValidValue(cedarPermissibleValuesItemValidValue);
+
+          // permissible values item value meaning
+          String cadsrPermissibleValuesItemValueMeaning = val.getVALUEMEANING().getContent();
+          System.out.println(cadsrPermissibleValuesItemValueMeaning);
+          ValueMeaning cedarPermissibleValuesItemValueMeaning = new ValueMeaning();
+          cedarPermissibleValuesItemValueMeaning.setValue(cadsrPermissibleValuesItemValueMeaning);
+          cedarPermissibleValuesItem.setValueMeaning(cedarPermissibleValuesItemValueMeaning);
+
+          // permissible values item meaning description
+          String cadsrPermissibleValuesItemMeaningDescription = val.getMEANINGDESCRIPTION().getContent();
+          System.out.println(cadsrPermissibleValuesItemMeaningDescription);
+          MeaningDescription cedarPermissibleValuesItemMeaningDescription = new MeaningDescription();
+          cedarPermissibleValuesItemMeaningDescription.setValue(cadsrPermissibleValuesItemMeaningDescription);
+          cedarPermissibleValuesItem.setMeaningDescription(cedarPermissibleValuesItemMeaningDescription);
+
+          // permissible values item meaning concepts
+          String cadsrPermissibleValuesItemMeaningConcepts = val.getMEANINGCONCEPTS().getContent();
+          System.out.println(cadsrPermissibleValuesItemMeaningConcepts);
+          MeaningConcepts cedarPermissibleValuesItemMeaningConcepts = new MeaningConcepts();
+          cedarPermissibleValuesItemMeaningConcepts.setValue(cadsrPermissibleValuesItemMeaningConcepts);
+          cedarPermissibleValuesItem.setMeaningConcepts(cedarPermissibleValuesItemMeaningConcepts);
+
+          // permissible values item pv begin date
+          String cadsrPermissibleValuesItemPVBeginDate = val.getPVBEGINDATE().getContent();
+          System.out.println(cadsrPermissibleValuesItemPVBeginDate);
+          PVBeginData cedarPermissibleValuesItemPVBeginDate = new PVBeginData();
+          cedarPermissibleValuesItemPVBeginDate.setValue(cadsrPermissibleValuesItemPVBeginDate);
+          cedarPermissibleValuesItem.setPVBeginData(cedarPermissibleValuesItemPVBeginDate);
+          //TODO note error: pv begin "data"
+
+          String cadsrPermissibleValuesItemPVEndDate = val.getPVENDDATE().getContent();
+          PVEndDate cedarPermissibleValuesItemPVEndDate = new PVEndDate();
+          if (cadsrPermissibleValuesItemPVEndDate.isEmpty()) {
+            cadsrPermissibleValuesItemPVEndDate = val.getPVENDDATE().getNULL();
+            if (cadsrPermissibleValuesItemPVEndDate.equals("TRUE")) {
+              cadsrPermissibleValuesItemPVEndDate = "NULL";
             }
           }
-          System.out.println(pvEndDate);
+          System.out.println(cadsrPermissibleValuesItemPVEndDate);
+          cedarPermissibleValuesItemPVEndDate.setValue(cadsrPermissibleValuesItemPVEndDate);
+          cedarPermissibleValuesItem.setPVEndDate(cedarPermissibleValuesItemPVEndDate);
 
-          System.out.println(val.getVMPUBLICID().getContent());
-          System.out.println(val.getVMVERSION().getContent());
+          //permissible values item vm public id
+          String cadsrPermissibleValuesItemVMPublicID = val.getVMPUBLICID().getContent();
+          System.out.println(cadsrPermissibleValuesItemVMPublicID);
+          VMPublicID cedarPermissibleValuesItemVMPublicID = new VMPublicID();
+          cedarPermissibleValuesItemVMPublicID.setValue(cadsrPermissibleValuesItemVMPublicID);
+          cedarPermissibleValuesItem.setVMPublicID(cedarPermissibleValuesItemVMPublicID);
+
+          //permissible values item vm version
+          String cadsrPermissibleValuesItemVMVersion = val.getVMVERSION().getContent();
+          System.out.println(cadsrPermissibleValuesItemVMVersion);
+          VMVersion cedarPermissibleValuesItemVMVersion = new VMVersion();
+          cedarPermissibleValuesItemVMVersion.setValue(cadsrPermissibleValuesItemVMVersion);
+          cedarPermissibleValuesItem.setVMVersion(cedarPermissibleValuesItemVMVersion);
+
+          cedarPermissibleValuesList.add(cedarPermissibleValuesItem);
         }
       }
+
+      cedarPermissibleValues.setPermissibleValuesItem(cedarPermissibleValuesList);
+      cedarValueDomain.setPermissibleValues(cedarPermissibleValues);
+
+      /* ******************************************************* */
 
       // value domain concepts
       System.out.println("**Value Domain Concepts**");
       List<ValueDomainConceptsITEM> valueDomainConceptsITEMList = cadsrVALUEDOMAIN.getValueDomainConcepts().getValueDomainConceptsITEM();
+      org.metadatacenter.ingestor.cedar.ValueDomainConcepts cedarValueDomainConcepts = new ValueDomainConcepts();
+      List<ValueDomainConceptsItem> cedarValueDomainConceptsList = new ArrayList<ValueDomainConceptsItem>();
       if (!valueDomainConceptsITEMList.isEmpty()) {
         for (ValueDomainConceptsITEM val : valueDomainConceptsITEMList) {
+
+          ValueDomainConceptsItem cedarValueDomainConceptsItem = new ValueDomainConceptsItem();
+
           System.out.println("value domain concepts list item: ");
-          System.out.println(val.getPREFERREDNAME().getContent());
-          System.out.println(val.getLONGNAME().getContent());
-          System.out.println(val.getCONID().getContent());
-          System.out.println(val.getDEFINITIONSOURCE().getContent());
-          System.out.println(val.getORIGIN().getContent());
-          System.out.println(val.getEVSSOURCE().getContent());
-          System.out.println(val.getPRIMARYFLAGIND().getContent());
-          System.out.println(val.getDISPLAYORDER().getContent());
+
+          //value domain concepts preferred name
+          String cadsrValueDomainConceptsItemPreferredName = val.getPREFERREDNAME().getContent();
+          System.out.println(cadsrValueDomainConceptsItemPreferredName);
+          PreferredName___________ cedarValueDomainConceptsItemPreferredName = new PreferredName___________();
+          cedarValueDomainConceptsItemPreferredName.setValue(cadsrValueDomainConceptsItemPreferredName);
+          cedarValueDomainConceptsItem.setPreferredName(cedarValueDomainConceptsItemPreferredName);
+
+          //value domain concepts long name
+          String cadsrValueDomainConceptsItemLongName = val.getLONGNAME().getContent();
+          System.out.println(cadsrValueDomainConceptsItemLongName);
+          LongName___________ cedarValueDomainConceptsItemLongName = new LongName___________();
+          cedarValueDomainConceptsItemLongName.setValue(cadsrValueDomainConceptsItemLongName);
+          cedarValueDomainConceptsItem.setLongName(cedarValueDomainConceptsItemLongName);
+
+          //value domain concepts concept id
+          String cadsrValueDomainConceptsItemConceptID = val.getCONID().getContent();
+          System.out.println(cadsrValueDomainConceptsItemConceptID);
+          ConceptID___ cedarValueDomainConceptsItemConceptID = new ConceptID___();
+          cedarValueDomainConceptsItemConceptID.setValue(cadsrValueDomainConceptsItemConceptID);
+          cedarValueDomainConceptsItem.setConceptID(cedarValueDomainConceptsItemConceptID);
+
+          //value domain concepts definition source
+          String cadsrValueDomainConceptsItemDefinitionSource = val.getDEFINITIONSOURCE().getContent();
+          System.out.println(cadsrValueDomainConceptsItemDefinitionSource);
+          DefinitionSource___ cedarValueDomainConceptsItemDefinitionSource = new DefinitionSource___();
+          cedarValueDomainConceptsItemDefinitionSource.setValue(cadsrValueDomainConceptsItemDefinitionSource);
+          cedarValueDomainConceptsItem.setDefinitionSource(cedarValueDomainConceptsItemDefinitionSource);
+
+          //value domain concepts origin
+          String cadsrValueDomainConceptsItemOrigin = val.getORIGIN().getContent();
+          System.out.println(cadsrValueDomainConceptsItemOrigin);
+          Origin______ cedarValueDomainConceptsItemOrigin = new Origin______();
+          cedarValueDomainConceptsItemOrigin.setValue(cadsrValueDomainConceptsItemOrigin);
+          cedarValueDomainConceptsItem.setOrigin(cedarValueDomainConceptsItemOrigin);
+
+          //value domain concepts evs source
+          String cadsrValueDomainConceptsItemEVS = val.getEVSSOURCE().getContent();
+          System.out.println(cadsrValueDomainConceptsItemEVS);
+          EVSSource___ cedarValueDomainConceptsItemEVS = new EVSSource___();
+          cedarValueDomainConceptsItemEVS.setValue(cadsrValueDomainConceptsItemEVS);
+          cedarValueDomainConceptsItem.setEVSSource(cedarValueDomainConceptsItemEVS);
+
+          //value domain concepts primary flag indicator
+          String cadsrValueDomainConceptsItemPrimaryFlag = val.getPRIMARYFLAGIND().getContent();
+          System.out.println(cadsrValueDomainConceptsItemPrimaryFlag);
+          PrimaryFlag___ cedarValueDomainConceptsItemPrimaryFlag = new PrimaryFlag___();
+          cedarValueDomainConceptsItemPrimaryFlag.setValue(cadsrValueDomainConceptsItemPrimaryFlag);
+          cedarValueDomainConceptsItem.setPrimaryFlag(cedarValueDomainConceptsItemPrimaryFlag);
+
+          //value domain concepts display order
+          String cadsrValueDomainConceptsItemDisplayOrder = val.getDISPLAYORDER().getContent();
+          System.out.println(cadsrValueDomainConceptsItemDisplayOrder);
+          DisplayOrder___ cedarValueDomainConceptsItemDisplayOrder = new DisplayOrder___();
+          cedarValueDomainConceptsItemDisplayOrder.setValue(cadsrValueDomainConceptsItemDisplayOrder);
+          cedarValueDomainConceptsItem.setDisplayOrder(cedarValueDomainConceptsItemDisplayOrder);
+
+
+          cedarValueDomainConceptsList.add(cedarValueDomainConceptsItem);
         }
       }
+      cedarValueDomainConcepts.setValueDomainConceptsItem(cedarValueDomainConceptsList);
+      cedarValueDomain.setValueDomainConcepts(cedarValueDomainConcepts);
+      cedarDataElement.setValueDomain(cedarValueDomain);
 
-      //reference documents
+
+      /* ******************************************************* */
+      /* ******************************************************* */
+
+
+      //reference documents list
       System.out.println("**Reference Documents**");
       List<REFERENCEDOCUMENTSLISTITEM> referencedocumentslistitemList = cadsrDataElement.getREFERENCEDOCUMENTSLIST().getREFERENCEDOCUMENTSLISTITEM();
+      ReferenceDocumentsList cedarReferenceDocuments = new ReferenceDocumentsList();
+      List<ReferenceDocumentsListItem> cedarReferenceDocumentsList = new ArrayList<ReferenceDocumentsListItem>();
       if (!referencedocumentslistitemList.isEmpty()) {
         for (REFERENCEDOCUMENTSLISTITEM val : referencedocumentslistitemList) {
+
+          ReferenceDocumentsListItem cedarReferenceDocumentsItem = new ReferenceDocumentsListItem();
+
           System.out.println("reference documents list item: ");
-          System.out.println(val.getName().getContent());
-          //organization name
-          String organizationName = val.getOrganizationName().getContent();
-          if (organizationName.isEmpty()) {
-            organizationName = val.getOrganizationName().getNULL();
-            if (organizationName.equals("TRUE")) {
-              organizationName = "NULL";
-            }
-          }
-          System.out.println(organizationName);
 
-          System.out.println(val.getDocumentType().getContent());
-          System.out.println(val.getDocumentText().getContent());
-          //url
-          String url = val.getURL().getContent();
-          if (url.isEmpty()) {
-            url = val.getURL().getNULL();
-            if (url.equals("TRUE")) {
-              url = "NULL";
-            }
-          }
-          System.out.println(url);
 
-          System.out.println(val.getLanguage().getContent());
-          //display order
-          String displayOrder = val.getDisplayOrder().getContent();
-          if (displayOrder.isEmpty()) {
-            displayOrder = val.getDisplayOrder().getNULL();
-            if (displayOrder.equals("TRUE")) {
-              displayOrder = "NULL";
+          //reference document item name
+          String cadsrReferenceDocumentsItemName = val.getName().getContent();
+          System.out.println(cadsrReferenceDocumentsItemName);
+          Name cedarReferenceDocumentsItemName = new Name();
+          cedarReferenceDocumentsItemName.setValue(cadsrReferenceDocumentsItemName);
+          cedarReferenceDocumentsItem.setName(cedarReferenceDocumentsItemName);
+
+          //reference document item organization name
+          String cadsrReferenceDocumentsItemOrganizationName = val.getOrganizationName().getContent();
+          if (cadsrReferenceDocumentsItemOrganizationName.isEmpty()) {
+            cadsrReferenceDocumentsItemOrganizationName = val.getOrganizationName().getNULL();
+            if (cadsrReferenceDocumentsItemOrganizationName.equals("TRUE")) {
+              cadsrReferenceDocumentsItemOrganizationName = "NULL";
             }
           }
-          System.out.println(displayOrder);
+          System.out.println(cadsrReferenceDocumentsItemOrganizationName);
+          OrganizationName cedarReferenceDocumentsItemOrganizationName = new OrganizationName();
+          cedarReferenceDocumentsItemOrganizationName.setValue(cadsrReferenceDocumentsItemOrganizationName);
+          cedarReferenceDocumentsItem.setOrganizationName(cedarReferenceDocumentsItemOrganizationName);
+
+          //reference document item document type
+          String cadsrReferenceDocumentsItemDocumentType = val.getDocumentType().getContent();
+          System.out.println(cadsrReferenceDocumentsItemDocumentType);
+          DocumentType cedarReferenceDocumentsItemDocumentType = new DocumentType();
+          cedarReferenceDocumentsItemDocumentType.setValue(cadsrReferenceDocumentsItemDocumentType);
+          cedarReferenceDocumentsItem.setDocumentType(cedarReferenceDocumentsItemDocumentType);
+
+          //reference document item document text
+          String cadsrReferenceDocumentsItemDocumentText = val.getDocumentText().getContent();
+          if(cadsrReferenceDocumentsItemDocumentText.isEmpty()) {
+            cadsrReferenceDocumentsItemDocumentText = val.getDocumentText().getNULL();
+            if (cadsrReferenceDocumentsItemDocumentText.equals("TRUE")) {
+              cadsrReferenceDocumentsItemDocumentText = "NULL";
+            }
+          }
+          System.out.println(cadsrReferenceDocumentsItemDocumentText);
+          DocumentText cedarReferenceDocumentsItemDocumentText = new DocumentText();
+          cedarReferenceDocumentsItemDocumentText.setValue(cadsrReferenceDocumentsItemDocumentText);
+          cedarReferenceDocumentsItem.setDocumentText(cedarReferenceDocumentsItemDocumentText);
+
+          //reference document item url
+          String cadsrReferenceDocumentsItemURL = val.getURL().getContent();
+          if (cadsrReferenceDocumentsItemURL.isEmpty()) {
+            cadsrReferenceDocumentsItemURL = val.getURL().getNULL();
+            if (cadsrReferenceDocumentsItemURL.equals("TRUE")) {
+              cadsrReferenceDocumentsItemURL = "NULL";
+            }
+          }
+          System.out.println(cadsrReferenceDocumentsItemURL);
+          URL cedarReferenceDocumentsItemURL = new URL();
+          cedarReferenceDocumentsItemURL.setValue(cadsrReferenceDocumentsItemURL);
+          cedarReferenceDocumentsItem.setURL(cedarReferenceDocumentsItemURL);
+
+          //reference document item language
+          String cadsrReferenceDocumentsItemLanguage = val.getLanguage().getContent();
+          System.out.println(cadsrReferenceDocumentsItemLanguage);
+          Language cedarReferenceDocumentsItemLanguage = new Language();
+          cedarReferenceDocumentsItemLanguage.setValue(cadsrReferenceDocumentsItemLanguage);
+          cedarReferenceDocumentsItem.setLanguage(cedarReferenceDocumentsItemLanguage);
+
+          //reference document item display order
+          String cadsrReferenceDocumentsItemDisplayOrder = val.getDisplayOrder().getContent();
+          if (cadsrReferenceDocumentsItemDisplayOrder.isEmpty()) {
+            cadsrReferenceDocumentsItemDisplayOrder = val.getDisplayOrder().getNULL();
+            if (cadsrReferenceDocumentsItemDisplayOrder.equals("TRUE")) {
+              cadsrReferenceDocumentsItemDisplayOrder = "NULL";
+            }
+          }
+          System.out.println(cadsrReferenceDocumentsItemDisplayOrder);
+          DisplayOrder____ cedarReferenceDocumentsItemDisplayOrder = new DisplayOrder____();
+          cedarReferenceDocumentsItemDisplayOrder.setValue(cadsrReferenceDocumentsItemDisplayOrder);
+          cedarReferenceDocumentsItem.setDisplayOrder(cedarReferenceDocumentsItemDisplayOrder);
+
+          cedarReferenceDocumentsList.add(cedarReferenceDocumentsItem);
         }
       }
+
+      cedarReferenceDocuments.setReferenceDocumentsListItem(cedarReferenceDocumentsList);
+      cedarDataElement.setReferenceDocumentsList(cedarReferenceDocuments);
+
+
+      /* ******************************************************* */
+      /* ******************************************************* */
+
 
       //classification items
       System.out.println("**Classifications**");
       CLASSIFICATIONSLIST cadsrCLASSIFICATIONSLIST = cadsrDataElement.getCLASSIFICATIONSLIST();
       List<CLASSIFICATIONSLISTITEM> cadsrCLASSIFICATIONSLISTITEM = cadsrCLASSIFICATIONSLIST.getCLASSIFICATIONSLISTITEM();
+      org.metadatacenter.ingestor.cedar.ClassificationsList cedarClassifications = new ClassificationsList();
+      List<ClassificationsListItem> cedarClassificationsList = new ArrayList<ClassificationsListItem>();
       if (!cadsrCLASSIFICATIONSLISTITEM.isEmpty()) {
         for (CLASSIFICATIONSLISTITEM val : cadsrCLASSIFICATIONSLISTITEM) {
+
+          ClassificationsListItem cedarClassificationsListItem = new ClassificationsListItem();
+
           System.out.println("classifications list item: ");
-          System.out.println(" \t classification scheme: ");
+
           ClassificationScheme valClassificationScheme = val.getClassificationScheme();
-          System.out.println(valClassificationScheme.getPublicId().getContent());
-          System.out.println(valClassificationScheme.getContextName().getContent());
-          System.out.println(valClassificationScheme.getContextVersion().getContent());
-          System.out.println(valClassificationScheme.getPreferredName().getContent());
-          System.out.println(valClassificationScheme.getVersion().getContent());
+          org.metadatacenter.ingestor.cedar.ClassificationScheme cedarClassificationScheme = new org.metadatacenter.ingestor.cedar.ClassificationScheme();
+          System.out.println(" \t classification scheme: ");
+
+
+          //classification scheme public id
+          String cadsrClassificationSchemePublicID = valClassificationScheme.getPublicId().getContent();
+          System.out.println(cadsrClassificationSchemePublicID);
+          PublicID________ cedarClassificationSchemePublicID = new PublicID________();
+          cedarClassificationSchemePublicID.setValue(cadsrClassificationSchemePublicID);
+          cedarClassificationScheme.setPublicID(cedarClassificationSchemePublicID);
+
+
+          //classification scheme context name
+          String cadsrClassificationSchemeContextName = valClassificationScheme.getContextName().getContent();
+          System.out.println(cadsrClassificationSchemeContextName);
+          ContextName_______ cedarClassificationSchemeContextName = new ContextName_______();
+          cedarClassificationSchemeContextName.setValue(cadsrClassificationSchemeContextName);
+          cedarClassificationScheme.setContextName(cedarClassificationSchemeContextName);
+
+
+          //classification scheme context version
+          String cadsrClassificationSchemeContextVersion = valClassificationScheme.getContextVersion().getContent();
+          System.out.println(cadsrClassificationSchemeContextVersion);
+          ContextVersion________ cedarClassificationSchemeContextVersion = new ContextVersion________();
+          cedarClassificationSchemeContextVersion.setValue(cadsrClassificationSchemeContextVersion);
+          cedarClassificationScheme.setContextVersion(cedarClassificationSchemeContextVersion);
+
+
+          //classification scheme preferred name
+          String cadsrClassificationSchemePreferredName = valClassificationScheme.getPreferredName().getContent();
+          System.out.println(cadsrClassificationSchemePreferredName);
+          PreferredName____________ cedarClassificationSchemePreferredName = new PreferredName____________();
+          cedarClassificationSchemePreferredName.setValue(cadsrClassificationSchemePreferredName);
+          cedarClassificationScheme.setPreferredName(cedarClassificationSchemePreferredName);
+
+
+          //classification scheme version
+          String cadsrClassificationSchemeVersion = valClassificationScheme.getVersion().getContent();
+          System.out.println(cadsrClassificationSchemeVersion);
+          Version________ cedarClassificationSchemeVersion = new Version________();
+          cedarClassificationSchemeVersion.setValue(cadsrClassificationSchemeVersion);
+          cedarClassificationScheme.setVersion(cedarClassificationSchemeVersion);
+
+
+          cedarClassificationsListItem.setClassificationScheme(cedarClassificationScheme);
+
+
+          //classification scheme attributes continued
           System.out.println("classifications list item (cont): ");
-          System.out.println(val.getClassificationSchemeItemName().getContent());
-          System.out.println(val.getClassificationSchemeItemType().getContent());
-          System.out.println(val.getCsiPublicId().getContent());
-          System.out.println(val.getCsiVersion().getContent());
+
+          //classification scheme item name
+          String cadsrCSIName = val.getClassificationSchemeItemName().getContent();
+          System.out.println(cadsrCSIName);
+          ClassificationSchemeItemName cedarCSIName = new ClassificationSchemeItemName();
+          cedarCSIName.setValue(cadsrCSIName);
+          cedarClassificationsListItem.setClassificationSchemeItemName(cedarCSIName);
+
+          //classification scheme item type
+          String cadsrCSIType = val.getClassificationSchemeItemType().getContent();
+          System.out.println(cadsrCSIType);
+          ClassificationSchemeItemType cedarCSIType = new ClassificationSchemeItemType();
+          cedarCSIType.setValue(cadsrCSIType);
+          cedarClassificationsListItem.setClassificationSchemeItemType(cedarCSIType);
+
+          //classification scheme item public id
+          String cadsrCSIPublicId = val.getCsiPublicId().getContent();
+          System.out.println(cadsrCSIPublicId);
+          CSIPublicID cedarCSIPublicId = new CSIPublicID();
+          cedarCSIPublicId.setValue(cadsrCSIPublicId);
+          cedarClassificationsListItem.setCSIPublicID(cedarCSIPublicId);
+
+          //classification scheme item version
+          String cadsrCSIVersion = val.getCsiVersion().getContent();
+          System.out.println(cadsrCSIVersion);
+          CSIVersion cedarCSIVersion = new CSIVersion();
+          cedarCSIVersion.setValue(cadsrCSIVersion);
+          cedarClassificationsListItem.setCSIVersion(cedarCSIVersion);
+
+          cedarClassificationsList.add(cedarClassificationsListItem);
         }
       }
+
+      cedarClassifications.setClassificationsListItem(cedarClassificationsList);
+      cedarDataElement.setClassificationsList(cedarClassifications);
+
+
+      /* ******************************************************* */
+      /* ******************************************************* */
+
 
       //alternate names
       System.out.println("**Alternate Names**");
       ALTERNATENAMELIST cadsrALTERNATENAMELIST = cadsrDataElement.getALTERNATENAMELIST();
       List<ALTERNATENAMELISTITEM> cadsrALTERNATENAMELISTITEM = cadsrALTERNATENAMELIST.getALTERNATENAMELISTITEM();
+      AlternateNameList cedarAlternateNames = new AlternateNameList();
+      List<AlternateNameListItem> cedarAlternateNameList = new ArrayList<AlternateNameListItem>();
       if (!cadsrALTERNATENAMELISTITEM.isEmpty()) {
         for (ALTERNATENAMELISTITEM val : cadsrALTERNATENAMELISTITEM) {
+
+          AlternateNameListItem cedarAlternateNameListItem = new AlternateNameListItem();
+
           System.out.println("alternate list item: ");
-          System.out.println(val.getContextName().getContent());
-          System.out.println(val.getContextVersion().getContent());
-          System.out.println(val.getAlternateName().getContent());
-          System.out.println(val.getAlternateNameType().getContent());
-          System.out.println(val.getLanguage().getContent());
+
+          //alternate name list item context name
+          String cadsrAlternateNameListItemContextName = val.getContextName().getContent();
+          System.out.println(cadsrAlternateNameListItemContextName);
+          ContextName________ cedarAlternateNameListItemContextName = new ContextName________();
+          cedarAlternateNameListItemContextName.setValue(cadsrAlternateNameListItemContextName);
+          cedarAlternateNameListItem.setContextName(cedarAlternateNameListItemContextName);
+
+          //alternate name list item
+          String cadsrAlternateNameListItemContextVersion = val.getContextVersion().getContent();
+          System.out.println(cadsrAlternateNameListItemContextVersion);
+          ContextVersion_________ cedarAlternateNameListItemContextVersion = new ContextVersion_________();
+          cedarAlternateNameListItemContextVersion.setValue(cadsrAlternateNameListItemContextVersion);
+          cedarAlternateNameListItem.setContextVersion(cedarAlternateNameListItemContextVersion);
+
+          //alternate name list item
+          String cadsrAlternateNameListItemAlternateName = val.getAlternateName().getContent();
+          System.out.println(cadsrAlternateNameListItemAlternateName);
+          AlternateName cedarAlternateNameListItemAlternateName = new AlternateName();
+          cedarAlternateNameListItemAlternateName.setValue(cadsrAlternateNameListItemAlternateName);
+          cedarAlternateNameListItem.setAlternateName(cedarAlternateNameListItemAlternateName);
+
+          //alternate name list item
+          String cadsrAlternateNameListItemAlternateNameType = val.getAlternateNameType().getContent();
+          System.out.println(cadsrAlternateNameListItemAlternateNameType);
+          AlternateNameType cedarAlternateNameListItemAlternateNameType = new AlternateNameType();
+          cedarAlternateNameListItemAlternateNameType.setValue(cadsrAlternateNameListItemAlternateNameType);
+          cedarAlternateNameListItem.setAlternateNameType(cedarAlternateNameListItemAlternateNameType);
+
+          //alternate name list item
+          String cadsrAlternateNameListItemLanguage = val.getLanguage().getContent();
+          System.out.println(cadsrAlternateNameListItemLanguage);
+          Language_ cedarAlternateNameListItemLanguage = new Language_();
+          cedarAlternateNameListItemLanguage.setValue(cadsrAlternateNameListItemLanguage);
+          cedarAlternateNameListItem.setLanguage(cedarAlternateNameListItemLanguage);
+
+          cedarAlternateNameList.add(cedarAlternateNameListItem);
         }
       }
+
+      cedarAlternateNames.setAlternateNameListItem(cedarAlternateNameList);
+      cedarDataElement.setAlternateNameList(cedarAlternateNames);
+
+
+      /* ******************************************************* */
+      /* ******************************************************* */
+
 
       //data element derivation
       System.out.println("**Data Element Derivation**");
       DATAELEMENTDERIVATION cadsrDATAELEMENTDERIVATION = cadsrDataElement.getDATAELEMENTDERIVATION();
+      DataElementDerivation cedarDataElementDerivation = new DataElementDerivation();
 
       //derivation type
-      String derivationType = cadsrDATAELEMENTDERIVATION.getDerivationType().getContent();
-      if (derivationType.isEmpty()) {
-        derivationType = cadsrDATAELEMENTDERIVATION.getDerivationType().getNULL();
-        if (derivationType.equals("TRUE")) {
-          derivationType = "NULL";
+      String cadsrDataElementDerivationType = cadsrDATAELEMENTDERIVATION.getDerivationType().getContent();
+      if (cadsrDataElementDerivationType.isEmpty()) {
+        cadsrDataElementDerivationType = cadsrDATAELEMENTDERIVATION.getDerivationType().getNULL();
+        if (cadsrDataElementDerivationType.equals("TRUE")) {
+          cadsrDataElementDerivationType = "NULL";
         }
       }
-      System.out.println(derivationType);
+      System.out.println(cadsrDataElementDerivationType);
+      DerivationType cedarDataElementDerivationType = new DerivationType();
+      cedarDataElementDerivationType.setValue(cadsrDataElementDerivationType);
+      cedarDataElementDerivation.setDerivationType(cedarDataElementDerivationType);
+
 
       //derivation type description
-      String derivationTypeDescription = cadsrDATAELEMENTDERIVATION.getDerivationTypeDescription().getContent();
-      if (derivationTypeDescription.isEmpty()) {
-        derivationTypeDescription = cadsrDATAELEMENTDERIVATION.getDerivationTypeDescription().getNULL();
-        if (derivationTypeDescription.equals("TRUE")) {
-          derivationTypeDescription = "NULL";
+      String cadsrDataElementDerivationTypeDescription = cadsrDATAELEMENTDERIVATION.getDerivationTypeDescription().getContent();
+      if (cadsrDataElementDerivationTypeDescription.isEmpty()) {
+        cadsrDataElementDerivationTypeDescription = cadsrDATAELEMENTDERIVATION.getDerivationTypeDescription().getNULL();
+        if (cadsrDataElementDerivationTypeDescription.equals("TRUE")) {
+          cadsrDataElementDerivationTypeDescription = "NULL";
         }
       }
-      System.out.println(derivationTypeDescription);
+      System.out.println(cadsrDataElementDerivationTypeDescription);
+      DerivationTypeDescription cedarDataElementDerivationTypeDescription = new DerivationTypeDescription();
+      cedarDataElementDerivationTypeDescription.setValue(cadsrDataElementDerivationTypeDescription);
+      cedarDataElementDerivation.setDerivationTypeDescription(cedarDataElementDerivationTypeDescription);
+
 
       //methods
-      String methods = cadsrDATAELEMENTDERIVATION.getMethods().getContent();
-      if (methods.isEmpty()) {
-        methods = cadsrDATAELEMENTDERIVATION.getMethods().getNULL();
-        if (methods.equals("TRUE")) {
-          methods = "NULL";
+      String cadsrDataElementDerivationMethods = cadsrDATAELEMENTDERIVATION.getMethods().getContent();
+      if (cadsrDataElementDerivationMethods.isEmpty()) {
+        cadsrDataElementDerivationMethods = cadsrDATAELEMENTDERIVATION.getMethods().getNULL();
+        if (cadsrDataElementDerivationMethods.equals("TRUE")) {
+          cadsrDataElementDerivationMethods = "NULL";
         }
       }
-      System.out.println(methods);
+      System.out.println(cadsrDataElementDerivationMethods);
+      Methods cedarDataElementDerivationMethods = new Methods();
+      cedarDataElementDerivationMethods.setValue(cadsrDataElementDerivationMethods);
+      cedarDataElementDerivation.setMethods(cedarDataElementDerivationMethods);
 
       //rule
-      String rule = cadsrDATAELEMENTDERIVATION.getRule().getContent();
-      if (rule.isEmpty()) {
-        rule = cadsrDATAELEMENTDERIVATION.getRule().getNULL();
-        if (rule.equals("TRUE")) {
-          rule = "NULL";
+      String cadsrDataElementDerivationRule = cadsrDATAELEMENTDERIVATION.getRule().getContent();
+      if (cadsrDataElementDerivationRule.isEmpty()) {
+        cadsrDataElementDerivationRule = cadsrDATAELEMENTDERIVATION.getRule().getNULL();
+        if (cadsrDataElementDerivationRule.equals("TRUE")) {
+          cadsrDataElementDerivationRule = "NULL";
         }
       }
-      System.out.println(rule);
+      System.out.println(cadsrDataElementDerivationRule);
+      Rule cedarDataElementDerivationRule = new Rule();
+      cedarDataElementDerivationRule.setValue(cadsrDataElementDerivationRule);
+      cedarDataElementDerivation.setRule(cedarDataElementDerivationRule);
 
       //concatenation character
-      String concatenationCharacter = cadsrDATAELEMENTDERIVATION.getConcatenationCharacter().getContent();
-      if (concatenationCharacter.isEmpty()) {
-        concatenationCharacter = cadsrDATAELEMENTDERIVATION.getConcatenationCharacter().getNULL();
-        if (concatenationCharacter.equals("TRUE")) {
-          concatenationCharacter = "NULL";
+      String cadsrDataElementDerivationConcatenationCharacter = cadsrDATAELEMENTDERIVATION.getConcatenationCharacter().getContent();
+      if (cadsrDataElementDerivationConcatenationCharacter.isEmpty()) {
+        cadsrDataElementDerivationConcatenationCharacter = cadsrDATAELEMENTDERIVATION.getConcatenationCharacter().getNULL();
+        if (cadsrDataElementDerivationConcatenationCharacter.equals("TRUE")) {
+          cadsrDataElementDerivationConcatenationCharacter = "NULL";
         }
       }
-      System.out.println(concatenationCharacter);
+      System.out.println(cadsrDataElementDerivationConcatenationCharacter);
+      ConcatenationCharacter cedarDataElementDerivationConcatenationCharacter = new ConcatenationCharacter();
+      cedarDataElementDerivationConcatenationCharacter.setValue(cadsrDataElementDerivationConcatenationCharacter);
+      cedarDataElementDerivation.setConcatenationCharacter(cedarDataElementDerivationConcatenationCharacter);
+
+
+      /* ******************************************************* */
+      /* ******************************************************* */
+
 
       //component data elements
       System.out.println("**Component Data Elements**");
-      List<ComponentDataElementsListITEM> componenentDataElementsList = cadsrDATAELEMENTDERIVATION.getComponentDataElementsList().getComponentDataElementsListITEM();
+      List<ComponentDataElementsListITEM> cadsrComponenentDataElementsList = cadsrDATAELEMENTDERIVATION.getComponentDataElementsList().getComponentDataElementsListITEM();
+      ComponentDataElementsList cedarComponentDataElements = new ComponentDataElementsList();
+      List<ComponentDataElementsListItem> cedarComponentDataElementsList = new ArrayList<ComponentDataElementsListItem>();
       String componenentDataElementsListNULLval = null;
-      if (componenentDataElementsList.isEmpty()) {
+      if (cadsrComponenentDataElementsList.isEmpty()) {
          componenentDataElementsListNULLval = cadsrDATAELEMENTDERIVATION.getComponentDataElementsList().getNULL();
         if (componenentDataElementsListNULLval.equals("TRUE")) {
           componenentDataElementsListNULLval = "NULL";
         }
         System.out.println(componenentDataElementsListNULLval);
       } else {
-        for (ComponentDataElementsListITEM val : componenentDataElementsList) {
+        for (ComponentDataElementsListITEM val : cadsrComponenentDataElementsList) {
+
+          ComponentDataElementsListItem cedarComponentDataElementsListItem = new ComponentDataElementsListItem();
+
           System.out.println("component data elements list item: ");
-          System.out.println(val.getPublicId().getContent());
-          System.out.println(val.getLongName().getContent());
-          System.out.println(val.getPreferredName().getContent());
-          System.out.println(val.getPreferredDefinition().getContent());
-          System.out.println(val.getVersion().getContent());
-          System.out.println(val.getWorkflowStatus().getContent());
-          System.out.println(val.getContextName().getContent());
-          System.out.println(val.getDisplayOrder().getContent());
+
+
+          //component data elements
+          String cadsrComponentDataElementsListItemPublicID = val.getPublicId().getContent();
+          System.out.println(cadsrComponentDataElementsListItemPublicID);
+          PublicID_________ cedarComponentDataElementsListItemPublicID = new PublicID_________();
+          cedarComponentDataElementsListItemPublicID.setValue(cadsrComponentDataElementsListItemPublicID);
+          cedarComponentDataElementsListItem.setPublicID(cedarComponentDataElementsListItemPublicID);
+
+          //component data elements
+          String cadsrComponentDataElementsListItemLongName = val.getLongName().getContent();
+          System.out.println(cadsrComponentDataElementsListItemLongName);
+          LongName____________ cedarComponentDataElementsListItemLongName = new LongName____________();
+          cedarComponentDataElementsListItemLongName.setValue(cadsrComponentDataElementsListItemLongName);
+          cedarComponentDataElementsListItem.setLongName(cedarComponentDataElementsListItemLongName);
+
+          //component data elements
+          String cadsrComponentDataElementsListItemPreferredName = val.getPreferredName().getContent();
+          System.out.println(cadsrComponentDataElementsListItemPreferredName);
+          PreferredName_____________ cedarComponentDataElementsListItemPreferredName = new PreferredName_____________();
+          cedarComponentDataElementsListItemPreferredName.setValue(cadsrComponentDataElementsListItemPreferredName);
+          cedarComponentDataElementsListItem.setPreferredName(cedarComponentDataElementsListItemPreferredName);
+
+          //component data elements
+          String cadsrComponentDataElementsListItemPreferredDefinition = val.getPreferredDefinition().getContent();
+          System.out.println(cadsrComponentDataElementsListItemPreferredDefinition);
+          PreferredDefinition___ cedarComponentDataElementsListItemPreferredDefinition = new PreferredDefinition___();
+          cedarComponentDataElementsListItemPreferredDefinition.setValue(cadsrComponentDataElementsListItemPreferredDefinition);
+          cedarComponentDataElementsListItem.setPreferredDefinition(cedarComponentDataElementsListItemPreferredDefinition);
+
+          //component data elements
+          String cadsrComponentDataElementsListItemVersion = val.getVersion().getContent();
+          System.out.println(cadsrComponentDataElementsListItemVersion);
+          Version_________ cedarComponentDataElementsListItemVersion = new Version_________();
+          cedarComponentDataElementsListItemVersion.setValue(cadsrComponentDataElementsListItemVersion);
+          cedarComponentDataElementsListItem.setVersion(cedarComponentDataElementsListItemVersion);
+
+          //component data elements
+          String cadsrComponentDataElementsListItemWorkflowStatus = val.getWorkflowStatus().getContent();
+          System.out.println(cadsrComponentDataElementsListItemWorkflowStatus);
+          WorkflowStatus___ cedarComponentDataElementsListItemWorkflowStatus = new WorkflowStatus___();
+          cedarComponentDataElementsListItemWorkflowStatus.setValue(cadsrComponentDataElementsListItemWorkflowStatus);
+          cedarComponentDataElementsListItem.setWorkflowStatus(cedarComponentDataElementsListItemWorkflowStatus);
+
+          //component data elements
+          String cadsrComponentDataElementsListItemContextName = val.getContextName().getContent();
+          System.out.println(cadsrComponentDataElementsListItemContextName);
+          ContextName_________ cedarComponentDataElementsListItemContextName = new ContextName_________();
+          cedarComponentDataElementsListItemContextName.setValue(cadsrComponentDataElementsListItemContextName);
+          cedarComponentDataElementsListItem.setContextName(cedarComponentDataElementsListItemContextName);
+
+          //component data elements
+          String cadsrComponentDataElementsListItemDisplayOrder = val.getDisplayOrder().getContent();
+          System.out.println(cadsrComponentDataElementsListItemDisplayOrder);
+          DisplayOrder_____ cedarComponentDataElementsListItemDisplayOrder = new DisplayOrder_____();
+          cedarComponentDataElementsListItemDisplayOrder.setValue(cadsrComponentDataElementsListItemDisplayOrder);
+          cedarComponentDataElementsListItem.setDisplayOrder(cedarComponentDataElementsListItemDisplayOrder);
+
+
+          cedarComponentDataElementsList.add(cedarComponentDataElementsListItem);
         }
       }
+
+      cedarComponentDataElements.setComponentDataElementsListItem(cedarComponentDataElementsList);
+      cedarDataElementDerivation.setComponentDataElementsList(cedarComponentDataElements);
+      cedarDataElement.setDataElementDerivation(cedarDataElementDerivation);
 
 
       // Specify a temporary file to store a DataElement template instance
