@@ -39,49 +39,101 @@ public class CDEXMLInstances2CEDARCDEInstances {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElementsList.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-    // Specify the XML file containing caDSR data elements
-    File xmlFile = new File("src/main/resources/xml/xml_cde_201510293457_1_UTF8_short.xml");
 
-    // Read a list of DataElement objects from an XML file containing a list of CDEs
-    DataElementsList dataElementsList = ((DataElementsList) jaxbUnmarshaller.unmarshal(xmlFile));
+    Boolean temp = false;
+    File xmlFile;
+    File[] xmlFileList; //how to use file array
+    String xmlDirectoryName;
+    String jsonDirectoryName = null;
+    DataElementsList dataElementsList;
+    if (argc.length == 0) {
+      temp = true;
+      xmlDirectoryName = "src/main/resources/xml/example/";
 
-    // Process each DataElement
-    for (org.metadatacenter.ingestor.cadsr.DataElement cadsrDataElement : dataElementsList.dataElement) {
-
-      System.out.println("Processing DataElement....");
-
-      // Create a DataElement Java object (which we will serialize as a CEDAR template instance) for each DataElement
-      org.metadatacenter.ingestor.cedar.DataElement cedarDataElement = new org.metadatacenter.ingestor.cedar.DataElement();
-
-      // Transfer the content of each DataElement to a ElementData
-      System.out.println("list XML CDE");
-
-      //wire data element from xml to json
-      convertCADSR2CEDARDataElementAttributes(cedarDataElement, cadsrDataElement);
-      convertCADSR2CEDARDataElementConcept(cedarDataElement, cadsrDataElement);
-      convertCADSR2CEDARValueDomain(cedarDataElement, cadsrDataElement);
-      convertCADSR2CEDARReferenceDocuments(cedarDataElement, cadsrDataElement);
-      convertCADSR2CEDARClassifications(cedarDataElement, cadsrDataElement);
-      convertCADSR2CEDARAlternateNames(cedarDataElement, cadsrDataElement);
-      convertCADSR2CEDARDataElementDerivation(cedarDataElement, cadsrDataElement);
-
-
-
-      // Specify a temporary file to store a DataElement template instance
-      File cdeFile = File.createTempFile("DataElement", ".json");
-
-      System.out.println("Writing DataElement to " + cdeFile.getAbsolutePath());
-
-      // Serialize the CDE instance
-      mapper.writeValue(cdeFile, cedarDataElement);
+      // Specify the XML file containing caDSR data elements
+      xmlFile = new File(xmlDirectoryName);
+      xmlFileList = xmlFile.listFiles();
+    } else {
+      xmlDirectoryName = argc[0];
+      jsonDirectoryName = argc[1];
+      File directory = new File(xmlDirectoryName);
+      xmlFileList = directory.listFiles();
     }
+    if (xmlFileList == null) {
+      System.out.println("There are no files in this directory.");
+      System.exit(1);
+    }
+    //check for null, exit if no files to process
+    for(File file : xmlFileList) {
+      String filename = file.getName();
+
+      if (file.isFile() && (filename.endsWith(".xml") || filename.endsWith(".XML"))) {
+        // Read a list of DataElement objects from an XML file containing a list of CDEs
+        dataElementsList = ((DataElementsList) jaxbUnmarshaller.unmarshal(file));
+
+        int i = 0;
+        for (org.metadatacenter.ingestor.cadsr.DataElement cadsrDataElement : dataElementsList.dataElement) {
+
+          org.metadatacenter.ingestor.cedar.DataElement cedarDataElement = convertDataElement(cadsrDataElement);
+
+          // Specify a temporary file to store a DataElement template instance
+          File cdeFile;
+          if (temp) {
+            cdeFile = File.createTempFile("DataElement", ".json");
+          } else {
+            String jsonFilePath = jsonDirectoryName + String.format("CEDARDataElement%d.json", i);
+            cdeFile = new File(jsonFilePath);
+          }
+
+
+          System.out.println("Writing DataElement to " + cdeFile.getAbsolutePath());
+
+          // Serialize the CDE instance
+          mapper.writeValue(cdeFile, cedarDataElement);
+          i++;
+        }
+      } else {
+        System.out.println(String.format("Invalid file: %s", filename));
+      }
+    }
+
+
+  }
+
+  private static org.metadatacenter.ingestor.cedar.DataElement convertDataElement(DataElement cadsrDataElement) {
+    // Process each DataElement
+    System.out.println("Processing DataElement....");
+
+    // Create a DataElement Java object (which we will serialize as a CEDAR template instance) for each DataElement
+    org.metadatacenter.ingestor.cedar.DataElement cedarDataElement = new org.metadatacenter.ingestor.cedar.DataElement();
+
+    // Transfer the content of each caDSR DataElement to a CEDAR DataElement
+    System.out.println("list CDE");
+
+    convertCADSR2CEDARDataElementAttributes(cedarDataElement, cadsrDataElement);
+    convertCADSR2CEDARDataElementConcept(cedarDataElement, cadsrDataElement);
+    convertCADSR2CEDARValueDomain(cedarDataElement, cadsrDataElement);
+    convertCADSR2CEDARReferenceDocuments(cedarDataElement, cadsrDataElement);
+    convertCADSR2CEDARClassifications(cedarDataElement, cadsrDataElement);
+    convertCADSR2CEDARAlternateNames(cedarDataElement, cadsrDataElement);
+    convertCADSR2CEDARDataElementDerivation(cedarDataElement, cadsrDataElement);
+
+    return cedarDataElement;
   }
 
 
-  public static void convertCADSR2CEDARDataElementAttributes(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
+  private static void convertCADSR2CEDARDataElementAttributes(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
 
     //data element details
     System.out.println("**Data Element Details**");
+
+    //RAI
+    //all caDSR CDEs come from the same registry and have the same Registration Authority Identifier
+    String rai = "2.16.840.1.113883.3.26.2";
+    System.out.println(rai);
+    RAI cedarRAI = new RAI();
+    cedarRAI.setValue(rai);
+    cedarDataElement.setRAI(cedarRAI);
 
     //DE public ID
     String cadsrPublicID = cadsrDataElement.getPUBLICID().getContent();
@@ -156,7 +208,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
 
 
 
-  public static void convertCADSR2CEDARDataElementConcept(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
+  private static void convertCADSR2CEDARDataElementConcept(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
     // build Data element concept from xml to json
     System.out.println("**Data Element Concept**");
     DATAELEMENTCONCEPT cadsrDATAELEMENTCONCEPT = cadsrDataElement.getDATAELEMENTCONCEPT();
@@ -277,7 +329,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     String cadsrDECcdVersion = cadsrDATAELEMENTCONCEPTDECConceptualDomain.getVersion().getContent();
     System.out.println(cadsrDECcdVersion);
     org.metadatacenter.ingestor.cedar.Version__ cedarDECcdVersion = new org.metadatacenter.ingestor.cedar.Version__();
-    cedarDECcdContextVersion.setValue(cadsrDECcdContextVersion);
+    cedarDECcdVersion.setValue(cadsrDECcdContextVersion);
     cedarDECConceptualDomain.setVersion(cedarDECcdVersion);
 
     //DEC CD long name
@@ -802,7 +854,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     cedarDataElement.setValueDomain(cedarValueDomain);
   }
 
-  public static void convertCADSR2CEDARValueDomainConceptualDomain(ValueDomain cedarValueDomain, VALUEDOMAIN cadsrVALUEDOMAIN) {
+  private static void convertCADSR2CEDARValueDomainConceptualDomain(ValueDomain cedarValueDomain, VALUEDOMAIN cadsrVALUEDOMAIN) {
     //value domain conceptual domain
     System.out.println("**VD Conceptual Domain**");
     ConceptualDomain cadsrVDConceptualDomain = cadsrVALUEDOMAIN.getConceptualDomain();
@@ -853,7 +905,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     cedarValueDomain.setConceptualDomain(cedarVDConceptualDomain);
   }
 
-  public static void convertCADSR2CEDARRepresentations(ValueDomain cedarValueDomain, VALUEDOMAIN cadsrVALUEDOMAIN) {
+  private static void convertCADSR2CEDARRepresentations(ValueDomain cedarValueDomain, VALUEDOMAIN cadsrVALUEDOMAIN) {
     //representation
     System.out.println("**Representation**");
     Representation cadsrValueDomainRepresentation = cadsrVALUEDOMAIN.getRepresentation();
@@ -899,7 +951,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     String cadsrRepresentationLongName = cadsrValueDomainRepresentation.getLongName().getContent();
     System.out.println(cadsrRepresentationLongName);
     LongName_________ cedarRepresentationLongName = new LongName_________();
-    cedarRepresentationVersion.setValue(cadsrRepresentationVersion);
+    cedarRepresentationLongName.setValue(cadsrRepresentationVersion);
     cedarValueDomainRepresentation.setLongName(cedarRepresentationLongName);
 
 
@@ -985,7 +1037,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     cedarValueDomainRepresentation.setConceptDetails(cedarRepresentationConceptDetails);
   }
 
-  public static void convertCADSR2CEDARPermissibleValues(ValueDomain cedarValueDomain, VALUEDOMAIN cadsrVALUEDOMAIN) {
+  private static void convertCADSR2CEDARPermissibleValues(ValueDomain cedarValueDomain, VALUEDOMAIN cadsrVALUEDOMAIN) {
     //permissible values
     System.out.println("**Permissible Values**");
     List<PermissibleValuesITEM> permissibleValuesITEMList = cadsrVALUEDOMAIN.getPermissibleValues().getPermissibleValuesITEM();
@@ -1068,7 +1120,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     cedarValueDomain.setPermissibleValues(cedarPermissibleValues);
   }
 
-  public static void convertCADSR2CEDARValueDomainConcepts(ValueDomain cedarValueDomain, VALUEDOMAIN cadsrVALUEDOMAIN) {
+  private static void convertCADSR2CEDARValueDomainConcepts(ValueDomain cedarValueDomain, VALUEDOMAIN cadsrVALUEDOMAIN) {
     // value domain concepts
     System.out.println("**Value Domain Concepts**");
     List<ValueDomainConceptsITEM> valueDomainConceptsITEMList = cadsrVALUEDOMAIN.getValueDomainConcepts().getValueDomainConceptsITEM();
@@ -1146,7 +1198,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
   }
 
 
-  public static void convertCADSR2CEDARReferenceDocuments(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
+  private static void convertCADSR2CEDARReferenceDocuments(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
     //reference documents list
     System.out.println("**Reference Documents**");
     List<REFERENCEDOCUMENTSLISTITEM> referencedocumentslistitemList = cadsrDataElement.getREFERENCEDOCUMENTSLIST().getREFERENCEDOCUMENTSLISTITEM();
@@ -1242,7 +1294,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
 
   }
 
-  public static void convertCADSR2CEDARClassifications(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
+  private static void convertCADSR2CEDARClassifications(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
     //classification items
     System.out.println("**Classifications**");
     CLASSIFICATIONSLIST cadsrCLASSIFICATIONSLIST = cadsrDataElement.getCLASSIFICATIONSLIST();
@@ -1345,7 +1397,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     cedarClassificationScheme.setVersion(cedarClassificationSchemeVersion);
   }
 
-  public static void convertCADSR2CEDARAlternateNames(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
+  private static void convertCADSR2CEDARAlternateNames(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
     //alternate names
     System.out.println("**Alternate Names**");
     ALTERNATENAMELIST cadsrALTERNATENAMELIST = cadsrDataElement.getALTERNATENAMELIST();
@@ -1402,7 +1454,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     cedarDataElement.setAlternateNameList(cedarAlternateNames);
   }
 
-  public static void convertCADSR2CEDARDataElementDerivation(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
+  private static void convertCADSR2CEDARDataElementDerivation(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
     //data element derivation
     System.out.println("**Data Element Derivation**");
     DATAELEMENTDERIVATION cadsrDATAELEMENTDERIVATION = cadsrDataElement.getDATAELEMENTDERIVATION();
@@ -1482,7 +1534,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     cedarDataElement.setDataElementDerivation(cedarDataElementDerivation);
   }
 
-  public static void convertCADSR2CEDARComponentDataElements(DataElementDerivation cedarDataElementDerivation, DATAELEMENTDERIVATION cadsrDATAELEMENTDERIVATION) {
+  private static void convertCADSR2CEDARComponentDataElements(DataElementDerivation cedarDataElementDerivation, DATAELEMENTDERIVATION cadsrDATAELEMENTDERIVATION) {
     //component data elements
     System.out.println("**Component Data Elements**");
     List<ComponentDataElementsListITEM> cadsrComponenentDataElementsList = cadsrDATAELEMENTDERIVATION.getComponentDataElementsList().getComponentDataElementsListITEM();
