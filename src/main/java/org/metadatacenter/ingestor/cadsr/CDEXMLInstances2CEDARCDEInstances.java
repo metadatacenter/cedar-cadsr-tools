@@ -1,5 +1,6 @@
 package org.metadatacenter.ingestor.cadsr;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.metadatacenter.ingestor.cedar.*;
 import org.metadatacenter.ingestor.cedar.AlternateName;
@@ -28,19 +29,21 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CDEXMLInstances2CEDARCDEInstances {
   public static void main(String[] argc) throws IOException, JAXBException, DatatypeConfigurationException {
     ObjectMapper mapper = new ObjectMapper();
+    mapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
 
     // Create JAXB XML unmarshaller
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElementsList.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
 
-    Boolean temp = false;
+    boolean temp = false;
     File xmlFile;
     File[] xmlFileList; //how to use file array
     String xmlDirectoryName;
@@ -83,6 +86,14 @@ public class CDEXMLInstances2CEDARCDEInstances {
           } else {
             String jsonFilePath = jsonDirectoryName + String.format("CEDARDataElement%d.json", i);
             cdeFile = new File(jsonFilePath);
+
+            boolean bool;
+            bool = cdeFile.createNewFile();
+            if(bool) {
+              System.out.println(String.format("New file created: %s", cdeFile));
+            } else {
+              System.out.println(String.format("File overwritten: %s", cdeFile));
+            }
           }
 
 
@@ -110,6 +121,9 @@ public class CDEXMLInstances2CEDARCDEInstances {
     // Transfer the content of each caDSR DataElement to a CEDAR DataElement
     System.out.println("list CDE");
 
+    URI id = URI.create("https://example.com/Dummy");
+    cedarDataElement.setId(id);
+
     convertCADSR2CEDARDataElementAttributes(cedarDataElement, cadsrDataElement);
     convertCADSR2CEDARDataElementConcept(cedarDataElement, cadsrDataElement);
     convertCADSR2CEDARValueDomain(cedarDataElement, cadsrDataElement);
@@ -117,6 +131,8 @@ public class CDEXMLInstances2CEDARCDEInstances {
     convertCADSR2CEDARClassifications(cedarDataElement, cadsrDataElement);
     convertCADSR2CEDARAlternateNames(cedarDataElement, cadsrDataElement);
     convertCADSR2CEDARDataElementDerivation(cedarDataElement, cadsrDataElement);
+
+    cedarDataElement.setTemplateId(id);
 
     return cedarDataElement;
   }
@@ -213,6 +229,8 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**Data Element Concept**");
     DATAELEMENTCONCEPT cadsrDATAELEMENTCONCEPT = cadsrDataElement.getDATAELEMENTCONCEPT();
     DataElementConcept cedarDataElementConcept = new DataElementConcept();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarDataElementConcept.setId(id);
 
     //DEC Public ID
     String cadsrDECPublicID = cadsrDATAELEMENTCONCEPT.getPublicId().getContent();
@@ -295,7 +313,8 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**DEC Conceptual Domain**");
     ConceptualDomain cadsrDATAELEMENTCONCEPTDECConceptualDomain = cadsrDATAELEMENTCONCEPT.getConceptualDomain();
     org.metadatacenter.ingestor.cedar.ConceptualDomain cedarDECConceptualDomain = new org.metadatacenter.ingestor.cedar.ConceptualDomain();
-
+    URI id = URI.create("https://example.com/Dummy");
+    cedarDECConceptualDomain.setId(id);
 
     //DEC CD public id
     String cadsrDECcdPublicID = cadsrDATAELEMENTCONCEPTDECConceptualDomain.getPublicId().getContent();
@@ -349,6 +368,8 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**ObjectClass**");
     ObjectClass cadsrDATAELEMENTCONCEPTObjectClass = cadsrDATAELEMENTCONCEPT.getObjectClass();
     org.metadatacenter.ingestor.cedar.ObjectClass cedarObjectClass = new org.metadatacenter.ingestor.cedar.ObjectClass();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarObjectClass.setId(id);
 
     //object class public id
     String cadsrObjClassPublicID = cadsrDATAELEMENTCONCEPTObjectClass.getPublicId().getContent();
@@ -400,11 +421,15 @@ public class CDEXMLInstances2CEDARCDEInstances {
     //object class concept details list
     List<ConceptDetailsITEM> cadsrDATAELEMENTCONCEPTObjectClassConceptDetailsITEM = cadsrDATAELEMENTCONCEPTObjectClass.getConceptDetails().getConceptDetailsITEM();
     org.metadatacenter.ingestor.cedar.ConceptDetails cedarObjClassConceptDetails = new ConceptDetails();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarObjClassConceptDetails.setId(id);
+
     List<ConceptDetailsItem> cedarObjClassConceptDetailsList = new ArrayList<ConceptDetailsItem>();
 
     if (!cadsrDATAELEMENTCONCEPTObjectClassConceptDetailsITEM.isEmpty()) {
       for (ConceptDetailsITEM val : cadsrDATAELEMENTCONCEPTObjectClassConceptDetailsITEM) {
         org.metadatacenter.ingestor.cedar.ConceptDetailsItem cedarObjClassConceptDetailsItem = new ConceptDetailsItem();
+        cedarObjClassConceptDetailsItem.setId(id);
 
         System.out.println("object class concept details list item: ");
 
@@ -483,6 +508,8 @@ public class CDEXMLInstances2CEDARCDEInstances {
     Property cadsrDATAELEMENTCONCEPTProperty = cadsrDATAELEMENTCONCEPT.getProperty();
 
     org.metadatacenter.ingestor.cedar.Property cedarProperty = new org.metadatacenter.ingestor.cedar.Property();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarProperty.setId(id);
 
     //property public id
     String cadsrPropertyPublicID = cadsrDATAELEMENTCONCEPTProperty.getPublicId().getContent();
@@ -533,11 +560,15 @@ public class CDEXMLInstances2CEDARCDEInstances {
     //property concept details list
     List<ConceptDetailsITEM> cadsrDATAELEMENTCONCEPTPropertyConceptDetailsITEM = cadsrDATAELEMENTCONCEPTProperty.getConceptDetails().getConceptDetailsITEM();
     org.metadatacenter.ingestor.cedar.ConceptDetails_ cedarPropertyConceptDetails = new ConceptDetails_();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarPropertyConceptDetails.setId(id);
+
     List<ConceptDetailsItem_> cedarPropertyConceptDetailsList = new ArrayList<ConceptDetailsItem_>();
 
     if (!cadsrDATAELEMENTCONCEPTPropertyConceptDetailsITEM.isEmpty()) {
       for (ConceptDetailsITEM val : cadsrDATAELEMENTCONCEPTPropertyConceptDetailsITEM) {
         org.metadatacenter.ingestor.cedar.ConceptDetailsItem_ cedarPropertyConceptDetailsItem = new ConceptDetailsItem_();
+        cedarPropertyConceptDetailsItem.setId(id);
 
         System.out.println("property concept details list item: ");
 
@@ -613,6 +644,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     //object class qualifier
     String cadsrObjectClassQualifier = cadsrDATAELEMENTCONCEPT.getObjectClassQualifier().getContent();
     org.metadatacenter.ingestor.cedar.ObjectClassQualifier cedarObjectClassQualifier = new org.metadatacenter.ingestor.cedar.ObjectClassQualifier();
+
     if (cadsrObjectClassQualifier.isEmpty()) {
       cadsrObjectClassQualifier = cadsrDATAELEMENTCONCEPT.getObjectClassQualifier().getNULL();
       if (cadsrObjectClassQualifier.equals("TRUE")) {
@@ -628,6 +660,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     //property qualifier
     String cadsrPropertyQualifier = cadsrDATAELEMENTCONCEPT.getPropertyQualifier().getContent();
     org.metadatacenter.ingestor.cedar.PropertyQualifier cedarPropertyQualifier = new org.metadatacenter.ingestor.cedar.PropertyQualifier();
+
     if (cadsrPropertyQualifier.isEmpty()) {
       cadsrPropertyQualifier = cadsrDATAELEMENTCONCEPT.getPropertyQualifier().getNULL();
       if (cadsrPropertyQualifier.equals("TRUE")) {
@@ -643,6 +676,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
     //origin
     String cadsrDECOrigin = cadsrDATAELEMENTCONCEPT.getOrigin().getContent();
     org.metadatacenter.ingestor.cedar.Origin___ cedarDECOrigin = new org.metadatacenter.ingestor.cedar.Origin___();
+
     if (cadsrDECOrigin.isEmpty()) {
       cadsrDECOrigin = cadsrDATAELEMENTCONCEPT.getOrigin().getNULL();
       if (cadsrDECOrigin.equals("TRUE")) {
@@ -659,6 +693,8 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**Value Domain**");
     VALUEDOMAIN cadsrVALUEDOMAIN = cadsrDataElement.getVALUEDOMAIN();
     org.metadatacenter.ingestor.cedar.ValueDomain cedarValueDomain = new org.metadatacenter.ingestor.cedar.ValueDomain();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarValueDomain.setId(id);
 
     //value domain public id
     String cadsrValueDomainPublicID = cadsrVALUEDOMAIN.getPublicId().getContent();
@@ -859,6 +895,8 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**VD Conceptual Domain**");
     ConceptualDomain cadsrVDConceptualDomain = cadsrVALUEDOMAIN.getConceptualDomain();
     org.metadatacenter.ingestor.cedar.ConceptualDomain_ cedarVDConceptualDomain = new org.metadatacenter.ingestor.cedar.ConceptualDomain_();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarVDConceptualDomain.setId(id);
 
     //value domain conceptual domain public id
     String cadsrVDConceptualDomainPublicID = cadsrVDConceptualDomain.getPublicId().getContent();
@@ -910,6 +948,8 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**Representation**");
     Representation cadsrValueDomainRepresentation = cadsrVALUEDOMAIN.getRepresentation();
     org.metadatacenter.ingestor.cedar.Representation cedarValueDomainRepresentation = new org.metadatacenter.ingestor.cedar.Representation();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarValueDomainRepresentation.setId(id);
 
     //representation public ID
     String cadsrRepresentationPublicID = cadsrValueDomainRepresentation.getPublicId().getContent();
@@ -964,12 +1004,14 @@ public class CDEXMLInstances2CEDARCDEInstances {
     //representation concept details list
     List<ConceptDetailsITEM> cadsrRepresentationConceptDetailsITEM = cadsrValueDomainRepresentation.getConceptDetails().getConceptDetailsITEM();
     org.metadatacenter.ingestor.cedar.ConceptDetails__ cedarRepresentationConceptDetails = new ConceptDetails__();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarRepresentationConceptDetails.setId(id);
     List<ConceptDetailsItem__> cedarRepresentationConceptDetailsList = new ArrayList<ConceptDetailsItem__>();
     if (!cadsrRepresentationConceptDetailsITEM.isEmpty()) {
       for (ConceptDetailsITEM val : cadsrRepresentationConceptDetailsITEM) {
 
         org.metadatacenter.ingestor.cedar.ConceptDetailsItem__ cedarRepresentationConceptDetailsItem = new ConceptDetailsItem__();
-
+        cedarRepresentationConceptDetailsItem.setId(id);
         System.out.println("representation concept details list item: ");
 
         //representation concept details preferred name
@@ -1042,11 +1084,14 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**Permissible Values**");
     List<PermissibleValuesITEM> permissibleValuesITEMList = cadsrVALUEDOMAIN.getPermissibleValues().getPermissibleValuesITEM();
     PermissibleValues cedarPermissibleValues = new PermissibleValues();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarPermissibleValues.setId(id);
     List<PermissibleValuesItem> cedarPermissibleValuesList = new ArrayList<PermissibleValuesItem>();
     if (!permissibleValuesITEMList.isEmpty()) {
       for (PermissibleValuesITEM val : permissibleValuesITEMList) {
 
         PermissibleValuesItem cedarPermissibleValuesItem = new PermissibleValuesItem();
+        cedarPermissibleValuesItem.setId(id);
 
         System.out.println("permissible values list item: ");
 
@@ -1125,11 +1170,15 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**Value Domain Concepts**");
     List<ValueDomainConceptsITEM> valueDomainConceptsITEMList = cadsrVALUEDOMAIN.getValueDomainConcepts().getValueDomainConceptsITEM();
     org.metadatacenter.ingestor.cedar.ValueDomainConcepts cedarValueDomainConcepts = new ValueDomainConcepts();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarValueDomainConcepts.setId(id);
+
     List<ValueDomainConceptsItem> cedarValueDomainConceptsList = new ArrayList<ValueDomainConceptsItem>();
     if (!valueDomainConceptsITEMList.isEmpty()) {
       for (ValueDomainConceptsITEM val : valueDomainConceptsITEMList) {
 
         ValueDomainConceptsItem cedarValueDomainConceptsItem = new ValueDomainConceptsItem();
+        cedarValueDomainConceptsItem.setId(id);
 
         System.out.println("value domain concepts list item: ");
 
@@ -1203,11 +1252,14 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**Reference Documents**");
     List<REFERENCEDOCUMENTSLISTITEM> referencedocumentslistitemList = cadsrDataElement.getREFERENCEDOCUMENTSLIST().getREFERENCEDOCUMENTSLISTITEM();
     ReferenceDocumentsList cedarReferenceDocuments = new ReferenceDocumentsList();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarReferenceDocuments.setId(id);
     List<ReferenceDocumentsListItem> cedarReferenceDocumentsList = new ArrayList<ReferenceDocumentsListItem>();
     if (!referencedocumentslistitemList.isEmpty()) {
       for (REFERENCEDOCUMENTSLISTITEM val : referencedocumentslistitemList) {
 
         ReferenceDocumentsListItem cedarReferenceDocumentsItem = new ReferenceDocumentsListItem();
+        cedarReferenceDocumentsItem.setId(id);
 
         System.out.println("reference documents list item: ");
 
@@ -1297,19 +1349,24 @@ public class CDEXMLInstances2CEDARCDEInstances {
   private static void convertCADSR2CEDARClassifications(org.metadatacenter.ingestor.cedar.DataElement cedarDataElement, DataElement cadsrDataElement) {
     //classification items
     System.out.println("**Classifications**");
-    CLASSIFICATIONSLIST cadsrCLASSIFICATIONSLIST = cadsrDataElement.getCLASSIFICATIONSLIST();
-    List<CLASSIFICATIONSLISTITEM> cadsrCLASSIFICATIONSLISTITEM = cadsrCLASSIFICATIONSLIST.getCLASSIFICATIONSLISTITEM();
+    CLASSIFICATIONSLIST cadsrClassificationsList = cadsrDataElement.getCLASSIFICATIONSLIST();
+    List<CLASSIFICATIONSLISTITEM> cadsrClassificationsListItem = cadsrClassificationsList.getCLASSIFICATIONSLISTITEM();
     org.metadatacenter.ingestor.cedar.ClassificationsList cedarClassifications = new ClassificationsList();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarClassifications.setId(id);
+
     List<ClassificationsListItem> cedarClassificationsList = new ArrayList<ClassificationsListItem>();
-    if (!cadsrCLASSIFICATIONSLISTITEM.isEmpty()) {
-      for (CLASSIFICATIONSLISTITEM val : cadsrCLASSIFICATIONSLISTITEM) {
+    if (!cadsrClassificationsListItem.isEmpty()) {
+      for (CLASSIFICATIONSLISTITEM val : cadsrClassificationsListItem) {
 
         ClassificationsListItem cedarClassificationsListItem = new ClassificationsListItem();
+        cedarClassificationsListItem.setId(id);
 
         System.out.println("classifications list item: ");
 
         ClassificationScheme cadsrClassificationScheme = val.getClassificationScheme();
         org.metadatacenter.ingestor.cedar.ClassificationScheme cedarClassificationScheme = new org.metadatacenter.ingestor.cedar.ClassificationScheme();
+        cedarClassificationScheme.setId(id);
         System.out.println(" \t classification scheme: ");
 
 
@@ -1403,11 +1460,14 @@ public class CDEXMLInstances2CEDARCDEInstances {
     ALTERNATENAMELIST cadsrALTERNATENAMELIST = cadsrDataElement.getALTERNATENAMELIST();
     List<ALTERNATENAMELISTITEM> cadsrALTERNATENAMELISTITEM = cadsrALTERNATENAMELIST.getALTERNATENAMELISTITEM();
     AlternateNameList cedarAlternateNames = new AlternateNameList();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarAlternateNames.setId(id);
     List<AlternateNameListItem> cedarAlternateNameList = new ArrayList<AlternateNameListItem>();
     if (!cadsrALTERNATENAMELISTITEM.isEmpty()) {
       for (ALTERNATENAMELISTITEM val : cadsrALTERNATENAMELISTITEM) {
 
         AlternateNameListItem cedarAlternateNameListItem = new AlternateNameListItem();
+        cedarAlternateNameListItem.setId(id);
 
         System.out.println("alternate list item: ");
 
@@ -1459,6 +1519,8 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**Data Element Derivation**");
     DATAELEMENTDERIVATION cadsrDATAELEMENTDERIVATION = cadsrDataElement.getDATAELEMENTDERIVATION();
     DataElementDerivation cedarDataElementDerivation = new DataElementDerivation();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarDataElementDerivation.setId(id);
 
     //derivation type
     String cadsrDataElementDerivationType = cadsrDATAELEMENTDERIVATION.getDerivationType().getContent();
@@ -1539,6 +1601,9 @@ public class CDEXMLInstances2CEDARCDEInstances {
     System.out.println("**Component Data Elements**");
     List<ComponentDataElementsListITEM> cadsrComponenentDataElementsList = cadsrDATAELEMENTDERIVATION.getComponentDataElementsList().getComponentDataElementsListITEM();
     ComponentDataElementsList cedarComponentDataElements = new ComponentDataElementsList();
+    URI id = URI.create("https://example.com/Dummy");
+    cedarComponentDataElements.setId(id);
+
     List<ComponentDataElementsListItem> cedarComponentDataElementsList = new ArrayList<ComponentDataElementsListItem>();
     String componenentDataElementsListNULLval = null;
     if (cadsrComponenentDataElementsList.isEmpty()) {
@@ -1551,6 +1616,7 @@ public class CDEXMLInstances2CEDARCDEInstances {
       for (ComponentDataElementsListITEM val : cadsrComponenentDataElementsList) {
 
         ComponentDataElementsListItem cedarComponentDataElementsListItem = new ComponentDataElementsListItem();
+        cedarComponentDataElementsListItem.setId(id);
 
         System.out.println("component data elements list item: ");
 
