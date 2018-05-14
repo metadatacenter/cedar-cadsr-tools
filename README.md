@@ -41,6 +41,12 @@ Then build it with Maven:
 
     mvn clean install
 
-To run:
+To run the converter tool:
 
-    mvn exec:java
+    mvn exec:java@convert -Dexec.args="[path-to-xml] [output-dir]"
+    
+To run the converter tool and upload the fields to CEDAR server:
+
+    mvn exec:java@upload -Dexec.args="[path-to-xml] [create-field-api] [apikey]"
+
+
