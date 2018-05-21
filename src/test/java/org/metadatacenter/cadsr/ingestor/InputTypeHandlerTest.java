@@ -1,5 +1,6 @@
 package org.metadatacenter.cadsr.ingestor;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.metadatacenter.cadsr.DataElement;
@@ -110,39 +111,48 @@ public class InputTypeHandlerTest {
     }
   }
 
-  @Test
-  public void shouldDefineNumericField_JAVA_LONG() throws JAXBException, IOException {
+  @Test(expected = UnsupportedDataElementException.class)
+  public void shouldNotProduceField_JAVA_LONG() throws JAXBException, IOException, UnsupportedDataElementException {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2608393.xml");
     try {
       Map<String, Object> inputType = handler.handle(dataElement).getInputType();
       // Assert
       assertThat(inputType.get(ModelNodeNames.INPUT_TYPE).toString(), is(equalTo("numeric")));
     } catch (UnsupportedDataElementException e) {
-      logger.warn(e.getMessage());
+      String message = e.getMessage();
+      assertThat(message, CoreMatchers.is("Failed to convert 'Healthcare Facility Site Identifier java.lang.Long' " +
+          "(ID: 2608393) - Reason: A non-enumerated java.lang.Long is not supported (Unsupported)"));
+      throw e;
     }
   }
 
-  @Test
-  public void shouldDefineNumericField_JAVA_INTEGER() throws JAXBException, IOException {
+  @Test(expected = UnsupportedDataElementException.class)
+  public void shouldNotProduceField_JAVA_INTEGER() throws JAXBException, IOException, UnsupportedDataElementException {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2513896.xml");
     try {
       Map<String, Object> inputType = handler.handle(dataElement).getInputType();
       // Assert
       assertThat(inputType.get(ModelNodeNames.INPUT_TYPE).toString(), is(equalTo("numeric")));
     } catch (UnsupportedDataElementException e) {
-      logger.warn(e.getMessage());
+      String message = e.getMessage();
+      assertThat(message, CoreMatchers.is("Failed to convert 'Fluid Specimen Second Dimension Position java.lang.Integer' " +
+          "(ID: 2513896) - Reason: A non-enumerated java.lang.Integer is not supported (Unsupported)"));
+      throw e;
     }
   }
 
-  @Test
-  public void shouldDefineNumericField_JAVA_DOUBLE() throws JAXBException, IOException {
+  @Test(expected = UnsupportedDataElementException.class)
+  public void shouldNotProduceField_JAVA_DOUBLE() throws JAXBException, IOException, UnsupportedDataElementException {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2513777.xml");
     try {
       Map<String, Object> inputType = handler.handle(dataElement).getInputType();
       // Assert
       assertThat(inputType.get(ModelNodeNames.INPUT_TYPE).toString(), is(equalTo("numeric")));
     } catch (UnsupportedDataElementException e) {
-      logger.warn(e.getMessage());
+      String message = e.getMessage();
+      assertThat(message, CoreMatchers.is("Failed to convert 'Fluid Specimen Milliliter Available Quantity java.lang.Double' " +
+          "(ID: 2513777) - Reason: A non-enumerated java.lang.Double is not supported (Unsupported)"));
+      throw e;
     }
   }
 
