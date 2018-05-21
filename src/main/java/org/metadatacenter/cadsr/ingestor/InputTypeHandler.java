@@ -24,6 +24,7 @@ public class InputTypeHandler implements ModelHandler {
     if (ENUMERATED.equals(valueDomainType)) {
       handleEnumeratedType(dataElement);
     } else if (NON_ENUMERATED.equals(valueDomainType)) {
+      checkUnsupportedFeatures(dataElement);
       handleNonEnumeratedType(dataElement);
     } else {
       String reason = String.format("Value domain is not either enumerated or non-enumerated = %s (Unknown)",
@@ -59,6 +60,29 @@ public class InputTypeHandler implements ModelHandler {
       inputType.put(ModelNodeNames.INPUT_TYPE, ModelNodeValues.DATE);
     } else {
       String reason = String.format("A non-enumerated %s is not supported (Unsupported)", datatype);
+      throw new UnsupportedDataElementException(dataElement, reason);
+    }
+  }
+
+  private void checkUnsupportedFeatures(DataElement dataElement) throws UnsupportedDataElementException {
+    String minValue = dataElement.getVALUEDOMAIN().getMinimumValue().getContent();
+    if (!Strings.isNullOrEmpty(minValue)) {
+      String reason = String.format("A value constraint of 'minimum value' is not supported (Unsupported)");
+      throw new UnsupportedDataElementException(dataElement, reason);
+    }
+    String maxValue = dataElement.getVALUEDOMAIN().getMaximumValue().getContent();
+    if (!Strings.isNullOrEmpty(maxValue)) {
+      String reason = String.format("A value constraint of 'maximum value' is not supported (Unsupported)");
+      throw new UnsupportedDataElementException(dataElement, reason);
+    }
+    String decimalPlace = dataElement.getVALUEDOMAIN().getDecimalPlace().getContent();
+    if (!Strings.isNullOrEmpty(decimalPlace)) {
+      String reason = String.format("A value constraint of 'decimal place' is not supported (Unsupported)");
+      throw new UnsupportedDataElementException(dataElement, reason);
+    }
+    String unitOfMeasure = dataElement.getVALUEDOMAIN().getUnitOfMeasure().getContent();
+    if (!Strings.isNullOrEmpty(unitOfMeasure)) {
+      String reason = String.format("A value constraint of 'unit of measure' is not supported (Unsupported)");
       throw new UnsupportedDataElementException(dataElement, reason);
     }
   }
