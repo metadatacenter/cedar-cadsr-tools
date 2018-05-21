@@ -45,11 +45,11 @@ public class CadsrUtils {
       DataElementsList del = getDataElementLists(is);
       fieldMaps.addAll(getFieldMapsFromDataElements(del));
     } catch (JAXBException e) {
-      logger.error("Error while parsing source document: " + e.getMessage());
+      logger.error("Error while parsing source document: " + e);
     } catch (ClassCastException e) {
-      logger.error("Source document is not a list of data elements: " + e.getMessage());
+      logger.error("Source document is not a list of data elements: " + e);
     } catch (UnsupportedEncodingException e) {
-      logger.error("Unsupported encoding: " + e.getMessage());
+      logger.error("Unsupported encoding: " + e);
     }
     return fieldMaps;
   }
@@ -77,11 +77,11 @@ public class CadsrUtils {
       DataElement dataElement = getDataElement(is);
       fieldMap.putAll(getFieldMapFromDataElement(dataElement));
     } catch (JAXBException e) {
-      logger.error("Error while parsing source document: " + e.getMessage());
+      logger.error("Error while parsing source document: " + e);
     } catch (ClassCastException e) {
-      logger.error("Source document is not a data element: " + e.getMessage());
+      logger.error("Source document is not a data element: " + e);
     } catch (UnsupportedEncodingException e) {
-      logger.error("Unsupported encoding: " + e.getMessage());
+      logger.error("Unsupported encoding: " + e);
     }
     return fieldMap;
   }
