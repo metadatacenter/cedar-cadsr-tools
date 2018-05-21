@@ -22,7 +22,7 @@ public class CadsrDatatypes {
   );
 
   public static final List<String> NUMERIC_LIST = Lists.newArrayList(
-      NUMBER, JAVA_LONG, JAVA_INTEGER, JAVA_DOUBLE
+      NUMBER
   );
 
   public static final List<String> DATE_LIST = Lists.newArrayList(
