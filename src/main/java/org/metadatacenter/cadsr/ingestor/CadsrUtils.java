@@ -100,6 +100,7 @@ public class CadsrUtils {
     setInputType(fieldMap, dataElement, new InputTypeHandler());
     setValueConstraints(fieldMap, dataElement, new ValueConstraintsHandler());
     setProperties(fieldMap, dataElement, new PropertiesHandler());
+    setVersion(fieldMap, dataElement, new VersionHandler());
   }
 
   private static void setFieldName(final Map<String, Object> fieldMap, String content) {
@@ -135,6 +136,11 @@ public class CadsrUtils {
     valueConstraintsHandler.handle(dataElement).apply(fieldMap);
   }
 
+  private static void setVersion(Map<String, Object> fieldMap, DataElement dataElement, VersionHandler
+      versionHandler) throws UnsupportedDataElementException {
+    versionHandler.handle(dataElement).apply(fieldMap);
+  }
+
   private static void createEmptyField(final Map<String, Object> fieldMap) {
     fieldMap.put(ModelNodeNames._SCHEMA, ModelNodeValues.JSON_SCHEMA_IRI);
     fieldMap.put(ModelNodeNames.LD_ID, null);
@@ -153,8 +159,6 @@ public class CadsrUtils {
     fieldMap.put(ModelNodeNames.PAV_CREATED_BY, null);
     fieldMap.put(ModelNodeNames.PAV_LAST_UPDATED_ON, null);
     fieldMap.put(ModelNodeNames.OSLC_MODIFIED_BY, null);
-    fieldMap.put(ModelNodeNames.PAV_VERSION, "0.0.1");
-    fieldMap.put(ModelNodeNames.BIBO_STATUS, "bibo:draft");
     fieldMap.put(ModelNodeNames.SCHEMA_SCHEMA_VERSION, CEDAR_SCHEMA_VERSION);
     fieldMap.put(ModelNodeNames.ADDITIONAL_PROPERTIES, ModelNodeValues.FALSE);
   }
