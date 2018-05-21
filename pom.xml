@@ -90,8 +90,12 @@
         </executions>
         <configuration>
           <packageName>org.metadatacenter.cadsr</packageName>
-          <sources>src/main/resources/xsd</sources>
-          <xjbSources>src/main/resources/xjb</xjbSources>
+          <sources>
+             <source>src/main/resources/xsd</source>
+          </sources>
+          <xjbSources>
+             <xjbSource>src/main/resources/xjb</xjbSource>
+          </xjbSources>
         </configuration>
       </plugin>
       <!-- Tell an IDE to include generated code in its compile phase. jsonschema2pojo uses ${basedir}/target/java-gen -->
