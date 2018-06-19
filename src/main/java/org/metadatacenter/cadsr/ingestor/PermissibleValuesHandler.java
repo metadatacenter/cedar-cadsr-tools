@@ -11,7 +11,7 @@ import org.metadatacenter.model.ModelNodeValues;
 
 import java.util.*;
 
-public class ValueConstraintsHandler implements ModelHandler {
+public class PermissibleValuesHandler implements ModelHandler {
 
   private static final String NCIT_ONTOLOGY_IRI = "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#";
   private static final String NCIT_ONTOLOGY_LABEL = "NCIT";
@@ -26,7 +26,7 @@ public class ValueConstraintsHandler implements ModelHandler {
   private final List<Map<String, Object>> classes = Lists.newArrayList();
   private final List<Map<String, Object>> branches = Lists.newArrayList();
 
-  public ValueConstraintsHandler handle(DataElement dataElement) throws UnsupportedDataElementException {
+  public PermissibleValuesHandler handle(DataElement dataElement) throws UnsupportedDataElementException {
     String valueDomainType = dataElement.getVALUEDOMAIN().getValueDomainType().getContent();
     if (ENUMERATED.equals(valueDomainType)) {
       handleEnumeratedType(dataElement);
