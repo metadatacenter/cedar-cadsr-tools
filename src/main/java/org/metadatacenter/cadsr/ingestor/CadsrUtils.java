@@ -12,12 +12,15 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.crypto.Data;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import static org.metadatacenter.cadsr.ingestor.Constants.MIN_BP_VALUESET_SIZE;
 
 public class CadsrUtils {
 

@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.metadatacenter</groupId>
     <artifactId>cedar-parent</artifactId>
-    <version>1.8.2-SNAPSHOT</version>
+    <version>1.8.9-SNAPSHOT</version>
   </parent>
 
   <groupId>org.metadatacenter</groupId>
   <artifactId>cadsr2cedar</artifactId>
-  <version>1.8.2-SNAPSHOT</version>
+  <version>1.8.9-SNAPSHOT</version>
   <name>Project that generates CEDAR template fields from caDSR XML-encoded DataElement instances</name>
 
   <scm>
@@ -41,6 +41,16 @@
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>3.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-distribution</artifactId>
+      <version>5.1.5</version>
     </dependency>
   </dependencies>
 
