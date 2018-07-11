@@ -101,6 +101,7 @@ public class CadsrUtils {
     setFieldName(fieldMap, dataElement.getLONGNAME().getContent());
     setFieldDescription(fieldMap, dataElement.getPREFERREDDEFINITION().getContent());
     setInputType(fieldMap, dataElement, new InputTypeHandler());
+    setPermissibleValues(fieldMap, dataElement, new PermissibleValuesHandler());
     setValueConstraints(fieldMap, dataElement, new ValueConstraintsHandler());
     setProperties(fieldMap, dataElement, new PropertiesHandler());
     setVersion(fieldMap, dataElement, new VersionHandler());
@@ -132,6 +133,11 @@ public class CadsrUtils {
   private static void setProperties(Map<String, Object> fieldMap, DataElement dataElement, PropertiesHandler
       propertiesHandler) throws UnsupportedDataElementException {
     propertiesHandler.handle(dataElement).apply(fieldMap);
+  }
+
+  private static void setPermissibleValues(Map<String, Object> fieldMap, DataElement dataElement, PermissibleValuesHandler
+      permissibleValuesHandler) throws UnsupportedDataElementException {
+    permissibleValuesHandler.handle(dataElement).apply(fieldMap);
   }
 
   private static void setValueConstraints(Map<String, Object> fieldMap, DataElement dataElement, ValueConstraintsHandler

@@ -1,37 +1,39 @@
 package org.metadatacenter.cadsr.ingestor;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.google.common.base.Strings;
 import org.metadatacenter.cadsr.DataElement;
-import org.metadatacenter.cadsr.PermissibleValues;
-import org.metadatacenter.cadsr.PermissibleValuesITEM;
+import org.metadatacenter.cadsr.VALUEDOMAIN;
 import org.metadatacenter.model.ModelNodeNames;
-import org.metadatacenter.model.ModelNodeValues;
 
-import java.util.*;
+import javax.annotation.Nullable;
+import java.math.BigDecimal;
+import java.util.Map;
 
 public class ValueConstraintsHandler implements ModelHandler {
-
-  private static final String NCIT_ONTOLOGY_IRI = "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#";
-  private static final String NCIT_ONTOLOGY_LABEL = "NCIT";
-
-  private static final int MAX_ENUMERATED_TERMS = 20;
 
   private static final String ENUMERATED = "Enumerated";
   private static final String NON_ENUMERATED = "NonEnumerated";
 
-  private final List<Map<String, Object>> ontologies = Lists.newArrayList();
-  private final List<Map<String, Object>> valueSets = Lists.newArrayList();
-  private final List<Map<String, Object>> classes = Lists.newArrayList();
-  private final List<Map<String, Object>> branches = Lists.newArrayList();
+  private static final String XSD_DECIMAL = "xsd:decimal";
+  private static final String XSD_LONG = "xsd:long";
+  private static final String XSD_INT = "xsd:int";
+  private static final String XSD_DOUBLE = "xsd:double";
+
+  private static final int NONE = -1;
+
+  private int minLength = NONE;
+  private int maxLength = NONE;
+  private int decimalPlace = NONE;
+  private Number minValue;
+  private Number maxValue;
+  private String unitOfMeasure;
+  private String numberType;
 
   public ValueConstraintsHandler handle(DataElement dataElement) throws UnsupportedDataElementException {
-    String valueDomainType = dataElement.getVALUEDOMAIN().getValueDomainType().getContent();
-    if (ENUMERATED.equals(valueDomainType)) {
-      handleEnumeratedType(dataElement);
-    } else if (NON_ENUMERATED.equals(valueDomainType)) {
-      handleNonEnumeratedType(dataElement);
+    final VALUEDOMAIN valueDomain = dataElement.getVALUEDOMAIN();
+    String valueDomainType = valueDomain.getValueDomainType().getContent();
+    if (ENUMERATED.equals(valueDomainType) || NON_ENUMERATED.equals(valueDomainType)) {
+      handleValueDomain(valueDomain);
     } else {
       String reason = String.format("Value domain is not either enumerated or non-enumerated = %s (Unknown)",
           valueDomainType);
@@ -40,128 +42,135 @@ public class ValueConstraintsHandler implements ModelHandler {
     return this;
   }
 
-  private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
-    PermissibleValues permissibleValues = dataElement.getVALUEDOMAIN().getPermissibleValues();
-    Set<Term> termSet = getTermSet(permissibleValues, dataElement);
-    setListOfClasses(termSet);
-  }
-
-  private Set<Term> getTermSet(PermissibleValues permissibleValues, DataElement dataElement) throws
-      UnsupportedDataElementException {
-    Set<Term> termSet = Sets.newHashSet();
-    for (PermissibleValuesITEM permissibleItem : permissibleValues.getPermissibleValuesITEM()) {
-      checkConceptNotNull(permissibleItem, dataElement);
-      checkComplexConcept(permissibleItem, dataElement);
-      termSet.add(new Term(
-          permissibleItem.getMEANINGCONCEPTS().getContent(),
-          permissibleItem.getVALUEMEANING().getContent(),
-          permissibleItem.getVALIDVALUE().getContent()
-      ));
-    }
-    checkPermissibleValueSize(termSet, dataElement);
-    return termSet;
-  }
-
-  private void setListOfClasses(Set<Term> termSet) {
-    for (Term term : termSet) {
-      Map<String, Object> controlledTerm = Maps.newHashMap();
-      controlledTerm.put(ModelNodeNames.URI, NCIT_ONTOLOGY_IRI + term.conceptId);
-      controlledTerm.put(ModelNodeNames.LABEL, term.label);
-      controlledTerm.put(ModelNodeNames.PREF_LABEL, term.prefLabel);
-      controlledTerm.put(ModelNodeNames.TYPE, ModelNodeValues.ONTOLOGY_CLASS);
-      controlledTerm.put(ModelNodeNames.SOURCE, NCIT_ONTOLOGY_LABEL);
-      classes.add(controlledTerm);
+  private void handleValueDomain(final VALUEDOMAIN valueDomain) throws UnsupportedDataElementException {
+    String datatype = valueDomain.getDatatype().getContent();
+    if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
+      handleStringValueConstraints(valueDomain);
+    } else if (CadsrDatatypes.NUMERIC_LIST.contains(datatype)) {
+      handleNumericValueConstraints(valueDomain);
     }
   }
 
-  private static void checkConceptNotNull(PermissibleValuesITEM permissibleItem, DataElement dataElement) throws
-      UnsupportedDataElementException {
-    String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
-    if ("".equals(conceptId)) {
-      String reason = String.format("Controlled term for value '%s' is null (NullValue)",
-          permissibleItem.getVALUEMEANING().getContent());
-      throw new UnsupportedDataElementException(dataElement, reason);
+  private void handleStringValueConstraints(final VALUEDOMAIN valueDomain) {
+    minLength = getMinimumLength(valueDomain);
+    maxLength = getMaximumLength(valueDomain);
+  }
+
+  private void handleNumericValueConstraints(final VALUEDOMAIN valueDomain) {
+    numberType = getNumberType(valueDomain);
+    minValue = getMinimumValue(valueDomain, numberType);
+    maxValue = getMaximumValue(valueDomain, numberType);
+    decimalPlace = getDecimalPlace(valueDomain);
+    unitOfMeasure = getUnitOfMeasure(valueDomain);
+  }
+
+  private static int getMinimumLength(final VALUEDOMAIN valueDomain) {
+    String value = valueDomain.getMinimumLength().getContent();
+    if (!Strings.isNullOrEmpty(value)) {
+      return Integer.parseInt(value);
+    } else {
+      return NONE;
     }
   }
 
-  private static void checkComplexConcept(PermissibleValuesITEM permissibleItem, DataElement dataElement) throws
-      UnsupportedDataElementException {
-    String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
-    if (conceptId.contains(",") || conceptId.contains(":")) {
-      String reason = String.format("Controlled term for value '%s' is a complex concept [%s] " +
-          "(Unsupported)", permissibleItem.getVALUEMEANING().getContent(), conceptId);
-      throw new UnsupportedDataElementException(dataElement, reason);
+  private static int getMaximumLength(final VALUEDOMAIN valueDomain) {
+    String value = valueDomain.getMaximumLength().getContent();
+    if (!Strings.isNullOrEmpty(value)) {
+      return Integer.parseInt(value);
+    } else {
+      return NONE;
     }
   }
 
-  private static void checkPermissibleValueSize(Set<Term> termSet, DataElement dataElement) throws
-      UnsupportedDataElementException {
-    int termSize = termSet.size();
-    if (termSize > MAX_ENUMERATED_TERMS) {
-      String reason = String.format("Controlled terms selection is too large = %d (Unsupported)", termSize);
-      throw new UnsupportedDataElementException(dataElement, reason);
+  @Nullable
+  private static String getNumberType(VALUEDOMAIN valueDomain) {
+    String numericDatatype = valueDomain.getDatatype().getContent();
+    if (!Strings.isNullOrEmpty(numericDatatype)) {
+      if (CadsrDatatypes.JAVA_LONG.equals(numericDatatype)) {
+        return XSD_LONG;
+      } else if (CadsrDatatypes.JAVA_INTEGER.equals(numericDatatype)) {
+        return XSD_INT;
+      } else if (CadsrDatatypes.JAVA_DOUBLE.equals(numericDatatype)) {
+        return XSD_DOUBLE;
+      } else {
+        return XSD_DECIMAL;
+      }
+    } else {
+      return null;
     }
   }
 
-  private void handleNonEnumeratedType(DataElement dataElement) {
-    // Does nothing
+  @Nullable
+  private static Number getMinimumValue(final VALUEDOMAIN valueDomain, String numberType) {
+    String value = valueDomain.getMinimumValue().getContent();
+    return getNumber(value, numberType);
   }
 
-  public List<Map<String, Object>> getOntologies() {
-    return Collections.unmodifiableList(ontologies);
+  @Nullable
+  private static Number getMaximumValue(VALUEDOMAIN valueDomain, String numberType) {
+    String value = valueDomain.getMaximumValue().getContent();
+    return getNumber(value, numberType);
   }
 
-  public List<Map<String, Object>> getValueSets() {
-    return Collections.unmodifiableList(valueSets);
+  @Nullable
+  private static Number getNumber(String numberValue, String numberType) {
+    if (!Strings.isNullOrEmpty(numberValue)) {
+      if (XSD_LONG.equals(numberType)) {
+        return Long.valueOf(numberValue);
+      } else if (XSD_INT.equals(numberType)) {
+        return Integer.valueOf(numberValue);
+      } else if (XSD_DOUBLE.equals(numberType)) {
+        return Double.valueOf(numberValue);
+      } else {
+        return new BigDecimal(numberValue);
+      }
+    } else {
+      return null;
+    }
   }
 
-  public List<Map<String, Object>> getClasses() {
-    return Collections.unmodifiableList(classes);
+  private static int getDecimalPlace(VALUEDOMAIN valueDomain) {
+    String decimalPlace = valueDomain.getDecimalPlace().getContent();
+    if (!Strings.isNullOrEmpty(decimalPlace)) {
+      return Integer.parseInt(decimalPlace);
+    } else {
+      return NONE;
+    }
   }
 
-  public List<Map<String, Object>> getBranches() {
-    return Collections.unmodifiableList(branches);
+  @Nullable
+  private static String getUnitOfMeasure(VALUEDOMAIN valueDomain) {
+    String unitOfMeasure = valueDomain.getUnitOfMeasure().getContent();
+    if (!Strings.isNullOrEmpty(unitOfMeasure)) {
+      return unitOfMeasure;
+    } else {
+      return null;
+    }
   }
 
   @Override
   public void apply(Map<String, Object> fieldObject) {
     Map<String, Object> valueConstraints = (Map<String, Object>) fieldObject.get(ModelNodeNames.VALUE_CONSTRAINTS);
-    valueConstraints.put(ModelNodeNames.ONTOLOGIES, getOntologies());
-    valueConstraints.put(ModelNodeNames.VALUE_SETS, getValueSets());
-    valueConstraints.put(ModelNodeNames.CLASSES, getClasses());
-    valueConstraints.put(ModelNodeNames.BRANCHES, getBranches());
-  }
-
-  /* Helper classes */
-
-  class Term {
-    final String conceptId;
-    final String prefLabel;
-    final String label;
-
-    public Term(String conceptId, String prefLabel, String label) {
-      this.conceptId = conceptId;
-      this.prefLabel = prefLabel;
-      this.label = label;
+    if (minLength != NONE) {
+      valueConstraints.put(ModelNodeNames.MIN_LENGTH, minLength);
     }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(conceptId, prefLabel, label);
+    if (maxLength != NONE) {
+      valueConstraints.put(ModelNodeNames.MAX_LENGTH, maxLength);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj == null) {
-        return false;
-      }
-      if (!(obj instanceof Term)) {
-        return false;
-      }
-      Term other = (Term) obj;
-      return Objects.equals(conceptId, other.conceptId)
-          && Objects.equals(prefLabel, other.prefLabel)
-          && Objects.equals(label, other.label);
+    if (decimalPlace != NONE) {
+      valueConstraints.put(ModelNodeNames.DECIMAL_PLACE, decimalPlace);
+    }
+    if (minValue != null) {
+      valueConstraints.put(ModelNodeNames.MIN_NUMBER_VALUE, minValue);
+    }
+    if (maxValue != null) {
+      valueConstraints.put(ModelNodeNames.MAX_NUMBER_VALUE, maxValue);
+    }
+    if (numberType != null) {
+      valueConstraints.put(ModelNodeNames.NUMBER_TYPE, numberType);
+    }
+    if (unitOfMeasure != null) {
+      valueConstraints.put(ModelNodeNames.UNIT_OF_MEASURE, unitOfMeasure);
     }
   }
 }

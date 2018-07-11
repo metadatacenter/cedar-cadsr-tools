@@ -18,11 +18,11 @@ public class ValueConstraintsHandlerTest {
 
   private static final Logger logger = LoggerFactory.getLogger(InputTypeHandlerTest.class);
 
-  private ValueConstraintsHandler handler;
+  private PermissibleValuesHandler handler;
 
   @Before
   public void init() {
-    handler = new ValueConstraintsHandler();
+    handler = new PermissibleValuesHandler();
   }
 
   @Test
@@ -49,7 +49,7 @@ public class ValueConstraintsHandlerTest {
   public void shouldProduceVCs_ENUMERATED_CHARACTER() throws JAXBException, IOException {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-5873923.xml");
     try {
-      ValueConstraintsHandler newHandler = handler.handle(dataElement);
+      PermissibleValuesHandler newHandler = handler.handle(dataElement);
       List<Map<String, Object>> ontologies = newHandler.getOntologies();
       List<Map<String, Object>> valueSets = newHandler.getValueSets();
       List<Map<String, Object>> branches = newHandler.getBranches();
@@ -85,7 +85,7 @@ public class ValueConstraintsHandlerTest {
   public void shouldThrowException_ENUMERATED_ALPHANUMERIC_PARTIALLY_ANNOTATED() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-3245384.xml");
     try {
-      ValueConstraintsHandler newHandler = handler.handle(dataElement);
+      PermissibleValuesHandler newHandler = handler.handle(dataElement);
     } catch (UnsupportedDataElementException e) {
       String message = e.getMessage();
       assertThat(message, is("Failed to convert 'Orthodontist Model Use Use Frequency' (ID: 3245384) - Reason: " +
@@ -145,7 +145,7 @@ public class ValueConstraintsHandlerTest {
   }
 
   private void assertNonEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
-    ValueConstraintsHandler newHandler = handler.handle(dataElement);
+    PermissibleValuesHandler newHandler = handler.handle(dataElement);
     List<Map<String, Object>> ontologies = newHandler.getOntologies();
     List<Map<String, Object>> valueSets = newHandler.getValueSets();
     List<Map<String, Object>> branches = newHandler.getBranches();
