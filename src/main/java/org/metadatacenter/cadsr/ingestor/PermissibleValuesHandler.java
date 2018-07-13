@@ -11,12 +11,11 @@ import org.metadatacenter.model.ModelNodeValues;
 
 import java.util.*;
 
+import static org.metadatacenter.cadsr.ingestor.Constants.MAX_ENUMERATED_TERMS;
+import static org.metadatacenter.cadsr.ingestor.Constants.NCIT_ONTOLOGY_IRI;
+import static org.metadatacenter.cadsr.ingestor.Constants.NCIT_ONTOLOGY_LABEL;
+
 public class PermissibleValuesHandler implements ModelHandler {
-
-  private static final String NCIT_ONTOLOGY_IRI = "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#";
-  private static final String NCIT_ONTOLOGY_LABEL = "NCIT";
-
-  private static final int MAX_ENUMERATED_TERMS = 20;
 
   private static final String ENUMERATED = "Enumerated";
   private static final String NON_ENUMERATED = "NonEnumerated";
@@ -43,7 +42,13 @@ public class PermissibleValuesHandler implements ModelHandler {
   private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
     PermissibleValues permissibleValues = dataElement.getVALUEDOMAIN().getPermissibleValues();
     Set<Term> termSet = getTermSet(permissibleValues, dataElement);
-    setListOfClasses(termSet);
+
+    if (termSet.size() <= MAX_ENUMERATED_TERMS) {
+      setListOfClasses(termSet);
+    }
+    else {
+      ValueSetsOntologyManager.addValueSetToOntology(dataElement, termSet);
+    }
   }
 
   private Set<Term> getTermSet(PermissibleValues permissibleValues, DataElement dataElement) throws
@@ -58,7 +63,7 @@ public class PermissibleValuesHandler implements ModelHandler {
           permissibleItem.getVALIDVALUE().getContent()
       ));
     }
-    checkPermissibleValueSize(termSet, dataElement);
+    //checkPermissibleValueSize(termSet, dataElement);
     return termSet;
   }
 
@@ -132,36 +137,4 @@ public class PermissibleValuesHandler implements ModelHandler {
     valueConstraints.put(ModelNodeNames.BRANCHES, getBranches());
   }
 
-  /* Helper classes */
-
-  class Term {
-    final String conceptId;
-    final String prefLabel;
-    final String label;
-
-    public Term(String conceptId, String prefLabel, String label) {
-      this.conceptId = conceptId;
-      this.prefLabel = prefLabel;
-      this.label = label;
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(conceptId, prefLabel, label);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (obj == null) {
-        return false;
-      }
-      if (!(obj instanceof Term)) {
-        return false;
-      }
-      Term other = (Term) obj;
-      return Objects.equals(conceptId, other.conceptId)
-          && Objects.equals(prefLabel, other.prefLabel)
-          && Objects.equals(label, other.label);
-    }
-  }
 }
