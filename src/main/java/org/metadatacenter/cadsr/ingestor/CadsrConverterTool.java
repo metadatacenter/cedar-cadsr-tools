@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,16 +39,19 @@ public class CadsrConverterTool {
       int counter = 0;
       for (Map<String, Object> fieldMap : fieldMaps) {
         try {
-          String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
-          String outputFolderPath = outputDirectory + "/" + CDES_FOLDER + "/";
-          File outputFolder = new File(outputFolderPath);
-          if (!outputFolder.exists()) {
-            outputFolder.mkdir();
-          }
-          String outputFilePath = outputFolderPath + UUID.randomUUID() + ".json";
-          Files.write(Paths.get(outputFilePath), fieldJson.getBytes());
-          if (counter % 100 == 0) {
-            logger.info(format("Writing resource (%d/%d)", counter++, totalCdes));
+          // TODO: remove the following IF
+          if (((List) ((Map) fieldMap.get("_valueConstraints")).get("valueSets")).size() > 0) { // Only save value sets
+            String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
+            String outputFolderPath = outputDirectory + "/" + CDES_FOLDER + "/";
+            File outputFolder = new File(outputFolderPath);
+            if (!outputFolder.exists()) {
+              outputFolder.mkdir();
+            }
+            String outputFilePath = outputFolderPath + UUID.randomUUID() + ".json";
+            Files.write(Paths.get(outputFilePath), fieldJson.getBytes());
+            if (counter % 100 == 0) {
+              logger.info(format("Writing resource (%d/%d)", counter++, totalCdes));
+            }
           }
         } catch (JsonProcessingException e) {
           logger.error(e.toString());
@@ -63,5 +67,6 @@ public class CadsrConverterTool {
     } catch (FileNotFoundException e) {
       logger.error(e.toString());
     }
+
   }
 }

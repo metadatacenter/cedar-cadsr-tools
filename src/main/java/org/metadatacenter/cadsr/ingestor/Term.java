@@ -4,18 +4,20 @@ import java.util.Objects;
 
 public class Term {
   final String conceptId;
-  final String prefLabel;
-  final String label;
+  final String dbLabel;
+  final String uiLabel;
+  final String description;
 
-  public Term(String conceptId, String prefLabel, String label) {
+  public Term(String conceptId, String dbLabel, String displayLabel, String description) {
     this.conceptId = conceptId;
-    this.prefLabel = prefLabel;
-    this.label = label;
+    this.dbLabel = dbLabel;
+    this.uiLabel = displayLabel;
+    this.description = description;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(conceptId, prefLabel, label);
+    return Objects.hash(conceptId, dbLabel, uiLabel, description);
   }
 
   @Override
@@ -28,7 +30,8 @@ public class Term {
     }
     Term other = (Term) obj;
     return Objects.equals(conceptId, other.conceptId)
-        && Objects.equals(prefLabel, other.prefLabel)
-        && Objects.equals(label, other.label);
+        && Objects.equals(dbLabel, other.dbLabel)
+        && Objects.equals(uiLabel, other.uiLabel)
+        && Objects.equals(description, other.description);
   }
 }

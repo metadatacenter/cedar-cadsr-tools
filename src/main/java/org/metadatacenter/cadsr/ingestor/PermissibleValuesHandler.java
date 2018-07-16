@@ -9,11 +9,12 @@ import org.metadatacenter.cadsr.PermissibleValuesITEM;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.metadatacenter.cadsr.ingestor.Constants.MAX_ENUMERATED_TERMS;
-import static org.metadatacenter.cadsr.ingestor.Constants.NCIT_ONTOLOGY_IRI;
-import static org.metadatacenter.cadsr.ingestor.Constants.NCIT_ONTOLOGY_LABEL;
+import static org.metadatacenter.cadsr.ingestor.Constants.*;
 
 public class PermissibleValuesHandler implements ModelHandler {
 
@@ -40,14 +41,15 @@ public class PermissibleValuesHandler implements ModelHandler {
   }
 
   private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
+
     PermissibleValues permissibleValues = dataElement.getVALUEDOMAIN().getPermissibleValues();
     Set<Term> termSet = getTermSet(permissibleValues, dataElement);
 
     if (termSet.size() <= MAX_ENUMERATED_TERMS) {
       setListOfClasses(termSet);
-    }
-    else {
+    } else {
       ValueSetsOntologyManager.addValueSetToOntology(dataElement, termSet);
+      setValueSet(dataElement, termSet.size());
     }
   }
 
@@ -59,8 +61,9 @@ public class PermissibleValuesHandler implements ModelHandler {
       checkComplexConcept(permissibleItem, dataElement);
       termSet.add(new Term(
           permissibleItem.getMEANINGCONCEPTS().getContent(),
+          permissibleItem.getVALIDVALUE().getContent(),
           permissibleItem.getVALUEMEANING().getContent(),
-          permissibleItem.getVALIDVALUE().getContent()
+          permissibleItem.getMEANINGDESCRIPTION().getContent()
       ));
     }
     //checkPermissibleValueSize(termSet, dataElement);
@@ -69,14 +72,23 @@ public class PermissibleValuesHandler implements ModelHandler {
 
   private void setListOfClasses(Set<Term> termSet) {
     for (Term term : termSet) {
-      Map<String, Object> controlledTerm = Maps.newHashMap();
-      controlledTerm.put(ModelNodeNames.URI, NCIT_ONTOLOGY_IRI + term.conceptId);
-      controlledTerm.put(ModelNodeNames.LABEL, term.label);
-      controlledTerm.put(ModelNodeNames.PREF_LABEL, term.prefLabel);
-      controlledTerm.put(ModelNodeNames.TYPE, ModelNodeValues.ONTOLOGY_CLASS);
-      controlledTerm.put(ModelNodeNames.SOURCE, NCIT_ONTOLOGY_LABEL);
-      classes.add(controlledTerm);
+      Map<String, Object> cls = Maps.newHashMap();
+      cls.put(ModelNodeNames.URI, NCIT_ONTOLOGY_IRI + term.conceptId);
+      cls.put(ModelNodeNames.LABEL, term.uiLabel);
+      cls.put(ModelNodeNames.PREF_LABEL, term.dbLabel);
+      cls.put(ModelNodeNames.TYPE, ModelNodeValues.ONTOLOGY_CLASS);
+      cls.put(ModelNodeNames.SOURCE, NCIT_ONTOLOGY_LABEL);
+      classes.add(cls);
     }
+  }
+
+  private void setValueSet(DataElement dataElement, int size) {
+    Map<String, Object> valueSet = Maps.newHashMap();
+    valueSet.put(ModelNodeNames.NAME, dataElement.getLONGNAME().getContent());
+    valueSet.put(ModelNodeNames.VS_COLLECTION, CDE_VALUESETS_ONTOLOGY_ID);
+    valueSet.put(ModelNodeNames.URI, ValueSetsUtil.generateValueSetIRI(dataElement));
+    valueSet.put(ModelNodeNames.NUM_TERMS, size);
+    valueSets.add(valueSet);
   }
 
   private static void checkConceptNotNull(PermissibleValuesITEM permissibleItem, DataElement dataElement) throws
@@ -99,14 +111,14 @@ public class PermissibleValuesHandler implements ModelHandler {
     }
   }
 
-  private static void checkPermissibleValueSize(Set<Term> termSet, DataElement dataElement) throws
-      UnsupportedDataElementException {
-    int termSize = termSet.size();
-    if (termSize > MAX_ENUMERATED_TERMS) {
-      String reason = String.format("Controlled terms selection is too large = %d (Unsupported)", termSize);
-      throw new UnsupportedDataElementException(dataElement, reason);
-    }
-  }
+//  private static void checkPermissibleValueSize(Set<Term> termSet, DataElement dataElement) throws
+//      UnsupportedDataElementException {
+//    int termSize = termSet.size();
+//    if (termSize > MAX_ENUMERATED_TERMS) {
+//      String reason = String.format("Controlled terms selection is too large = %d (Unsupported)", termSize);
+//      throw new UnsupportedDataElementException(dataElement, reason);
+//    }
+//  }
 
   private void handleNonEnumeratedType(DataElement dataElement) {
     // Does nothing
