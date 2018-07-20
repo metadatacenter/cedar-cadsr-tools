@@ -7,10 +7,17 @@ import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY
 public class ValueSetsUtil {
 
   public static String generateValueSetIRI(DataElement dataElement) {
-    String id = dataElement.getPUBLICID().getContent();
-    String version = dataElement.getVERSION().getContent();
-    String iri = CDE_VALUESETS_ONTOLOGY_IRI + "#VS_DE" + id + "v" + version;
-    return iri;
+    String valueSetId = dataElement.getVALUEDOMAIN().getPublicId().getContent();
+    String valueSetVersion = dataElement.getVALUEDOMAIN().getVersion().getContent();
+    return generateValueSetIRI(valueSetId, valueSetVersion);
+  }
+
+  public static String generateValueSetIRI(String valueSetId, String valueSetVersion) {
+    return CDE_VALUESETS_ONTOLOGY_IRI + "#" + generateValueSetId(valueSetId, valueSetVersion);
+  }
+
+  public static String generateValueSetId(String valueSetId, String valueSetVersion) {
+    return "VS_VD" + valueSetId + "v" + valueSetVersion;
   }
 
 }
