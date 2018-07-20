@@ -15,12 +15,14 @@ import static org.metadatacenter.cadsr.ingestor.Constants.*;
 
 public class ValueSetsOntologyManager {
 
-  public static OWLOntologyManager manager;
+  private static OWLOntologyManager manager;
   private static OWLOntology ontology;
+  private static OWLDataFactory owlDataFactory;
   private static final Logger logger = LoggerFactory.getLogger(ValueSetsOntologyManager.class);
 
   static {
-     manager = OWLManager.createOWLOntologyManager();
+    manager = OWLManager.createOWLOntologyManager();
+    owlDataFactory = manager.getOWLDataFactory();
     // Create the ontology that will contain the value sets. The root classes will represent value sets. All
     // subclasses of a rootclass will represent the values of the value set.
     try {
@@ -31,25 +33,43 @@ public class ValueSetsOntologyManager {
   }
 
   public static void addValueSetToOntology(DataElement dataElement, Set<Term> values) {
-    // In order to get access to objects that represent entities we need a data factory
-    OWLDataFactory factory = manager.getOWLDataFactory();
+
+    String valueSetId = dataElement.getVALUEDOMAIN().getPublicId().getContent();
+    String valueSetVersion = dataElement.getVALUEDOMAIN().getVersion().getContent();
 
     // Create the class that will represent the value set
-    OWLClass valueSetClass = dataElementToOWLClass(dataElement, factory);
+    OWLClass valueSetClass = dataElementToOWLClass(valueSetId, valueSetVersion);
 
-    // Values of the value set
-    for (Term value : values) {
-      ontology = addPermissibleValuesToOntology(value, valueSetClass, ontology, factory, manager);
+    // Check if the ontology already contains that class
+    if (!ontology.containsClassInSignature(valueSetClass.getIRI())) {
+
+      String vsDescription = "Value set for ValueDomain ID=" + valueSetId + " (version " + valueSetVersion + ")";
+
+      // Add annotation properties to the value set
+      ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_LABEL.getIRI(), ValueSetsUtil.generateValueSetId
+          (valueSetId, valueSetVersion), valueSetClass);
+      ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_COMMENT.getIRI(), vsDescription, valueSetClass);
+
+      // Values of the value set
+      for (Term value : values) {
+        ontology = addPermissibleValuesToOntology(value, valueSetClass);
+      }
+    } else {
+      logger.info("The value set has not been added to the ontology because it's already there. Class IRI: " +
+          valueSetClass.getIRI());
     }
+
+
   }
 
-  public static OWLClass dataElementToOWLClass(DataElement dataElement, OWLDataFactory factory) {
-    return factory.getOWLClass(IRI.create(ValueSetsUtil.generateValueSetIRI(dataElement)));
+  public static OWLClass dataElementToOWLClass(String valueSetId, String valueSetVersion) {
+    return owlDataFactory.getOWLClass(IRI.create(ValueSetsUtil.generateValueSetIRI(valueSetId, valueSetVersion)));
   }
 
-  public static OWLOntology addPermissibleValuesToOntology(Term value, OWLClass valueSetClass,
-                                                           OWLOntology ontology, OWLDataFactory factory,
-                                                           OWLOntologyManager manager) {
+  public static OWLOntology addPermissibleValuesToOntology(Term value, OWLClass valueSetClass) {
+
+    OWLDataFactory factory = manager.getOWLDataFactory();
+
     // Create the class that represents the value
     OWLClass valueClass = factory.getOWLClass(IRI.create(NCIT_ONTOLOGY_IRI + value.conceptId));
     // Create subclass axiom
@@ -58,23 +78,18 @@ public class ValueSetsOntologyManager {
     manager.addAxiom(ontology, axiom);
 
     // Add annotation properties to the value
-    ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_LABEL.getIRI(), value.uiLabel, valueClass,
-        ontology, factory, manager);
-    ontology = addAnnotationAxiomToClass(SKOSVocabulary.HIDDENLABEL.getIRI(), value.dbLabel, valueClass, ontology,
-        factory, manager);
-    ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_COMMENT.getIRI(), value.description, valueClass,
-        ontology, factory, manager);
+    ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_LABEL.getIRI(), value.uiLabel, valueClass);
+    ontology = addAnnotationAxiomToClass(SKOSVocabulary.HIDDENLABEL.getIRI(), value.dbLabel, valueClass);
+    ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_COMMENT.getIRI(), value.description, valueClass);
 
     return ontology;
   }
 
-  public static OWLOntology addAnnotationAxiomToClass(IRI propertyIRI, String annotationText, OWLClass c,
-                                                      OWLOntology ontology,
-                                                      OWLDataFactory factory, OWLOntologyManager manager) {
-    OWLAnnotationProperty p = factory.getOWLAnnotationProperty(propertyIRI);
-    OWLAnnotationValue v = factory.getOWLLiteral(annotationText);
-    OWLAnnotation valueMeaningAnnotation = factory.getOWLAnnotation(p, v);
-    OWLAnnotationAssertionAxiom ax = factory.getOWLAnnotationAssertionAxiom(c.getIRI(), valueMeaningAnnotation);
+  public static OWLOntology addAnnotationAxiomToClass(IRI propertyIRI, String annotationText, OWLClass c) {
+    OWLAnnotationProperty p = owlDataFactory.getOWLAnnotationProperty(propertyIRI);
+    OWLAnnotationValue v = owlDataFactory.getOWLLiteral(annotationText);
+    OWLAnnotation valueMeaningAnnotation = owlDataFactory.getOWLAnnotation(p, v);
+    OWLAnnotationAssertionAxiom ax = owlDataFactory.getOWLAnnotationAssertionAxiom(c.getIRI(), valueMeaningAnnotation);
     manager.addAxiom(ontology, ax);
     return ontology;
   }

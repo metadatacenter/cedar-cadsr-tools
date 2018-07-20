@@ -95,7 +95,7 @@ public class CadsrUtils {
   private static void parseDataElement(DataElement dataElement, final Map<String, Object> fieldMap) throws
       UnsupportedDataElementException {
     createEmptyField(fieldMap);
-    setFieldName(fieldMap, dataElement.getLONGNAME().getContent());
+    setFieldName(fieldMap, dataElement.getPUBLICID().getContent() + " - " + dataElement.getLONGNAME().getContent());
     setFieldDescription(fieldMap, dataElement.getPREFERREDDEFINITION().getContent());
     setInputType(fieldMap, dataElement, new InputTypeHandler());
     setPermissibleValues(fieldMap, dataElement, new PermissibleValuesHandler());

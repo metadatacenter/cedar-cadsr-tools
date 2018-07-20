@@ -84,7 +84,7 @@ public class PermissibleValuesHandler implements ModelHandler {
 
   private void setValueSet(DataElement dataElement, int size) {
     Map<String, Object> valueSet = Maps.newHashMap();
-    valueSet.put(ModelNodeNames.NAME, dataElement.getLONGNAME().getContent());
+    valueSet.put(ModelNodeNames.NAME, dataElement.getVALUEDOMAIN().getLongName().getContent());
     valueSet.put(ModelNodeNames.VS_COLLECTION, CDE_VALUESETS_ONTOLOGY_ID);
     valueSet.put(ModelNodeNames.URI, ValueSetsUtil.generateValueSetIRI(dataElement));
     valueSet.put(ModelNodeNames.NUM_TERMS, size);
