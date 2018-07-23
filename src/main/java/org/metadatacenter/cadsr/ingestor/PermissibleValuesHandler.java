@@ -46,7 +46,10 @@ public class PermissibleValuesHandler implements ModelHandler {
     Set<Term> termSet = getTermSet(permissibleValues, dataElement);
 
     if (termSet.size() <= MAX_ENUMERATED_TERMS) {
-      setListOfClasses(termSet);
+      String valueDomainId = dataElement.getVALUEDOMAIN().getPublicId().getContent();
+      String valueDomainVersion = dataElement.getVALUEDOMAIN().getVersion().getContent();
+      String valueSetId = ValueSetsUtil.generateValueSetId(valueDomainId, valueDomainVersion);
+      setListOfClasses(valueSetId, termSet);
     } else {
       ValueSetsOntologyManager.addValueSetToOntology(dataElement, termSet);
       setValueSet(dataElement, termSet.size());
@@ -60,9 +63,11 @@ public class PermissibleValuesHandler implements ModelHandler {
       checkConceptNotNull(permissibleItem, dataElement);
       checkComplexConcept(permissibleItem, dataElement);
       termSet.add(new Term(
-          permissibleItem.getMEANINGCONCEPTS().getContent(),
+          permissibleItem.getVMPUBLICID().getContent(),
+          permissibleItem.getVMVERSION().getContent(),
           permissibleItem.getVALIDVALUE().getContent(),
           permissibleItem.getVALUEMEANING().getContent(),
+          permissibleItem.getMEANINGCONCEPTS().getContent(),
           permissibleItem.getMEANINGDESCRIPTION().getContent()
       ));
     }
@@ -70,11 +75,11 @@ public class PermissibleValuesHandler implements ModelHandler {
     return termSet;
   }
 
-  private void setListOfClasses(Set<Term> termSet) {
+  private void setListOfClasses(String valueSetId, Set<Term> termSet) {
     for (Term term : termSet) {
       Map<String, Object> cls = Maps.newHashMap();
-      cls.put(ModelNodeNames.URI, NCIT_ONTOLOGY_IRI + term.conceptId);
-      cls.put(ModelNodeNames.LABEL, term.uiLabel);
+      cls.put(ModelNodeNames.URI, ValueSetsUtil.generateValueId(valueSetId, term.termId, term.termVersion));
+      cls.put(ModelNodeNames.LABEL, term.displayLabel);
       cls.put(ModelNodeNames.PREF_LABEL, term.dbLabel);
       cls.put(ModelNodeNames.TYPE, ModelNodeValues.ONTOLOGY_CLASS);
       cls.put(ModelNodeNames.SOURCE, NCIT_ONTOLOGY_LABEL);
