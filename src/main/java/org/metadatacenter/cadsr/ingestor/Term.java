@@ -3,21 +3,25 @@ package org.metadatacenter.cadsr.ingestor;
 import java.util.Objects;
 
 public class Term {
-  final String conceptId;
+  final String termId;
+  final String termVersion;
   final String dbLabel;
-  final String uiLabel;
+  final String displayLabel;
+  final String relatedTermId;
   final String description;
 
-  public Term(String conceptId, String dbLabel, String displayLabel, String description) {
-    this.conceptId = conceptId;
+  public Term(String termId, String termVersion, String dbLabel, String displayLabel, String relatedTermId, String description) {
+    this.termId = termId;
+    this.termVersion = termVersion;
     this.dbLabel = dbLabel;
-    this.uiLabel = displayLabel;
+    this.relatedTermId = relatedTermId;
+    this.displayLabel = displayLabel;
     this.description = description;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(conceptId, dbLabel, uiLabel, description);
+    return Objects.hash(termId, termVersion, dbLabel, displayLabel, relatedTermId, description);
   }
 
   @Override
@@ -29,9 +33,11 @@ public class Term {
       return false;
     }
     Term other = (Term) obj;
-    return Objects.equals(conceptId, other.conceptId)
+    return Objects.equals(termId, other.termId)
+        && Objects.equals(termVersion, other.termVersion)
         && Objects.equals(dbLabel, other.dbLabel)
-        && Objects.equals(uiLabel, other.uiLabel)
+        && Objects.equals(displayLabel, other.displayLabel)
+        && Objects.equals(relatedTermId, other.relatedTermId)
         && Objects.equals(description, other.description);
   }
 }

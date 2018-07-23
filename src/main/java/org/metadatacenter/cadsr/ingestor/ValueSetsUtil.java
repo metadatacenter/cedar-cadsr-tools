@@ -17,7 +17,15 @@ public class ValueSetsUtil {
   }
 
   public static String generateValueSetId(String valueSetId, String valueSetVersion) {
-    return "VS_VD" + valueSetId + "v" + valueSetVersion;
+    return "VD" + valueSetId + "v" + valueSetVersion;
+  }
+
+  public static String generateValueIRI(String valueSetId, String valueId, String valueVersion) {
+    return CDE_VALUESETS_ONTOLOGY_IRI + "#" + generateValueId(valueSetId, valueId, valueVersion);
+  }
+
+  public static String generateValueId(String valueSetId, String valueId, String valueVersion) {
+    return valueSetId + "_VM" + valueId + "v" + valueVersion;
   }
 
 }
