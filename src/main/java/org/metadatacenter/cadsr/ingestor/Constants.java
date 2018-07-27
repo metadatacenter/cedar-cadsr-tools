@@ -2,8 +2,17 @@ package org.metadatacenter.cadsr.ingestor;
 
 public final class Constants {
 
-  public static final String NCIT_ONTOLOGY_IRI = "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#";
+  // NCIt URIs
+  public static final String NCIT_IRI = "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#";
   public static final String NCIT_ONTOLOGY_LABEL = "NCIT";
+  // Schema.org URIs
+  public static final String SCHEMAORG_IRI = "https://schema.org/";
+  public static final String SCHEMAORG_STARTTIME_IRI = SCHEMAORG_IRI + "startTime";
+  public static final String SCHEMAORG_ENDTIME_IRI = SCHEMAORG_IRI + "endTime";
+  // Dublic Core URIs
+  public static final String DUBLINCORE_IRI = "http://purl.org/dc/terms/";
+  public static final String DUBLINCORE_IDENTIFIER_IRI = DUBLINCORE_IRI + "identifier";
+  public static final String DUBLINCORE_VERSION_IRI = DUBLINCORE_IRI + "hasVersion";
 
   // Maximum number of enumerated values, or minimum number of values for the value set to be defined as a BioPortal
   // value set. A value of 0 means that all value sets will be created as BioPortal value sets.
@@ -15,5 +24,7 @@ public final class Constants {
   public static final String CDE_VALUESETS_ONTOLOGY_FOLDER = "ontology";
   public static final String CDE_VALUESETS_ONTOLOGY_NAME = "cdesvs.owl";
   //public static final String CDE_STATUS_RELEASED = "RELEASED";
+
+
 
 }

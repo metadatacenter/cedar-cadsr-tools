@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.exception;
 
 import org.metadatacenter.cadsr.DataElement;
 
@@ -26,7 +26,6 @@ public class UnsupportedDataElementException extends Exception {
   public String getMessage() {
     String cdeId = dataElement.getPUBLICID().getContent();
     String cdeName = dataElement.getLONGNAME().getContent();
-    return null;
-    //return String.format("Failed to convert '%s' (ID: %s) - Reason: %s", cdeName, cdeId, reason);
+    return String.format("Failed to convert '%s' (ID: %s) - Reason: %s", cdeName, cdeId, reason);
   }
 }
