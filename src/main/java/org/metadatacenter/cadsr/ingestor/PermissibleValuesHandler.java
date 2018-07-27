@@ -6,8 +6,13 @@ import com.google.common.collect.Sets;
 import org.metadatacenter.cadsr.DataElement;
 import org.metadatacenter.cadsr.PermissibleValues;
 import org.metadatacenter.cadsr.PermissibleValuesITEM;
+import org.metadatacenter.cadsr.ingestor.exception.DuplicatedAxiomException;
+import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
+import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +22,8 @@ import java.util.Set;
 import static org.metadatacenter.cadsr.ingestor.Constants.*;
 
 public class PermissibleValuesHandler implements ModelHandler {
+
+  private static final Logger logger = LoggerFactory.getLogger(PermissibleValuesHandler.class);
 
   private static final String ENUMERATED = "Enumerated";
   private static final String NON_ENUMERATED = "NonEnumerated";
@@ -43,44 +50,55 @@ public class PermissibleValuesHandler implements ModelHandler {
   private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
 
     PermissibleValues permissibleValues = dataElement.getVALUEDOMAIN().getPermissibleValues();
-    Set<Term> termSet = getTermSet(permissibleValues, dataElement);
+    Set<Value> values = getValues(permissibleValues, dataElement);
 
-    if (termSet.size() <= MAX_ENUMERATED_TERMS) {
+    if (values.size() <= MAX_ENUMERATED_TERMS) {
       String valueDomainId = dataElement.getVALUEDOMAIN().getPublicId().getContent();
       String valueDomainVersion = dataElement.getVALUEDOMAIN().getVersion().getContent();
-      String valueSetId = ValueSetsUtil.generateValueSetId(valueDomainId, valueDomainVersion);
-      setListOfClasses(valueSetId, termSet);
+      String valueSetId = null;
+      try {
+        valueSetId = ValueSetsUtil.generateValueSetId(valueDomainId, valueDomainVersion);
+      } catch (InvalidIdentifierException e) {
+        logger.error(e.getMessage());
+      }
+      setListOfClasses(valueSetId, values);
     } else {
-      ValueSetsOntologyManager.addValueSetToOntology(dataElement, termSet);
-      setValueSet(dataElement, termSet.size());
+      try {
+        ValueSetsOntologyManager.addValueSetToOntology(dataElement, values);
+      } catch (DuplicatedAxiomException e) {
+        logger.error(e.getMessage());
+      }
+      setValueSet(dataElement, values.size());
     }
   }
 
-  private Set<Term> getTermSet(PermissibleValues permissibleValues, DataElement dataElement) throws
+  private Set<Value> getValues(PermissibleValues permissibleValues, DataElement dataElement) throws
       UnsupportedDataElementException {
-    Set<Term> termSet = Sets.newHashSet();
+    Set<Value> termSet = Sets.newHashSet();
     for (PermissibleValuesITEM permissibleItem : permissibleValues.getPermissibleValuesITEM()) {
       checkConceptNotNull(permissibleItem, dataElement);
       checkComplexConcept(permissibleItem, dataElement);
-      termSet.add(new Term(
+      termSet.add(new Value(
           permissibleItem.getVMPUBLICID().getContent(),
           permissibleItem.getVMVERSION().getContent(),
           permissibleItem.getVALIDVALUE().getContent(),
           permissibleItem.getVALUEMEANING().getContent(),
-          permissibleItem.getMEANINGCONCEPTS().getContent(),
-          permissibleItem.getMEANINGDESCRIPTION().getContent()
+          NCIT_IRI + permissibleItem.getMEANINGCONCEPTS().getContent(),
+          permissibleItem.getMEANINGDESCRIPTION().getContent(),
+          permissibleItem.getPVBEGINDATE().getContent(),
+          permissibleItem.getPVENDDATE().getContent()
       ));
     }
     //checkPermissibleValueSize(termSet, dataElement);
     return termSet;
   }
 
-  private void setListOfClasses(String valueSetId, Set<Term> termSet) {
-    for (Term term : termSet) {
+  private void setListOfClasses(String valueSetId, Set<Value> values) {
+    for (Value value : values) {
       Map<String, Object> cls = Maps.newHashMap();
-      cls.put(ModelNodeNames.URI, ValueSetsUtil.generateValueId(valueSetId, term.termId, term.termVersion));
-      cls.put(ModelNodeNames.LABEL, term.displayLabel);
-      cls.put(ModelNodeNames.PREF_LABEL, term.dbLabel);
+      cls.put(ModelNodeNames.URI, ValueSetsUtil.generateValueId(valueSetId, value));
+      cls.put(ModelNodeNames.LABEL, value.getDisplayLabel());
+      cls.put(ModelNodeNames.PREF_LABEL, value.getDbLabel());
       cls.put(ModelNodeNames.TYPE, ModelNodeValues.ONTOLOGY_CLASS);
       cls.put(ModelNodeNames.SOURCE, NCIT_ONTOLOGY_LABEL);
       classes.add(cls);

@@ -1,6 +1,7 @@
 package org.metadatacenter.cadsr.ingestor;
 
 import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
 
 import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY_IRI;
 
@@ -13,19 +14,34 @@ public class ValueSetsUtil {
   }
 
   public static String generateValueSetIRI(String valueSetId, String valueSetVersion) {
-    return CDE_VALUESETS_ONTOLOGY_IRI + "#" + generateValueSetId(valueSetId, valueSetVersion);
+    String valueSetIRI = null;
+    try {
+      valueSetIRI = CDE_VALUESETS_ONTOLOGY_IRI + "/" + generateValueSetId(valueSetId, valueSetVersion);
+    } catch (InvalidIdentifierException e) {
+      e.printStackTrace();
+    }
+    return valueSetIRI;
   }
 
-  public static String generateValueSetId(String valueSetId, String valueSetVersion) {
-    return "VD" + valueSetId + "v" + valueSetVersion;
+  public static String generateValueSetId(String valueDomainId, String valueDomainVersion) throws
+      InvalidIdentifierException {
+    if (valueDomainId != null && valueDomainId.length() > 0) {
+      String valueSetId = "VD" + valueDomainId;
+      if (valueDomainVersion != null && valueDomainVersion.length() > 0) {
+        valueSetId = valueSetId + "v" + valueDomainVersion;
+      }
+      return valueSetId;
+    } else {
+      throw new InvalidIdentifierException("The value domain identifier is null or empty");
+    }
   }
 
-  public static String generateValueIRI(String valueSetId, String valueId, String valueVersion) {
-    return CDE_VALUESETS_ONTOLOGY_IRI + "#" + generateValueId(valueSetId, valueId, valueVersion);
+  public static String generateValueIRI(String valueSetId, Value value) {
+    return CDE_VALUESETS_ONTOLOGY_IRI + "/" + generateValueId(valueSetId, value);
   }
 
-  public static String generateValueId(String valueSetId, String valueId, String valueVersion) {
-    return valueSetId + "_VM" + valueId + "v" + valueVersion;
+  public static String generateValueId(String valueSetId, Value value) {
+    return Util.getSha1(valueSetId + value.toString());
   }
 
 }
