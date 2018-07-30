@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.metadatacenter.cadsr.DataElement;
 import org.metadatacenter.cadsr.DataElementsList;
+import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
@@ -35,6 +36,8 @@ public class CadsrUtils {
         fieldMaps.add(field);
       } catch (UnsupportedDataElementException e) {
         logger.warn(e.getMessage());
+      } catch (UnknownSeparatorException e) {
+        logger.error(e.getMessage());
       }
     }
     return fieldMaps;
@@ -68,6 +71,8 @@ public class CadsrUtils {
       parseDataElement(de, fieldMap);
     } catch (UnsupportedDataElementException e) {
       logger.warn(e.getMessage());
+    } catch (UnknownSeparatorException e) {
+      logger.error(e.getMessage());
     }
     return fieldMap;
   }
@@ -94,7 +99,7 @@ public class CadsrUtils {
   }
 
   private static void parseDataElement(DataElement dataElement, final Map<String, Object> fieldMap) throws
-      UnsupportedDataElementException {
+      UnsupportedDataElementException, UnknownSeparatorException {
     createEmptyField(fieldMap);
     setFieldName(fieldMap, dataElement.getPUBLICID().getContent() + " - " + dataElement.getLONGNAME().getContent());
     setFieldDescription(fieldMap, dataElement.getPREFERREDDEFINITION().getContent());
@@ -134,7 +139,7 @@ public class CadsrUtils {
   }
 
   private static void setPermissibleValues(Map<String, Object> fieldMap, DataElement dataElement, PermissibleValuesHandler
-      permissibleValuesHandler) throws UnsupportedDataElementException {
+      permissibleValuesHandler) throws UnsupportedDataElementException, UnknownSeparatorException {
     permissibleValuesHandler.handle(dataElement).apply(fieldMap);
   }
 

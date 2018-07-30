@@ -3,6 +3,7 @@ package org.metadatacenter.cadsr.ingestor;
 import org.junit.Before;
 import org.junit.Test;
 import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ public class ValueConstraintsHandlerTest {
   }
 
   @Test
-  public void shouldProduceVCs_ENUMERATED_CHARACTER() throws JAXBException, IOException {
+  public void shouldProduceVCs_ENUMERATED_CHARACTER() throws JAXBException, IOException, UnknownSeparatorException {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-5873923.xml");
     try {
       PermissibleValuesHandler newHandler = handler.handle(dataElement);
@@ -146,7 +147,12 @@ public class ValueConstraintsHandlerTest {
   }
 
   private void assertNonEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
-    PermissibleValuesHandler newHandler = handler.handle(dataElement);
+    PermissibleValuesHandler newHandler = null;
+    try {
+      newHandler = handler.handle(dataElement);
+    } catch (UnknownSeparatorException e) {
+      logger.error(e.getMessage());
+    }
     List<Map<String, Object>> ontologies = newHandler.getOntologies();
     List<Map<String, Object>> valueSets = newHandler.getValueSets();
     List<Map<String, Object>> branches = newHandler.getBranches();

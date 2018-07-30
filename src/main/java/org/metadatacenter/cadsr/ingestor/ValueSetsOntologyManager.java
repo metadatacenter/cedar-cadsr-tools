@@ -64,23 +64,24 @@ public class ValueSetsOntologyManager {
       if (valueDomainVersion != null) {
         ontology = addAnnotationAxiomToClass(IRI.create(DUBLINCORE_VERSION_IRI), valueDomainVersion, valueSetClass);
       }
+      // This is the label that will be shown in BP's ontology hierarchy
       ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_LABEL.getIRI(), valueSetId, valueSetClass);
       if (valueDomainPrefName != null) {
-        ontology = addAnnotationAxiomToClass(SKOSVocabulary.PREFLABEL.getIRI(), valueDomainPrefName, valueSetClass);
+        ontology = addAnnotationAxiomToClass(SKOSVocabulary.ALTLABEL.getIRI(), valueDomainPrefName, valueSetClass);
       }
       if (valueDomainPrefDefinition != null) {
-        ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDF_DESCRIPTION.getIRI(), valueDomainPrefDefinition,
+        ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_COMMENT.getIRI(), valueDomainPrefDefinition,
             valueSetClass);
       }
-      if (valueDomainLongName != null && !valueDomainLongName.equals(valueDomainPrefName)) {
-        ontology = addAnnotationAxiomToClass(SKOSVocabulary.ALTLABEL.getIRI(), valueDomainLongName, valueSetClass);
-      }
+//      if (valueDomainLongName != null && !valueDomainLongName.equals(valueDomainPrefName)) {
+//        ontology = addAnnotationAxiomToClass(SKOSVocabulary.ALTLABEL.getIRI(), valueDomainLongName, valueSetClass);
+//      }
       // Values of the value set
       for (Value value : values) {
         ontology = addPermissibleValuesToOntology(valueSetId, value, valueSetClass);
       }
     } else {
-      logger.info("The value set has not been added to the ontology because it's already there. Class IRI: " +
+      logger.debug("The value set has not been added to the ontology because it's already there. Class IRI: " +
           valueSetClass.getIRI());
     }
   }
@@ -105,13 +106,15 @@ public class ValueSetsOntologyManager {
       ontology = addAnnotationAxiomToClass(IRI.create(DUBLINCORE_VERSION_IRI), value.getVersion(), valueClass);
     }
     if (value.getDbLabel() != null) {
-      ontology = addAnnotationAxiomToClass(SKOSVocabulary.HIDDENLABEL.getIRI(), value.getDbLabel(), valueClass);
+      ontology = addAnnotationAxiomToClass(SKOSVocabulary.ALTLABEL.getIRI(), value.getDbLabel(), valueClass);
+      //ontology = addAnnotationAxiomToClass(SKOSVocabulary.HIDDENLABEL.getIRI(), value.getDbLabel(), valueClass);
     }
     if (value.getDisplayLabel() != null) {
       ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_LABEL.getIRI(), value.getDisplayLabel(), valueClass);
     }
     if (value.getRelatedTermUri() != null) {
-      ontology = addAnnotationAxiomToClass(SKOSVocabulary.RELATEDMATCH.getIRI(), value.getRelatedTermUri(), valueClass);
+      ontology = addAnnotationAxiomToClass(IRI.create(SKOS_NOTATION_IRI), value.getRelatedTermUri(), valueClass);
+      //ontology = addAnnotationAxiomToClass(SKOSVocabulary.RELATEDMATCH.getIRI(), value.getRelatedTermUri(), valueClass);
     }
     if (value.getDescription() != null) {
       ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_COMMENT.getIRI(), value.getDescription(), valueClass);
