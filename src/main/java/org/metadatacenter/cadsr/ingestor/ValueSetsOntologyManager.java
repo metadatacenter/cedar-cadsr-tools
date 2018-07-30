@@ -106,15 +106,14 @@ public class ValueSetsOntologyManager {
       ontology = addAnnotationAxiomToClass(IRI.create(DUBLINCORE_VERSION_IRI), value.getVersion(), valueClass);
     }
     if (value.getDbLabel() != null) {
-      ontology = addAnnotationAxiomToClass(SKOSVocabulary.ALTLABEL.getIRI(), value.getDbLabel(), valueClass);
+      ontology = addAnnotationAxiomToClass(IRI.create(SKOS_NOTATION_IRI), value.getDbLabel(), valueClass);
       //ontology = addAnnotationAxiomToClass(SKOSVocabulary.HIDDENLABEL.getIRI(), value.getDbLabel(), valueClass);
     }
     if (value.getDisplayLabel() != null) {
       ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_LABEL.getIRI(), value.getDisplayLabel(), valueClass);
     }
     if (value.getRelatedTermUri() != null) {
-      ontology = addAnnotationAxiomToClass(IRI.create(SKOS_NOTATION_IRI), value.getRelatedTermUri(), valueClass);
-      //ontology = addAnnotationAxiomToClass(SKOSVocabulary.RELATEDMATCH.getIRI(), value.getRelatedTermUri(), valueClass);
+      ontology = addAnnotationAxiomToClass(SKOSVocabulary.RELATEDMATCH.getIRI(), value.getRelatedTermUri(), valueClass);
     }
     if (value.getDescription() != null) {
       ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_COMMENT.getIRI(), value.getDescription(), valueClass);
