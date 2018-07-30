@@ -8,6 +8,7 @@ import org.metadatacenter.cadsr.PermissibleValues;
 import org.metadatacenter.cadsr.PermissibleValuesITEM;
 import org.metadatacenter.cadsr.ingestor.exception.DuplicatedAxiomException;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
+import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
@@ -33,7 +34,8 @@ public class PermissibleValuesHandler implements ModelHandler {
   private final List<Map<String, Object>> classes = Lists.newArrayList();
   private final List<Map<String, Object>> branches = Lists.newArrayList();
 
-  public PermissibleValuesHandler handle(DataElement dataElement) throws UnsupportedDataElementException {
+  public PermissibleValuesHandler handle(DataElement dataElement) throws UnsupportedDataElementException,
+      UnknownSeparatorException {
     String valueDomainType = dataElement.getVALUEDOMAIN().getValueDomainType().getContent();
     if (ENUMERATED.equals(valueDomainType)) {
       handleEnumeratedType(dataElement);
@@ -47,7 +49,8 @@ public class PermissibleValuesHandler implements ModelHandler {
     return this;
   }
 
-  private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
+  private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException,
+      UnknownSeparatorException {
 
     PermissibleValues permissibleValues = dataElement.getVALUEDOMAIN().getPermissibleValues();
     Set<Value> values = getValues(permissibleValues, dataElement);
@@ -73,17 +76,29 @@ public class PermissibleValuesHandler implements ModelHandler {
   }
 
   private Set<Value> getValues(PermissibleValues permissibleValues, DataElement dataElement) throws
-      UnsupportedDataElementException {
+      UnsupportedDataElementException, UnknownSeparatorException {
     Set<Value> termSet = Sets.newHashSet();
     for (PermissibleValuesITEM permissibleItem : permissibleValues.getPermissibleValuesITEM()) {
-      checkConceptNotNull(permissibleItem, dataElement);
-      checkComplexConcept(permissibleItem, dataElement);
+      String conceptUri = null;
+      if (isNullConcept(permissibleItem)) {
+        // use “VM” plus the Value Meaning PublicID and Version
+        String publicId = permissibleItem.getVMPUBLICID().getContent();
+        String version = permissibleItem.getVMVERSION().getContent();
+        conceptUri = CDE_VALUESETS_ONTOLOGY_IRI + "/VM" + publicId + "v" + version;
+      } else if (isComplexConcept(permissibleItem)) {
+        // Use the rightmost concept (last) in the list of concepts
+        conceptUri = NCIT_IRI + extractLastConcept(permissibleItem.getMEANINGCONCEPTS().getContent());
+      } else { // regular concept
+        conceptUri = NCIT_IRI + permissibleItem.getMEANINGCONCEPTS().getContent();
+      }
+      // checkConceptNotNull(permissibleItem, dataElement);
+      // checkComplexConcept(permissibleItem, dataElement);
       termSet.add(new Value(
           permissibleItem.getVMPUBLICID().getContent(),
           permissibleItem.getVMVERSION().getContent(),
           permissibleItem.getVALIDVALUE().getContent(),
           permissibleItem.getVALUEMEANING().getContent(),
-          NCIT_IRI + permissibleItem.getMEANINGCONCEPTS().getContent(),
+          conceptUri,
           permissibleItem.getMEANINGDESCRIPTION().getContent(),
           permissibleItem.getPVBEGINDATE().getContent(),
           permissibleItem.getPVENDDATE().getContent()
@@ -124,6 +139,15 @@ public class PermissibleValuesHandler implements ModelHandler {
     }
   }
 
+  private static boolean isNullConcept(PermissibleValuesITEM permissibleItem) {
+    String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
+    if (conceptId == null || conceptId.length() == 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   private static void checkComplexConcept(PermissibleValuesITEM permissibleItem, DataElement dataElement) throws
       UnsupportedDataElementException {
     String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
@@ -132,6 +156,27 @@ public class PermissibleValuesHandler implements ModelHandler {
           "(Unsupported)", permissibleItem.getVALUEMEANING().getContent(), conceptId);
       throw new UnsupportedDataElementException(dataElement, reason);
     }
+  }
+
+  private static boolean isComplexConcept(PermissibleValuesITEM permissibleItem) {
+    String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
+    if (conceptId.contains(",") || conceptId.contains(":")) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private static String extractLastConcept(String complexConcept) throws UnknownSeparatorException {
+    String separator = null;
+    if (complexConcept.contains(":")) {
+      separator = ":";
+    } else if (complexConcept.contains(",")) {
+      separator = ",";
+    } else {
+      throw new UnknownSeparatorException("Found a complex concept with an unknown separator: " + complexConcept);
+    }
+    return complexConcept.substring(complexConcept.indexOf(separator) + 1);
   }
 
 //  private static void checkPermissibleValueSize(Set<Term> termSet, DataElement dataElement) throws
