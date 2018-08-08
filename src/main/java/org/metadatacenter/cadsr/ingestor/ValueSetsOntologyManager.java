@@ -41,7 +41,7 @@ public class ValueSetsOntologyManager {
     String valueDomainPrefName = Util.getValueOrNull(dataElement.getVALUEDOMAIN().getPreferredName().getContent());
     String valueDomainPrefDefinition = Util.getValueOrNull(dataElement.getVALUEDOMAIN().getPreferredDefinition()
         .getContent());
-    String valueDomainLongName = Util.getValueOrNull(dataElement.getVALUEDOMAIN().getPreferredName().getContent());
+    //String valueDomainLongName = Util.getValueOrNull(dataElement.getVALUEDOMAIN().getPreferredName().getContent());
     //String valueSetWorkflowStatus = Util.getValueOrNull(dataElement.getVALUEDOMAIN().getWorkflowStatus().getContent
     // ());
 
@@ -81,8 +81,8 @@ public class ValueSetsOntologyManager {
         ontology = addPermissibleValuesToOntology(valueSetId, value, valueSetClass);
       }
     } else {
-      logger.debug("The value set has not been added to the ontology because it's already there. Class IRI: " +
-          valueSetClass.getIRI());
+//      logger.debug("The value set has not been added to the ontology because it's already there. Class IRI: " +
+//          valueSetClass.getIRI());
     }
   }
 
