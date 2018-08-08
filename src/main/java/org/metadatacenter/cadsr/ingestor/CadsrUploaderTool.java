@@ -41,6 +41,8 @@ public class CadsrUploaderTool {
       }
     } catch (FileNotFoundException e) {
       logger.error(e.getMessage());
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 

@@ -168,15 +168,19 @@ public class PermissibleValuesHandler implements ModelHandler {
   }
 
   private static String extractLastConcept(String complexConcept) throws UnknownSeparatorException {
-    String separator = null;
-    if (complexConcept.contains(":")) {
-      separator = ":";
-    } else if (complexConcept.contains(",")) {
-      separator = ",";
-    } else {
+    String lastConcept = null;
+    int indexColon = complexConcept.lastIndexOf(":");
+    int indexComma = complexConcept.lastIndexOf(",");
+    if (indexColon > indexComma) {
+      lastConcept = complexConcept.substring(indexColon + 1);
+    }
+    else if (indexColon < indexComma) {
+      lastConcept = complexConcept.substring(indexComma + 1);
+    }
+    else {
       throw new UnknownSeparatorException("Found a complex concept with an unknown separator: " + complexConcept);
     }
-    return complexConcept.substring(complexConcept.indexOf(separator) + 1);
+    return lastConcept;
   }
 
 //  private static void checkPermissibleValueSize(Set<Term> termSet, DataElement dataElement) throws

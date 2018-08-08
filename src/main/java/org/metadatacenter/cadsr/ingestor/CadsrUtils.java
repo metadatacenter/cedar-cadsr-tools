@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -43,7 +44,7 @@ public class CadsrUtils {
     return fieldMaps;
   }
 
-  public static Collection<Map<String, Object>> getFieldMapsFromInputStream(InputStream is) {
+  public static Collection<Map<String, Object>> getFieldMapsFromInputStream(InputStream is) throws IOException {
     final List<Map<String, Object>> fieldMaps = Lists.newArrayList();
     try {
       DataElementsList del = getDataElementLists(is);

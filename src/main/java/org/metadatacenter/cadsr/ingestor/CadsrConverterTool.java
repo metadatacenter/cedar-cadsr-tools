@@ -22,13 +22,14 @@ import static org.metadatacenter.cadsr.ingestor.Constants.*;
 public class CadsrConverterTool {
 
   private static final Logger logger = LoggerFactory.getLogger(CadsrConverterTool.class);
-  private static final boolean SAVE_FIELDS = false;
+  private static final boolean SAVE_FIELDS = true;
   private static final boolean SAVE_VALUESETS_ONTOLOGY = true;
 
   public static void main(String[] args) {
 
     String cdeSourceFolder = args[0];
     String outputDirectory = args[1];
+    int totalCdes = 0;
 
     try {
       for (final File fileEntry : new File(cdeSourceFolder).listFiles()) {
@@ -37,15 +38,14 @@ public class CadsrConverterTool {
           // Do nothing
         } else {
           Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream(fileEntry));
-          int totalCdes = fieldMaps.size();
-          logger.info("Total number of CDEs: " + totalCdes);
+          totalCdes += fieldMaps.size();
 
           if (SAVE_FIELDS) {
             int count = 0;
             for (Map<String, Object> fieldMap : fieldMaps) {
               try {
                 // TODO: remove the following line (it is used to save only fields with value sets)
-                if (((List) ((Map) fieldMap.get("_valueConstraints")).get("valueSets")).size() > 0) {
+                //if (((List) ((Map) fieldMap.get("_valueConstraints")).get("valueSets")).size() == 0) {
                   String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
                   String outputFolderPath = outputDirectory + "/" + CDES_FOLDER + "/";
                   File outputFolder = new File(outputFolderPath);
@@ -58,10 +58,7 @@ public class CadsrConverterTool {
                     logger.info(format("Writing field (%d/%d)", count++, totalCdes));
                   }
                   count++;
-//                  if (count == 2) {
-//                    System.exit(0);
-//                  }
-                }
+                //}
               } catch (JsonProcessingException e) {
                 logger.error(e.toString());
               } catch (IOException e) {
@@ -78,8 +75,13 @@ public class CadsrConverterTool {
         logger.info("Saving ontology - " + ontologyFile.getAbsolutePath());
         ValueSetsOntologyManager.saveOntology(ontologyFile);
       }
+
+      logger.info("Total number of CDE fields generated: " + totalCdes);
+
     } catch (FileNotFoundException e) {
       logger.error(e.toString());
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 }
