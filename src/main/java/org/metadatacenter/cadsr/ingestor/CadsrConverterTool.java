@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,28 +36,26 @@ public class CadsrConverterTool {
         if (fileEntry.isDirectory()) {
           // Do nothing
         } else {
-          Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream(fileEntry));
+          Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream
+              (fileEntry));
           totalCdes += fieldMaps.size();
 
           if (SAVE_FIELDS) {
             int count = 0;
             for (Map<String, Object> fieldMap : fieldMaps) {
               try {
-                // TODO: remove the following line (it is used to save only fields with value sets)
-                //if (((List) ((Map) fieldMap.get("_valueConstraints")).get("valueSets")).size() == 0) {
-                  String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
-                  String outputFolderPath = outputDirectory + "/" + CDES_FOLDER + "/";
-                  File outputFolder = new File(outputFolderPath);
-                  if (!outputFolder.exists()) {
-                    outputFolder.mkdir();
-                  }
-                  String outputFilePath = outputFolderPath + UUID.randomUUID() + ".json";
-                  Files.write(Paths.get(outputFilePath), fieldJson.getBytes());
-                  if (count % 100 == 0) {
-                    logger.info(format("Writing field (%d/%d)", count++, totalCdes));
-                  }
-                  count++;
-                //}
+                String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
+                String outputFolderPath = outputDirectory + "/" + CDES_FOLDER + "/";
+                File outputFolder = new File(outputFolderPath);
+                if (!outputFolder.exists()) {
+                  outputFolder.mkdir();
+                }
+                String outputFilePath = outputFolderPath + UUID.randomUUID() + ".json";
+                Files.write(Paths.get(outputFilePath), fieldJson.getBytes());
+                if (count % 100 == 0) {
+                  logger.info(format("Writing field (%d/%d)", count++, totalCdes));
+                }
+                count++;
               } catch (JsonProcessingException e) {
                 logger.error(e.toString());
               } catch (IOException e) {
