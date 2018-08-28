@@ -2,84 +2,111 @@ package org.metadatacenter.cadsr.ingestor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Stopwatch;
+import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-import static java.lang.String.format;
-import static org.metadatacenter.cadsr.ingestor.Constants.*;
+import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY_NAME;
 
 public class CadsrConverterTool {
 
   private static final Logger logger = LoggerFactory.getLogger(CadsrConverterTool.class);
-  private static final boolean SAVE_FIELDS = true;
-  private static final boolean SAVE_VALUESETS_ONTOLOGY = true;
+
+  private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
 
   public static void main(String[] args) {
 
-    String cdeSourceFolder = args[0];
-    String outputDirectory = args[1];
-    int totalCdes = 0;
-
+    String inputSourceLocation = args[0];
+    String outputTargetLocation = args[1];
     try {
-      for (final File fileEntry : new File(cdeSourceFolder).listFiles()) {
-        logger.info("Processing file: " + fileEntry.getName());
-        if (fileEntry.isDirectory()) {
-          // Do nothing
-        } else {
-          Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream
-              (fileEntry));
-          totalCdes += fieldMaps.size();
-
-          if (SAVE_FIELDS) {
-            int count = 0;
-            for (Map<String, Object> fieldMap : fieldMaps) {
-              try {
-                String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
-                String outputFolderPath = outputDirectory + "/" + CDES_FOLDER + "/";
-                File outputFolder = new File(outputFolderPath);
-                if (!outputFolder.exists()) {
-                  outputFolder.mkdir();
-                }
-                String outputFilePath = outputFolderPath + UUID.randomUUID() + ".json";
-                Files.write(Paths.get(outputFilePath), fieldJson.getBytes());
-                if (count % 100 == 0) {
-                  logger.info(format("Writing field (%d/%d)", count++, totalCdes));
-                }
-                count++;
-              } catch (JsonProcessingException e) {
-                logger.error(e.toString());
-              } catch (IOException e) {
-                logger.error(e.toString());
-              }
-            }
-          }
-        }
+      File inputSource = new File(inputSourceLocation);
+      File outputDir = checkOutputDirectoryExists(outputTargetLocation);
+      final Stopwatch stopwatch = Stopwatch.createStarted();
+      int totalCdes = 0;
+      if (inputSource.isDirectory()) {
+        totalCdes = convertCdeFromDirectory(inputSource, outputDir);
+      } else {
+        totalCdes = convertCdeFromFile(inputSource, outputDir);
       }
-      if (SAVE_VALUESETS_ONTOLOGY) {
-        File ontologyFile = new File(outputDirectory + "/" +
-            CDE_VALUESETS_ONTOLOGY_FOLDER + "/" + CDE_VALUESETS_ONTOLOGY_NAME);
-        // Save value sets ontology
-        logger.info("Saving ontology - " + ontologyFile.getAbsolutePath());
-        ValueSetsOntologyManager.saveOntology(ontologyFile);
-      }
-
-      logger.info("Total number of CDE fields generated: " + totalCdes);
-
-    } catch (FileNotFoundException e) {
+      File outputOntologyFile = new File(outputDir, CDE_VALUESETS_ONTOLOGY_NAME);
+      logger.info("Storing the generated value set ontology at " + outputOntologyFile);
+      ValueSetsOntologyManager.saveOntology(outputOntologyFile);
+      logger.info("----------------------------------------------------------");
+      logger.info("Total number of generated CDEs: " + countFormat.format(totalCdes));
+      long elapsedTimeInSeconds = stopwatch.elapsed(TimeUnit.SECONDS);
+      long hours = elapsedTimeInSeconds / 3600;
+      long minutes = (elapsedTimeInSeconds % 3600) / 60;
+      long seconds = (elapsedTimeInSeconds % 60);
+      logger.info("Total time: " + String.format("%02d:%02d:%02d", hours, minutes, seconds));
+      logger.info("Finished at: " + LocalDateTime.now());
+      logger.info("----------------------------------------------------------");
+    } catch (JsonProcessingException e) {
       logger.error(e.toString());
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.error(e.toString());
     }
+  }
+
+  public static File checkOutputDirectoryExists(String outputDirectory) throws IOException {
+    File outputDir = new File(outputDirectory);
+    if (!outputDir.exists()) {
+      outputDir.mkdir();
+    }
+    return outputDir;
+  }
+
+  private static int convertCdeFromDirectory(File inputDir, File outputDir) throws IOException {
+    int totalCdes = 0;
+    for (final File inputFile : inputDir.listFiles()) {
+      totalCdes += convertCdeFromFile(inputFile, outputDir);
+    }
+    return totalCdes;
+  }
+
+  public static int convertCdeFromFile(File inputFile, File outputDir) throws IOException {
+    logger.info("Processing input file at " + inputFile.getAbsolutePath());
+    File outputSubDir = createDirectoryBasedOnInputFileName(inputFile, outputDir);
+    Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream(inputFile));
+    int totalFields = fieldMaps.size();
+    if (totalFields > 0) {
+      int counter = 0;
+      for (Map<String, Object> fieldMap : fieldMaps) {
+        try {
+          String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
+          Files.write(fieldJson.getBytes(), new File(outputSubDir, UUID.randomUUID() + ".json"));
+          if (multiplesOfAHundred(counter)) {
+            logger.info(String.format("Generating CDEs (%d/%d)", counter, totalFields));
+          }
+          counter++;
+        } catch (JsonProcessingException e) {
+          logger.error(e.toString());
+        } catch (IOException e) {
+          logger.error(e.toString());
+        }
+      }
+      logger.info(String.format("Generating CDEs (%d/%d)", counter, totalFields));
+    }
+    return totalFields;
+  }
+
+  private static File createDirectoryBasedOnInputFileName(File sourceFile, File outputDir) throws IOException {
+    String outputLocation = outputDir.getAbsolutePath() + "/" + Files.getNameWithoutExtension(sourceFile.getName());
+    return checkOutputDirectoryExists(outputLocation);
+  }
+
+  private static boolean multiplesOfAHundred(int counter) {
+    return counter != 0 && counter % 100 == 0;
   }
 }
 
