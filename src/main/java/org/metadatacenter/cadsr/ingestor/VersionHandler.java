@@ -41,7 +41,16 @@ public class VersionHandler implements ModelHandler {
       String reason = String.format("Data element version is empty (Unknown)");
       throw new UnsupportedDataElementException(dataElement, reason);
     }
-    this.version = version;
+    this.version = reformatVersioningNumber(version);
+  }
+
+  private static String reformatVersioningNumber(String version) {
+    String[] originalVersion = version.split("\\.");
+    String[] baseVersion = {"0", "0", "0"};
+    for (int i = 0; i < originalVersion.length; i++) {
+      baseVersion[i] = originalVersion[i];
+    }
+    return String.join(".", baseVersion);
   }
 
   @Nullable
