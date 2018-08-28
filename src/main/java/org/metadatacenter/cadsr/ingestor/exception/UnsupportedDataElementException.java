@@ -26,6 +26,6 @@ public class UnsupportedDataElementException extends Exception {
   public String getMessage() {
     String cdeId = dataElement.getPUBLICID().getContent();
     String cdeName = dataElement.getLONGNAME().getContent();
-    return String.format("Failed to convert '%s' (ID: %s) - Reason: %s", cdeName, cdeId, reason);
+    return String.format("Skipping '%s' (ID: %s) - Reason: %s", cdeName, cdeId, reason);
   }
 }
