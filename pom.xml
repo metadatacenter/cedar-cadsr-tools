@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.metadatacenter</groupId>
     <artifactId>cedar-parent</artifactId>
-    <version>1.8.9-SNAPSHOT</version>
+    <version>1.9.2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.metadatacenter</groupId>
   <artifactId>cadsr2cedar</artifactId>
-  <version>1.8.9-SNAPSHOT</version>
+  <version>1.9.2-SNAPSHOT</version>
   <name>Project that generates CEDAR template fields from caDSR XML-encoded DataElement instances</name>
 
   <scm>
@@ -20,6 +20,16 @@
   </scm>
 
   <dependencies>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>23.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.9.6</version>
+    </dependency>
     <dependency>
       <groupId>org.metadatacenter</groupId>
       <artifactId>cedar-server-globals</artifactId>
@@ -106,10 +116,10 @@
         <configuration>
           <packageName>org.metadatacenter.cadsr</packageName>
           <sources>
-             <source>src/main/resources/xsd</source>
+            <source>src/main/resources/xsd</source>
           </sources>
           <xjbSources>
-             <xjbSource>src/main/resources/xjb</xjbSource>
+            <xjbSource>src/main/resources/xjb</xjbSource>
           </xjbSources>
         </configuration>
       </plugin>
