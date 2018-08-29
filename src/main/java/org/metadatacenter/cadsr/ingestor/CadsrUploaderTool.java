@@ -35,33 +35,25 @@ public class CadsrUploaderTool {
     String folderId = args[2];
     String apiKey = args[3];
 
+    final Stopwatch stopwatch = Stopwatch.createStarted();
+
+    int totalCdes = 0;
+    boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
       String endpoint = getRestEndpoint(targetServer, folderId);
-      final Stopwatch stopwatch = Stopwatch.createStarted();
-      int totalCdes = 0;
       if (inputSource.isDirectory()) {
         totalCdes = uploadCdeFromDirectory(inputSource, endpoint, apiKey);
       } else {
         totalCdes = uploadCdeFromFile(inputSource, endpoint, apiKey);
       }
-      File outputTempDir = Files.createTempDir();
-      File outputOntologyFile = new File(outputTempDir, CDE_VALUESETS_ONTOLOGY_NAME);
-      logger.info("Storing the generated value set ontology at " + outputOntologyFile);
-      ValueSetsOntologyManager.saveOntology(outputOntologyFile);
-      logger.info("----------------------------------------------------------");
-      logger.info("Total number of generated CDEs: " + countFormat.format(totalCdes));
-      long elapsedTimeInSeconds = stopwatch.elapsed(TimeUnit.SECONDS);
-      long hours = elapsedTimeInSeconds / 3600;
-      long minutes = (elapsedTimeInSeconds % 3600) / 60;
-      long seconds = (elapsedTimeInSeconds % 60);
-      logger.info("Total time: " + String.format("%02d:%02d:%02d", hours, minutes, seconds));
-      logger.info("Finished at: " + LocalDateTime.now());
-      logger.info("----------------------------------------------------------");
-    } catch (JsonProcessingException e) {
+      success = true;
+    } catch (Exception e) {
       logger.error(e.toString());
-    } catch (IOException e) {
-      logger.error(e.toString());
+      success = false;
+    } finally {
+      storeOntologyInTempDir();
+      printSummary(stopwatch, totalCdes, success);
     }
   }
 
@@ -189,5 +181,30 @@ public class CadsrUploaderTool {
 
   private static boolean multiplesOfAHundred(int counter) {
     return counter != 0 && counter % 100 == 0;
+  }
+
+  private static void storeOntologyInTempDir() {
+    File outputTempDir = Files.createTempDir();
+    File outputOntologyFile = new File(outputTempDir, CDE_VALUESETS_ONTOLOGY_NAME);
+    logger.info("Storing the generated value set ontology at " + outputOntologyFile);
+    ValueSetsOntologyManager.saveOntology(outputOntologyFile);
+  }
+
+  private static void printSummary(Stopwatch stopwatch, int totalCdes, boolean success) {
+    logger.info("----------------------------------------------------------");
+    if (success) {
+      logger.info("UPLOAD SUCCESS");
+    } else {
+      logger.info("UPLOAD FAILED (see error.log for details");
+    }
+    logger.info("----------------------------------------------------------");
+    logger.info("Total number of generated CDEs: " + countFormat.format(totalCdes));
+    long elapsedTimeInSeconds = stopwatch.elapsed(TimeUnit.SECONDS);
+    long hours = elapsedTimeInSeconds / 3600;
+    long minutes = (elapsedTimeInSeconds % 3600) / 60;
+    long seconds = (elapsedTimeInSeconds % 60);
+    logger.info("Total time: " + String.format("%02d:%02d:%02d", hours, minutes, seconds));
+    logger.info("Finished at: " + LocalDateTime.now());
+    logger.info("----------------------------------------------------------");
   }
 }
