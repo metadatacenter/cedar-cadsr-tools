@@ -6,8 +6,6 @@ import org.metadatacenter.cadsr.DataElement;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
 
-import javax.xml.bind.JAXBException;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +19,7 @@ public class CadsrUtilsTest {
 
   @Ignore
   @Test
-  public void shouldProduceFieldMap_ENUMERATED_CHARACTER() throws JAXBException, IOException {
+  public void shouldProduceFieldMap_ENUMERATED_CHARACTER() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-5873923.xml");
     Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
     // Assert
@@ -43,7 +41,7 @@ public class CadsrUtilsTest {
 
   @Ignore
   @Test
-  public void shouldProduceFieldMap_NON_ENUMERATED_CHARACTER() throws JAXBException, IOException {
+  public void shouldProduceFieldMap_NON_ENUMERATED_CHARACTER() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2182451.xml");
     Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
     // Assert
@@ -61,7 +59,7 @@ public class CadsrUtilsTest {
   }
 
   @Test
-  public void shouldProduceFieldMap_NON_ENUMERATED_DATE() throws JAXBException, IOException {
+  public void shouldProduceFieldMap_NON_ENUMERATED_DATE() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2001826.xml");
     Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
     // Assert
@@ -79,7 +77,7 @@ public class CadsrUtilsTest {
   }
 
   @Test
-  public void shouldProduceFieldMap_NON_ENUMERATED_NUMBER() throws JAXBException, IOException {
+  public void shouldProduceFieldMap_NON_ENUMERATED_NUMBER() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2002061.xml");
     Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
     // Assert

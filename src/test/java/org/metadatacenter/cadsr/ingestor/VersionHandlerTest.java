@@ -4,18 +4,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.metadatacenter.cadsr.DataElement;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.xml.bind.JAXBException;
-import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class VersionHandlerTest {
-
-  private static final Logger logger = LoggerFactory.getLogger(VersionHandlerTest.class);
 
   private VersionHandler handler;
 
@@ -25,18 +18,14 @@ public class VersionHandlerTest {
   }
 
   @Test
-  public void shouldProduceVersioning_RELEASED() throws JAXBException, IOException {
+  public void shouldProduceVersioning_RELEASED() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2001826.xml");
-    try {
-      VersionHandler newHandler = handler.handle(dataElement);
-      String status = newHandler.getStatus();
-      String version = newHandler.getVersion();
-      // Assert
-      assertThat(status, is("bibo:published"));
-      assertThat(version, is("3.0.0"));
-    } catch (UnsupportedDataElementException e) {
-      logger.warn(e.getMessage());
-    }
+    VersionHandler newHandler = handler.handle(dataElement);
+    String status = newHandler.getStatus();
+    String version = newHandler.getVersion();
+    // Assert
+    assertThat(status, is("bibo:published"));
+    assertThat(version, is("3.0.0"));
   }
 
   @Test(expected = UnsupportedDataElementException.class)
