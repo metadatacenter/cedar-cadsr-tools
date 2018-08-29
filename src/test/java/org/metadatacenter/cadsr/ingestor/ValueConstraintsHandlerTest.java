@@ -58,16 +58,9 @@ public class ValueConstraintsHandlerTest {
       List<Map<String, Object>> classes = newHandler.getClasses();
       // Assert
       assertThat(ontologies.isEmpty(), is(true));
-      assertThat(valueSets.isEmpty(), is(true));
+      assertThat(valueSets.isEmpty(), is(false));
       assertThat(branches.isEmpty(), is(true));
-      assertThat(classes.isEmpty(), is(false));
-      assertThat(classes.size(), is(2));
-      assertThat(classes.get(0).get("uri"), is("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C49488"));
-      assertThat(classes.get(0).get("label"), is("Yes"));
-      assertThat(classes.get(0).get("prefLabel"), is("Yes"));
-      assertThat(classes.get(1).get("uri"), is("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C49487"));
-      assertThat(classes.get(1).get("label"), is("No"));
-      assertThat(classes.get(1).get("prefLabel"), is("No"));
+      assertThat(classes.isEmpty(), is(true));
     } catch (UnsupportedDataElementException e) {
       logger.warn(e.getMessage());
     }
@@ -83,14 +76,23 @@ public class ValueConstraintsHandlerTest {
     }
   }
 
-  @Test(expected = UnsupportedDataElementException.class)
-  public void shouldThrowException_ENUMERATED_ALPHANUMERIC_PARTIALLY_ANNOTATED() throws Exception {
+  @Test
+  public void shouldProduceVCs_ENUMERATED_ALPHANUMERIC_PARTIALLY_ANNOTATED() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-3245384.xml");
     try {
       PermissibleValuesHandler newHandler = handler.handle(dataElement);
+      List<Map<String, Object>> ontologies = newHandler.getOntologies();
+      List<Map<String, Object>> valueSets = newHandler.getValueSets();
+      List<Map<String, Object>> branches = newHandler.getBranches();
+      List<Map<String, Object>> classes = newHandler.getClasses();
+      // Assert
+      assertThat(ontologies.isEmpty(), is(true));
+      assertThat(valueSets.isEmpty(), is(false));
+      assertThat(branches.isEmpty(), is(true));
+      assertThat(classes.isEmpty(), is(true));
     } catch (UnsupportedDataElementException e) {
       String message = e.getMessage();
-      assertThat(message, is("Failed to convert 'Orthodontist Model Use Use Frequency' (ID: 3245384) - Reason: " +
+      assertThat(message, is("Skipping 'Orthodontist Model Use Use Frequency' (ID: 3245384) - Reason: " +
           "Controlled term for value 'OCCASIONALLY' is null (NullValue)"));
       throw e;
     }
