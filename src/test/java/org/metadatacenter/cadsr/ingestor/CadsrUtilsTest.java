@@ -1,5 +1,6 @@
 package org.metadatacenter.cadsr.ingestor;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.metadatacenter.cadsr.DataElement;
 import org.metadatacenter.model.ModelNodeNames;
@@ -18,6 +19,7 @@ import static org.hamcrest.core.IsNull.nullValue;
 
 public class CadsrUtilsTest {
 
+  @Ignore
   @Test
   public void shouldProduceFieldMap_ENUMERATED_CHARACTER() throws JAXBException, IOException {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-5873923.xml");
@@ -39,6 +41,7 @@ public class CadsrUtilsTest {
     assertThat(getRequired(fieldMap, 0), is(ModelNodeNames.LD_ID));
   }
 
+  @Ignore
   @Test
   public void shouldProduceFieldMap_NON_ENUMERATED_CHARACTER() throws JAXBException, IOException {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2182451.xml");
