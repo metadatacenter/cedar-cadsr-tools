@@ -8,10 +8,17 @@ import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -27,6 +34,17 @@ public class CadsrUploaderTool {
   private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
 
   private static ObjectMapper objectMapper = new ObjectMapper();
+
+  //@formatter:off
+  private static TrustManager[] trustAllCerts = new TrustManager[1];
+  static {
+    trustAllCerts[0] = new X509TrustManager() {
+      public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+      public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+      public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+    };
+  }
+  //@formatter:on
 
   public static void main(String[] args) {
 
@@ -165,6 +183,7 @@ public class CadsrUploaderTool {
   }
 
   private static HttpURLConnection createAndOpenConnection(String endpoint, String apiKey) throws IOException {
+    ignoreSSLCheckingByAcceptingAnyCertificates();
     try {
       URL url = new URL(endpoint);
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -174,6 +193,18 @@ public class CadsrUploaderTool {
       conn.setRequestProperty("Authorization", apiKey);
       return conn;
     } catch (MalformedURLException e) {
+      logger.error(e.getMessage());
+      throw new RuntimeException(e.getMessage());
+    }
+  }
+
+  private static void ignoreSSLCheckingByAcceptingAnyCertificates() {
+    try {
+      SSLContext sc = SSLContext.getInstance("SSL");
+      sc.init(null, trustAllCerts, new java.security.SecureRandom());
+      HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+      HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> 1 == 1);
+    } catch (KeyManagementException | NoSuchAlgorithmException e) {
       logger.error(e.getMessage());
       throw new RuntimeException(e.getMessage());
     }
@@ -195,7 +226,7 @@ public class CadsrUploaderTool {
     if (success) {
       logger.info("UPLOAD SUCCESS");
     } else {
-      logger.info("UPLOAD FAILED (see error.log for details");
+      logger.info("UPLOAD FAILED (see error.log for details)");
     }
     logger.info("----------------------------------------------------------");
     logger.info("Total number of generated CDEs: " + countFormat.format(totalCdes));
