@@ -115,7 +115,7 @@ public class CadsrConverterTool {
     if (success) {
       logger.info("UPLOAD SUCCESS");
     } else {
-      logger.info("UPLOAD FAILED (see error.log for details");
+      logger.info("UPLOAD FAILED (see error.log for details)");
     }
     logger.info("----------------------------------------------------------");
     logger.info("Total number of generated CDEs: " + countFormat.format(totalCdes));
