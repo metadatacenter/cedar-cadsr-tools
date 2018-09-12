@@ -26,7 +26,7 @@ public class CadsrUtils {
 
   private static final Logger logger = LoggerFactory.getLogger(CadsrUtils.class);
 
-  private static final String CEDAR_SCHEMA_VERSION = "1.4.0";
+  private static final String CEDAR_SCHEMA_VERSION = "1.5.0";
 
   public static Collection<Map<String, Object>> getFieldMapsFromDataElements(DataElementsList del) {
     final List<Map<String, Object>> fieldMaps = Lists.newArrayList();
@@ -102,13 +102,19 @@ public class CadsrUtils {
   private static void parseDataElement(DataElement dataElement, final Map<String, Object> fieldMap) throws
       UnsupportedDataElementException, UnknownSeparatorException {
     createEmptyField(fieldMap);
-    setFieldName(fieldMap, dataElement.getPUBLICID().getContent() + " - " + dataElement.getLONGNAME().getContent());
+    setFieldIdentifier(fieldMap, dataElement.getPUBLICID().getContent());
+    setFieldName(fieldMap, dataElement.getLONGNAME().getContent());
     setFieldDescription(fieldMap, dataElement.getPREFERREDDEFINITION().getContent());
+    setFieldQuestions(fieldMap, dataElement, new UserQuestionsHandler());
     setInputType(fieldMap, dataElement, new InputTypeHandler());
     setPermissibleValues(fieldMap, dataElement, new PermissibleValuesHandler());
     setValueConstraints(fieldMap, dataElement, new ValueConstraintsHandler());
     setProperties(fieldMap, dataElement, new PropertiesHandler());
     setVersion(fieldMap, dataElement, new VersionHandler());
+  }
+
+  private static void setFieldIdentifier(final Map<String, Object> fieldMap, String content) {
+    fieldMap.put(ModelNodeNames.SCHEMA_IDENTIFIER, content);
   }
 
   private static void setFieldName(final Map<String, Object> fieldMap, String content) {
@@ -127,6 +133,11 @@ public class CadsrUtils {
 
   private static void setFieldDescription(final Map<String, Object> fieldMap, String content) {
     fieldMap.put(ModelNodeNames.SCHEMA_DESCRIPTION, content);
+  }
+
+  private static void setFieldQuestions(final Map<String, Object> fieldMap, DataElement dataElement, UserQuestionsHandler
+      userQuestionsHandler) throws UnsupportedDataElementException {
+    userQuestionsHandler.handle(dataElement).apply(fieldMap);
   }
 
   private static void setInputType(final Map<String, Object> fieldMap, DataElement dataElement, InputTypeHandler
@@ -183,8 +194,11 @@ public class CadsrUtils {
     context.put(ModelNodeNames.OSLC, ModelNodeValues.OSLC_IRI);
     context.put(ModelNodeNames.SCHEMA, ModelNodeValues.SCHEMA_IRI);
     context.put(ModelNodeNames.BIBO, ModelNodeValues.BIBO_IRI);
+    context.put(ModelNodeNames.SKOS, ModelNodeValues.SKOS_IRI);
     context.put(ModelNodeNames.SCHEMA_NAME, setAtTypeString());
     context.put(ModelNodeNames.SCHEMA_DESCRIPTION, setAtTypeString());
+    context.put(ModelNodeNames.SKOS_PREFLABEL, setAtTypeString());
+    context.put(ModelNodeNames.SKOS_ALTLABEL, setAtTypeString());
     context.put(ModelNodeNames.PAV_CREATED_ON, setAtTypeDateTime());
     context.put(ModelNodeNames.PAV_CREATED_BY, setAtTypeId());
     context.put(ModelNodeNames.PAV_LAST_UPDATED_ON, setAtTypeDateTime());
