@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.metadatacenter</groupId>
     <artifactId>cedar-parent</artifactId>
-    <version>1.9.2-SNAPSHOT</version>
+    <version>2.0.6-SNAPSHOT</version>
   </parent>
 
   <groupId>org.metadatacenter</groupId>
   <artifactId>cadsr2cedar</artifactId>
-  <version>1.9.2-SNAPSHOT</version>
+  <version>2.0.6-SNAPSHOT</version>
   <name>Project that generates CEDAR template fields from caDSR XML-encoded DataElement instances</name>
 
   <scm>
