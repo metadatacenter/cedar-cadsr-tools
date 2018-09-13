@@ -81,12 +81,12 @@
         <version>1.2.1</version>
         <executions>
           <execution>
-            <id>convert</id>
+            <id>transform</id>
             <goals>
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.CadsrConverterTool</mainClass>
+              <mainClass>org.metadatacenter.cadsr.ingestor.CadsrTransformerTool</mainClass>
             </configuration>
           </execution>
           <execution>
