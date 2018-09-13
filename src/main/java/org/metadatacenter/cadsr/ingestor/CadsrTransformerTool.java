@@ -19,9 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY_NAME;
 
-public class CadsrConverterTool {
+public class CadsrTransformerTool {
 
-  private static final Logger logger = LoggerFactory.getLogger(CadsrConverterTool.class);
+  private static final Logger logger = LoggerFactory.getLogger(CadsrTransformerTool.class);
 
   private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
 
@@ -113,9 +113,9 @@ public class CadsrConverterTool {
   private static void printSummary(Stopwatch stopwatch, int totalCdes, boolean success) {
     logger.info("----------------------------------------------------------");
     if (success) {
-      logger.info("UPLOAD SUCCESS");
+      logger.info("TRANSFORMATION SUCCESS");
     } else {
-      logger.info("UPLOAD FAILED (see error.log for details)");
+      logger.info("TRANSFORMATION FAILED (see error.log for details)");
     }
     logger.info("----------------------------------------------------------");
     logger.info("Total number of generated CDEs: " + countFormat.format(totalCdes));
