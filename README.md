@@ -41,12 +41,20 @@ Then build it with Maven:
 
     mvn clean install
 
-To run the converter tool:
+To run the transformer tool:
 
-    mvn exec:java@convert -Dexec.args="[path-to-xml] [output-dir]"
+    mvn exec:java@transform -Dexec.args="/path/to/input /path/to/output"
+
+where:
+- `/path/to/input` is the input [caDSR XML file](https://wiki.nci.nih.gov/display/caDSR/caDSR+Hosted+Data+Standards%2C+Downloads%2C+and+Transformation+Utilities) location in your local machine, which can be either a directory or a file
+- `/path/to/output` is the directory location to store the output files
     
 To run the converter tool and upload the fields to CEDAR server:
 
-    mvn exec:java@upload -Dexec.args="[path-to-xml] [create-field-api] [apikey]"
+    mvn exec:java@upload -Dexec.args="/path/to/input target-server folder-id 'cedar-apikey'"
 
-
+where:
+- `/path/to/input` is the input [caDSR XML file](https://wiki.nci.nih.gov/display/caDSR/caDSR+Hosted+Data+Standards%2C+Downloads%2C+and+Transformation+Utilities) location in your local machine, which can be either a directory or a file
+- `target-server` is the CEDAR server types and the options are "local", "staging", "production"
+- `folder-id` is the folder unique identifier found in the URL of your CEDAR workspace (e.g., 4aabbfc6-f953-4779-b667-e0d6a1234ce8)
+- `cedar-apikey` is your CEDAR API key that will give the permission to upload files to the server (e.g., 'apiKey 0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff')
