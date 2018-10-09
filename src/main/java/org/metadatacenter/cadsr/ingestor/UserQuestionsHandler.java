@@ -1,13 +1,13 @@
 package org.metadatacenter.cadsr.ingestor;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.metadatacenter.cadsr.DataElement;
 import org.metadatacenter.cadsr.REFERENCEDOCUMENTSLIST;
 import org.metadatacenter.model.ModelNodeNames;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class UserQuestionsHandler extends InputTypeHandler {
 
@@ -15,7 +15,7 @@ public class UserQuestionsHandler extends InputTypeHandler {
   private static final String ALTERNATE_QUESTION_TEXT = "Alternate Question Text";
 
   private String preferredQuestion;
-  private List<String> alternateQuestions = Lists.newArrayList();
+  private Set<String> alternateQuestions = Sets.newHashSet();
 
   public UserQuestionsHandler handle(DataElement dataElement) {
     final REFERENCEDOCUMENTSLIST referenceDocumentList = dataElement.getREFERENCEDOCUMENTSLIST();
