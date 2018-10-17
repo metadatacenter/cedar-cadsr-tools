@@ -23,11 +23,5 @@ public final class Constants {
 
   public static final String CDE_VALUESETS_ONTOLOGY_ID = "CADSR-VS";
   public static final String CDE_VALUESETS_ONTOLOGY_IRI = "https://cadsr.nci.nih.gov/metadata/" + CDE_VALUESETS_ONTOLOGY_ID;
-  public static final String CDES_FOLDER = "cdes";
-  public static final String CDE_VALUESETS_ONTOLOGY_FOLDER = "ontology";
   public static final String CDE_VALUESETS_ONTOLOGY_NAME = "cadsr-vs.owl";
-  //public static final String CDE_STATUS_RELEASED = "RELEASED";
-
-
-
 }
