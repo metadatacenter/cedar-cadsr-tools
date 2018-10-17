@@ -79,18 +79,8 @@ public class PermissibleValuesHandler implements ModelHandler {
       UnsupportedDataElementException, UnknownSeparatorException {
     Set<Value> termSet = Sets.newHashSet();
     for (PermissibleValuesITEM permissibleItem : permissibleValues.getPermissibleValuesITEM()) {
-      String conceptUri = null;
-      if (isNullConcept(permissibleItem)) {
-        // use “VM” plus the Value Meaning PublicID and Version
-        String publicId = permissibleItem.getVMPUBLICID().getContent();
-        String version = permissibleItem.getVMVERSION().getContent();
-        conceptUri = CDE_VALUESETS_ONTOLOGY_IRI + "/VM" + publicId + "v" + version;
-      } else if (isComplexConcept(permissibleItem)) {
-        // Use the rightmost concept (last) in the list of concepts
-        conceptUri = NCIT_IRI + extractLastConcept(permissibleItem.getMEANINGCONCEPTS().getContent());
-      } else { // regular concept
-        conceptUri = NCIT_IRI + permissibleItem.getMEANINGCONCEPTS().getContent();
-      }
+      String termIri = constructTermIri(permissibleItem);
+      String termSource = getTermSource(permissibleItem);
       // checkConceptNotNull(permissibleItem, dataElement);
       // checkComplexConcept(permissibleItem, dataElement);
       termSet.add(new Value(
@@ -98,7 +88,8 @@ public class PermissibleValuesHandler implements ModelHandler {
           permissibleItem.getVMVERSION().getContent(),
           permissibleItem.getVALIDVALUE().getContent(),
           permissibleItem.getVALUEMEANING().getContent(),
-          conceptUri,
+          termIri,
+          termSource,
           permissibleItem.getMEANINGDESCRIPTION().getContent(),
           permissibleItem.getPVBEGINDATE().getContent(),
           permissibleItem.getPVENDDATE().getContent()
@@ -108,6 +99,32 @@ public class PermissibleValuesHandler implements ModelHandler {
     return termSet;
   }
 
+  private String constructTermIri(PermissibleValuesITEM permissibleItem) throws UnknownSeparatorException {
+    String conceptUri;
+    if (isNullConcept(permissibleItem)) {
+      // use “VM” plus the Value Meaning PublicID and Version
+      String publicId = permissibleItem.getVMPUBLICID().getContent();
+      String version = permissibleItem.getVMVERSION().getContent();
+      conceptUri = CDE_VALUESETS_ONTOLOGY_IRI + "/VM" + publicId + "v" + version;
+    } else {
+      String conceptOrigin = permissibleItem.getMEANINGCONCEPTORIGIN().getContent();
+      String ontologyIri = CadsrConceptOrigins.ONTOLOGY_IRI_MAP.get(conceptOrigin);
+      if (isComplexConcept(permissibleItem)) {
+        // Use the rightmost concept (last) in the list of concepts
+        conceptUri = ontologyIri + extractLastConcept(permissibleItem.getMEANINGCONCEPTS().getContent());
+      } else { // regular concept
+        conceptUri = ontologyIri + permissibleItem.getMEANINGCONCEPTS().getContent();
+      }
+    }
+    return conceptUri;
+  }
+
+  private String getTermSource(PermissibleValuesITEM permissibleItem) {
+    String conceptOrigin = permissibleItem.getMEANINGCONCEPTORIGIN().getContent();
+    String termSource = CadsrConceptOrigins.ONTOLOGY_LABEL_MAP.get(conceptOrigin);
+    return termSource;
+  }
+
   private void setListOfClasses(String valueSetId, Set<Value> values) {
     for (Value value : values) {
       Map<String, Object> cls = Maps.newHashMap();
@@ -115,7 +132,7 @@ public class PermissibleValuesHandler implements ModelHandler {
       cls.put(ModelNodeNames.LABEL, value.getDisplayLabel());
       cls.put(ModelNodeNames.PREF_LABEL, value.getDbLabel());
       cls.put(ModelNodeNames.TYPE, ModelNodeValues.ONTOLOGY_CLASS);
-      cls.put(ModelNodeNames.SOURCE, NCIT_ONTOLOGY_LABEL);
+      cls.put(ModelNodeNames.SOURCE, value.getTermSource());
       classes.add(cls);
     }
   }
@@ -173,11 +190,9 @@ public class PermissibleValuesHandler implements ModelHandler {
     int indexComma = complexConcept.lastIndexOf(",");
     if (indexColon > indexComma) {
       lastConcept = complexConcept.substring(indexColon + 1);
-    }
-    else if (indexColon < indexComma) {
+    } else if (indexColon < indexComma) {
       lastConcept = complexConcept.substring(indexComma + 1);
-    }
-    else {
+    } else {
       throw new UnknownSeparatorException("Found a complex concept with an unknown separator: " + complexConcept);
     }
     return lastConcept;

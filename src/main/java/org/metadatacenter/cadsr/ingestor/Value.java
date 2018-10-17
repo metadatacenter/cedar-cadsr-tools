@@ -1,5 +1,8 @@
 package org.metadatacenter.cadsr.ingestor;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
+
 import java.util.Objects;
 
 public class Value {
@@ -8,45 +11,23 @@ public class Value {
   private final String dbLabel; // VALIDVALUE
   private final String displayLabel; // VALUEMEANING
   private final String relatedTermUri; // MEANINGCONCEPTS
+  private final String termSource; // MEANINGCONCEPTORIGIN
   private final String description; // MEANINGDESCRIPTION
   private final String beginDate; // PVBEGINDATE
   private final String endDate; // PVENDDATE
 
 
-  public Value(String id, String version, String dbLabel, String displayLabel, String relatedTermUri, String
-      description, String beginDate, String endDate) {
-    if (id != null && id.length() == 0) {
-      id = null;
-    }
-    if (version != null && version.length() == 0) {
-      version = null;
-    }
-    if (dbLabel != null && dbLabel.length() == 0) {
-      dbLabel = null;
-    }
-    if (displayLabel != null && displayLabel.length() == 0) {
-      displayLabel = null;
-    }
-    if (relatedTermUri != null && relatedTermUri.length() == 0) {
-      relatedTermUri = null;
-    }
-    if (description != null && description.length() == 0) {
-      description = null;
-    }
-    if (beginDate != null && beginDate.length() == 0) {
-      beginDate = null;
-    }
-    if (endDate != null && endDate.length() == 0) {
-      endDate = null;
-    }
-    this.id = id;
-    this.version = version;
-    this.dbLabel = dbLabel;
-    this.relatedTermUri = relatedTermUri;
-    this.displayLabel = displayLabel;
-    this.description = description;
-    this.beginDate = beginDate;
-    this.endDate = endDate;
+  public Value(String id, String version, String dbLabel, String displayLabel, String relatedTermUri,
+               String termSource, String description, String beginDate, String endDate) {
+    this.id = Strings.isNullOrEmpty(id) ? null : id;
+    this.version = Strings.isNullOrEmpty(version) ? null : version;
+    this.dbLabel = Strings.isNullOrEmpty(dbLabel) ? null : dbLabel;
+    this.relatedTermUri = Strings.isNullOrEmpty(relatedTermUri) ? null : relatedTermUri;
+    this.termSource = Strings.isNullOrEmpty(termSource) ? null : termSource;
+    this.displayLabel = Strings.isNullOrEmpty(displayLabel) ? null : displayLabel;
+    this.description = Strings.isNullOrEmpty(description) ? null : description;
+    this.beginDate = Strings.isNullOrEmpty(beginDate) ? null : beginDate;
+    this.endDate = Strings.isNullOrEmpty(endDate) ? null : endDate;
   }
 
   public String getId() {
@@ -69,6 +50,10 @@ public class Value {
     return relatedTermUri;
   }
 
+  public String getTermSource() {
+    return termSource;
+  }
+
   public String getDescription() {
     return description;
   }
@@ -83,21 +68,22 @@ public class Value {
 
   @Override
   public String toString() {
-    return "Value{" +
-        "id='" + id + '\'' +
-        ", version='" + version + '\'' +
-        ", dbLabel='" + dbLabel + '\'' +
-        ", displayLabel='" + displayLabel + '\'' +
-        ", relatedTermUri='" + relatedTermUri + '\'' +
-        ", description='" + description + '\'' +
-        ", beginDate='" + beginDate + '\'' +
-        ", endDate='" + endDate + '\'' +
-        '}';
+    return MoreObjects.toStringHelper(this)
+        .add("id", getId())
+        .add("version", getVersion())
+        .add("dbLabel", getDbLabel())
+        .add("displayLabel", getDisplayLabel())
+        .add("relatedTermUri", getRelatedTermUri())
+        .add("termSource", getTermSource())
+        .add("description", getDescription())
+        .add("beginDate", getBeginDate())
+        .add("endDate", getEndDate())
+        .toString();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, version, dbLabel, displayLabel,
+    return Objects.hash(id, version, dbLabel, displayLabel, termSource,
         relatedTermUri, description, beginDate, endDate);
   }
 
@@ -115,6 +101,7 @@ public class Value {
         && Objects.equals(dbLabel, other.dbLabel)
         && Objects.equals(displayLabel, other.displayLabel)
         && Objects.equals(relatedTermUri, other.relatedTermUri)
+        && Objects.equals(termSource, other.termSource)
         && Objects.equals(description, other.description)
         && Objects.equals(beginDate, other.beginDate)
         && Objects.equals(endDate, other.endDate);
