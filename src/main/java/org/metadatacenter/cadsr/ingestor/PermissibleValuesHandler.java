@@ -1,5 +1,6 @@
 package org.metadatacenter.cadsr.ingestor;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -143,7 +144,7 @@ public class PermissibleValuesHandler implements ModelHandler {
 
   private static boolean isNullConcept(PermissibleValuesITEM permissibleItem) {
     String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
-    return (conceptId == null || conceptId.length() == 0);
+    return Strings.isNullOrEmpty(conceptId);
   }
 
   private static boolean isComplexConcept(PermissibleValuesITEM permissibleItem) {
