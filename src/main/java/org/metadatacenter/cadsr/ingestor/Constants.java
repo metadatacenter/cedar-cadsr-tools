@@ -2,9 +2,6 @@ package org.metadatacenter.cadsr.ingestor;
 
 public final class Constants {
 
-  // NCIt URIs
-  public static final String NCIT_IRI = "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#";
-  public static final String NCIT_ONTOLOGY_LABEL = "NCIT";
   // Schema.org URIs
   public static final String SCHEMAORG_IRI = "https://schema.org/";
   public static final String SCHEMAORG_STARTTIME_IRI = SCHEMAORG_IRI + "startTime";
