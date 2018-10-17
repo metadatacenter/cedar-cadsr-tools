@@ -112,8 +112,8 @@ public class ValueSetsOntologyManager {
     if (value.getDisplayLabel() != null) {
       ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_LABEL.getIRI(), value.getDisplayLabel(), valueClass);
     }
-    if (value.getRelatedTermUri() != null) {
-      ontology = addAnnotationAxiomToClass(SKOSVocabulary.RELATEDMATCH.getIRI(), value.getRelatedTermUri(), valueClass);
+    if (value.getTermIri() != null) {
+      ontology = addAnnotationAxiomToClass(SKOSVocabulary.RELATEDMATCH.getIRI(), value.getTermIri(), valueClass);
     }
     if (value.getDescription() != null) {
       ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_COMMENT.getIRI(), value.getDescription(), valueClass);

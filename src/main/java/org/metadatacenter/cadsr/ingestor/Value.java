@@ -10,19 +10,19 @@ public class Value {
   private final String version; // VMVERSION
   private final String dbLabel; // VALIDVALUE
   private final String displayLabel; // VALUEMEANING
-  private final String relatedTermUri; // MEANINGCONCEPTS
+  private final String termIri; // MEANINGCONCEPTS
   private final String termSource; // MEANINGCONCEPTORIGIN
   private final String description; // MEANINGDESCRIPTION
   private final String beginDate; // PVBEGINDATE
   private final String endDate; // PVENDDATE
 
 
-  public Value(String id, String version, String dbLabel, String displayLabel, String relatedTermUri,
+  public Value(String id, String version, String dbLabel, String displayLabel, String termIri,
                String termSource, String description, String beginDate, String endDate) {
     this.id = Strings.isNullOrEmpty(id) ? null : id;
     this.version = Strings.isNullOrEmpty(version) ? null : version;
     this.dbLabel = Strings.isNullOrEmpty(dbLabel) ? null : dbLabel;
-    this.relatedTermUri = Strings.isNullOrEmpty(relatedTermUri) ? null : relatedTermUri;
+    this.termIri = Strings.isNullOrEmpty(termIri) ? null : termIri;
     this.termSource = Strings.isNullOrEmpty(termSource) ? null : termSource;
     this.displayLabel = Strings.isNullOrEmpty(displayLabel) ? null : displayLabel;
     this.description = Strings.isNullOrEmpty(description) ? null : description;
@@ -46,8 +46,8 @@ public class Value {
     return displayLabel;
   }
 
-  public String getRelatedTermUri() {
-    return relatedTermUri;
+  public String getTermIri() {
+    return termIri;
   }
 
   public String getTermSource() {
@@ -73,7 +73,7 @@ public class Value {
         .add("version", getVersion())
         .add("dbLabel", getDbLabel())
         .add("displayLabel", getDisplayLabel())
-        .add("relatedTermUri", getRelatedTermUri())
+        .add("termIri", getTermIri())
         .add("termSource", getTermSource())
         .add("description", getDescription())
         .add("beginDate", getBeginDate())
@@ -83,8 +83,7 @@ public class Value {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, version, dbLabel, displayLabel, termSource,
-        relatedTermUri, description, beginDate, endDate);
+    return Objects.hash(id, version, dbLabel, displayLabel, termIri, termSource, description, beginDate, endDate);
   }
 
   @Override
@@ -100,7 +99,7 @@ public class Value {
         && Objects.equals(version, other.version)
         && Objects.equals(dbLabel, other.dbLabel)
         && Objects.equals(displayLabel, other.displayLabel)
-        && Objects.equals(relatedTermUri, other.relatedTermUri)
+        && Objects.equals(termIri, other.termIri)
         && Objects.equals(termSource, other.termSource)
         && Objects.equals(description, other.description)
         && Objects.equals(beginDate, other.beginDate)
