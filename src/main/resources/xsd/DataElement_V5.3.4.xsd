@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
  <xs:element name='ALTERNATENAMELIST'>
@@ -191,6 +190,7 @@
  <xs:element name='DataElement'>
   <xs:complexType>
    <xs:sequence>
+    <xs:element ref='RAI'/>
     <xs:element ref='PUBLICID'/>
     <xs:element ref='LONGNAME'/>
     <xs:element ref='PREFERREDNAME'/>
@@ -356,6 +356,18 @@
   </xs:complexType>
  </xs:element>
 
+ <xs:element name='MEANINGCONCEPTDISPLAYORDER'>
+  <xs:complexType mixed='true'>
+   <xs:attribute name='NULL' type='xs:NMTOKEN'/>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='MEANINGCONCEPTORIGIN'>
+  <xs:complexType mixed='true'>
+   <xs:attribute name='NULL' type='xs:NMTOKEN'/>
+  </xs:complexType>
+ </xs:element>
+
  <xs:element name='MEANINGCONCEPTS'>
   <xs:complexType mixed='true'>
    <xs:attribute name='NULL' type='xs:NMTOKEN'/>
@@ -449,6 +461,8 @@
     <xs:element ref='VALUEMEANING'/>
     <xs:element ref='MEANINGDESCRIPTION'/>
     <xs:element ref='MEANINGCONCEPTS'/>
+    <xs:element ref='MEANINGCONCEPTORIGIN'/>
+    <xs:element ref='MEANINGCONCEPTDISPLAYORDER'/>
     <xs:element ref='PVBEGINDATE'/>
     <xs:element ref='PVENDDATE'/>
     <xs:element ref='VMPUBLICID'/>
@@ -509,6 +523,11 @@
  </xs:element>
 
  <xs:element name='PUBLICID'>
+  <xs:complexType mixed='true'>
+  </xs:complexType>
+ </xs:element>
+
+ <xs:element name='RAI'>
   <xs:complexType mixed='true'>
   </xs:complexType>
  </xs:element>
