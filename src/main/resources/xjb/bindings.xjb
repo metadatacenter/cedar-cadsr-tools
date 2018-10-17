@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
 <jaxb:bindings version="2.0" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
- xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" xmlns:xs="http://www.w3.org/2001/XMLSchema"
- xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
- xmlns:inheritance="http://jaxb2-commons.dev.java.net/basic/inheritance">
+               xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <jaxb:bindings schemaLocation="../xsd/DataElement_V5.3.4.xsd">
 
@@ -71,7 +69,7 @@
       <jaxb:class name="DisplayOrder1"/>
     </jaxb:bindings>
 
-   <jaxb:bindings node="//xs:element[@name='PREFERREDDEFINITION']">
+    <jaxb:bindings node="//xs:element[@name='PREFERREDDEFINITION']">
       <jaxb:class name="PREFERREDDEFINITION1"/>
     </jaxb:bindings>
 
