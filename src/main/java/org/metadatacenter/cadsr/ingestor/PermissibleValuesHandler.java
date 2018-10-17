@@ -49,11 +49,10 @@ public class PermissibleValuesHandler implements ModelHandler {
     return this;
   }
 
-  private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException,
-      UnknownSeparatorException {
+  private void handleEnumeratedType(DataElement dataElement) throws UnknownSeparatorException {
 
     PermissibleValues permissibleValues = dataElement.getVALUEDOMAIN().getPermissibleValues();
-    Set<Value> values = getValues(permissibleValues, dataElement);
+    Set<Value> values = getValues(permissibleValues);
 
     if (values.size() <= MAX_ENUMERATED_TERMS) {
       String valueDomainId = dataElement.getVALUEDOMAIN().getPublicId().getContent();
@@ -75,14 +74,11 @@ public class PermissibleValuesHandler implements ModelHandler {
     }
   }
 
-  private Set<Value> getValues(PermissibleValues permissibleValues, DataElement dataElement) throws
-      UnsupportedDataElementException, UnknownSeparatorException {
+  private Set<Value> getValues(PermissibleValues permissibleValues) throws UnknownSeparatorException {
     Set<Value> termSet = Sets.newHashSet();
     for (PermissibleValuesITEM permissibleItem : permissibleValues.getPermissibleValuesITEM()) {
       String termIri = constructTermIri(permissibleItem);
       String termSource = getTermSource(permissibleItem);
-      // checkConceptNotNull(permissibleItem, dataElement);
-      // checkComplexConcept(permissibleItem, dataElement);
       termSet.add(new Value(
           permissibleItem.getVMPUBLICID().getContent(),
           permissibleItem.getVMVERSION().getContent(),
@@ -95,7 +91,6 @@ public class PermissibleValuesHandler implements ModelHandler {
           permissibleItem.getPVENDDATE().getContent()
       ));
     }
-    //checkPermissibleValueSize(termSet, dataElement);
     return termSet;
   }
 
@@ -146,42 +141,14 @@ public class PermissibleValuesHandler implements ModelHandler {
     valueSets.add(valueSet);
   }
 
-  private static void checkConceptNotNull(PermissibleValuesITEM permissibleItem, DataElement dataElement) throws
-      UnsupportedDataElementException {
-    String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
-    if ("".equals(conceptId)) {
-      String reason = String.format("Controlled term for value '%s' is null (NullValue)",
-          permissibleItem.getVALUEMEANING().getContent());
-      throw new UnsupportedDataElementException(dataElement, reason);
-    }
-  }
-
   private static boolean isNullConcept(PermissibleValuesITEM permissibleItem) {
     String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
-    if (conceptId == null || conceptId.length() == 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  private static void checkComplexConcept(PermissibleValuesITEM permissibleItem, DataElement dataElement) throws
-      UnsupportedDataElementException {
-    String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
-    if (conceptId.contains(",") || conceptId.contains(":")) {
-      String reason = String.format("Controlled term for value '%s' is a complex concept [%s] " +
-          "(Unsupported)", permissibleItem.getVALUEMEANING().getContent(), conceptId);
-      throw new UnsupportedDataElementException(dataElement, reason);
-    }
+    return (conceptId == null || conceptId.length() == 0);
   }
 
   private static boolean isComplexConcept(PermissibleValuesITEM permissibleItem) {
     String conceptId = permissibleItem.getMEANINGCONCEPTS().getContent();
-    if (conceptId.contains(",") || conceptId.contains(":")) {
-      return true;
-    } else {
-      return false;
-    }
+    return (conceptId.contains(",") || conceptId.contains(":"));
   }
 
   private static String extractLastConcept(String complexConcept) throws UnknownSeparatorException {
@@ -197,15 +164,6 @@ public class PermissibleValuesHandler implements ModelHandler {
     }
     return lastConcept;
   }
-
-//  private static void checkPermissibleValueSize(Set<Term> termSet, DataElement dataElement) throws
-//      UnsupportedDataElementException {
-//    int termSize = termSet.size();
-//    if (termSize > MAX_ENUMERATED_TERMS) {
-//      String reason = String.format("Controlled terms selection is too large = %d (Unsupported)", termSize);
-//      throw new UnsupportedDataElementException(dataElement, reason);
-//    }
-//  }
 
   private void handleNonEnumeratedType(DataElement dataElement) {
     // Does nothing
@@ -235,5 +193,4 @@ public class PermissibleValuesHandler implements ModelHandler {
     valueConstraints.put(ModelNodeNames.CLASSES, getClasses());
     valueConstraints.put(ModelNodeNames.BRANCHES, getBranches());
   }
-
 }
