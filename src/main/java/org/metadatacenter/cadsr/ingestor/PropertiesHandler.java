@@ -157,7 +157,6 @@ public class PropertiesHandler implements ModelHandler {
   private List<String> setRequiredList() {
     List<String> requiredList = Lists.newArrayList();
     addIfNotNull(requiredList, ModelNodeNames.LD_VALUE, getValueProperty());
-    addIfNotNull(requiredList, ModelNodeNames.LD_ID, getIdProperty());
     return requiredList;
   }
 
