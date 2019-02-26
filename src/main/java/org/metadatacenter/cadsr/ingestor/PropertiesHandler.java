@@ -21,6 +21,7 @@ public class PropertiesHandler implements ModelHandler {
   private final Map<String, Object> valueProperty = Maps.newHashMap();
   private final Map<String, Object> idProperty = Maps.newHashMap();
   private final Map<String, Object> rdfsLabelProperty = Maps.newHashMap();
+  private final Map<String, Object> skosNotationProperty = Maps.newHashMap();
 
   public PropertiesHandler handle(DataElement dataElement) throws UnsupportedDataElementException {
     String valueDomainType = dataElement.getVALUEDOMAIN().getValueDomainType().getContent();
@@ -42,6 +43,7 @@ public class PropertiesHandler implements ModelHandler {
       typeProperty.put(ModelNodeNames.LD_TYPE, setOneOfStringOrArray());
       idProperty.put(ModelNodeNames.LD_ID, setUriString());
       rdfsLabelProperty.put(ModelNodeNames.RDFS_LABEL, setTypeStringOrNull());
+      skosNotationProperty.put(ModelNodeNames.SKOS_NOTATION, setTypeStringOrNull());
     } else {
       String reason = String.format("An enumerated %s is not supported (Unsupported)", datatype);
       throw new UnsupportedDataElementException(dataElement, reason);
