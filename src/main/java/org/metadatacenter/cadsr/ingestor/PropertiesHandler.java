@@ -137,11 +137,13 @@ public class PropertiesHandler implements ModelHandler {
 
   @Override
   public void apply(final Map<String, Object> fieldObject) {
-    fieldObject.put(ModelNodeNames.PROPERTIES, setPropertiesObject());
-    fieldObject.put(ModelNodeNames.REQUIRED, setRequiredList());
+    fieldObject.put(ModelNodeNames.PROPERTIES, getPropertiesObject());
+    if (!getRequiredList().isEmpty()) {
+      fieldObject.put(ModelNodeNames.REQUIRED, getRequiredList());
+    }
   }
 
-  private Map<String, Object> setPropertiesObject() {
+  private Map<String, Object> getPropertiesObject() {
     Map<String, Object> properties = Maps.newHashMap();
     putIfNotNull(properties, getTypeProperty());
     putIfNotNull(properties, getValueProperty());
@@ -156,7 +158,7 @@ public class PropertiesHandler implements ModelHandler {
     }
   }
 
-  private List<String> setRequiredList() {
+  private List<String> getRequiredList() {
     List<String> requiredList = Lists.newArrayList();
     addIfNotNull(requiredList, ModelNodeNames.LD_VALUE, getValueProperty());
     return requiredList;

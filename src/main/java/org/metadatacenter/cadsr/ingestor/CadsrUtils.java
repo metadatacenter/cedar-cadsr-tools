@@ -176,7 +176,6 @@ public class CadsrUtils {
     fieldMap.put(ModelNodeNames.UI, setDefaultUi());
     fieldMap.put(ModelNodeNames.VALUE_CONSTRAINTS, setDefaultValueConstraints());
     fieldMap.put(ModelNodeNames.PROPERTIES, null);
-    fieldMap.put(ModelNodeNames.REQUIRED, null);
     fieldMap.put(ModelNodeNames.SCHEMA_NAME, "");
     fieldMap.put(ModelNodeNames.SCHEMA_DESCRIPTION, "");
     fieldMap.put(ModelNodeNames.PAV_CREATED_ON, null);
