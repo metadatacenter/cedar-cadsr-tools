@@ -35,7 +35,7 @@ public class InputTypeHandler implements ModelHandler {
   private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
     String datatype = dataElement.getVALUEDOMAIN().getDatatype().getContent();
     if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
-      inputType.put(ModelNodeNames.INPUT_TYPE, ModelNodeValues.TEXT_FIELD);
+      inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.TEXT_FIELD);
     } else {
       String reason = String.format("An enumerated %s is not supported (Unsupported)", datatype);
       throw new UnsupportedDataElementException(dataElement, reason);
@@ -45,11 +45,11 @@ public class InputTypeHandler implements ModelHandler {
   private void handleNonEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
     String datatype = dataElement.getVALUEDOMAIN().getDatatype().getContent();
     if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
-      inputType.put(ModelNodeNames.INPUT_TYPE, ModelNodeValues.TEXT_FIELD);
+      inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.TEXT_FIELD);
     } else if (CadsrDatatypes.NUMERIC_LIST.contains(datatype)) {
-      inputType.put(ModelNodeNames.INPUT_TYPE, ModelNodeValues.NUMERIC);
+      inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.NUMERIC);
     } else if (CadsrDatatypes.DATE_LIST.contains(datatype)) {
-      inputType.put(ModelNodeNames.INPUT_TYPE, ModelNodeValues.DATE);
+      inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.DATE);
     } else {
       String reason = String.format("A non-enumerated %s is not supported (Unsupported)", datatype);
       throw new UnsupportedDataElementException(dataElement, reason);
