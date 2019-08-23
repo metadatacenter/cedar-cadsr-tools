@@ -124,21 +124,21 @@ public class PermissibleValuesHandler implements ModelHandler {
   private void setListOfClasses(String valueSetId, Set<Value> values) {
     for (Value value : values) {
       Map<String, Object> cls = Maps.newHashMap();
-      cls.put(ModelNodeNames.URI, ValueSetsUtil.generateValueId(valueSetId, value));
-      cls.put(ModelNodeNames.LABEL, value.getDisplayLabel());
-      cls.put(ModelNodeNames.PREF_LABEL, value.getDbLabel());
-      cls.put(ModelNodeNames.TYPE, ModelNodeValues.ONTOLOGY_CLASS);
-      cls.put(ModelNodeNames.SOURCE, value.getTermSource());
+      cls.put(ModelNodeNames.VALUE_CONSTRAINTS_URI, ValueSetsUtil.generateValueId(valueSetId, value));
+      cls.put(ModelNodeNames.VALUE_CONSTRAINTS_LABEL, value.getDisplayLabel());
+      cls.put(ModelNodeNames.VALUE_CONSTRAINTS_PREFLABEL, value.getDbLabel());
+      cls.put(ModelNodeNames.VALUE_CONSTRAINTS_TYPE, ModelNodeValues.ONTOLOGY_CLASS);
+      cls.put(ModelNodeNames.VALUE_CONSTRAINTS_SOURCE, value.getTermSource());
       classes.add(cls);
     }
   }
 
   private void setValueSet(DataElement dataElement, int size) {
     Map<String, Object> valueSet = Maps.newHashMap();
-    valueSet.put(ModelNodeNames.NAME, dataElement.getVALUEDOMAIN().getLongName().getContent());
-    valueSet.put(ModelNodeNames.VS_COLLECTION, CDE_VALUESETS_ONTOLOGY_ID);
-    valueSet.put(ModelNodeNames.URI, ValueSetsUtil.generateValueSetIRI(dataElement));
-    valueSet.put(ModelNodeNames.NUM_TERMS, size);
+    valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_NAME, dataElement.getVALUEDOMAIN().getLongName().getContent());
+    valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_VS_COLLECTION, CDE_VALUESETS_ONTOLOGY_ID);
+    valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_URI, ValueSetsUtil.generateValueSetIRI(dataElement));
+    valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_NUM_TERMS, size);
     valueSets.add(valueSet);
   }
 
@@ -189,9 +189,9 @@ public class PermissibleValuesHandler implements ModelHandler {
   @Override
   public void apply(Map<String, Object> fieldObject) {
     Map<String, Object> valueConstraints = (Map<String, Object>) fieldObject.get(ModelNodeNames.VALUE_CONSTRAINTS);
-    valueConstraints.put(ModelNodeNames.ONTOLOGIES, getOntologies());
-    valueConstraints.put(ModelNodeNames.VALUE_SETS, getValueSets());
-    valueConstraints.put(ModelNodeNames.CLASSES, getClasses());
-    valueConstraints.put(ModelNodeNames.BRANCHES, getBranches());
+    valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_ONTOLOGIES, getOntologies());
+    valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_VALUE_SETS, getValueSets());
+    valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_CLASSES, getClasses());
+    valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_BRANCHES, getBranches());
   }
 }

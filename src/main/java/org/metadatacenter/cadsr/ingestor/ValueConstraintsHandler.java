@@ -153,25 +153,25 @@ public class ValueConstraintsHandler implements ModelHandler {
   public void apply(Map<String, Object> fieldObject) {
     Map<String, Object> valueConstraints = (Map<String, Object>) fieldObject.get(ModelNodeNames.VALUE_CONSTRAINTS);
     if (minLength != NONE) {
-      valueConstraints.put(ModelNodeNames.MIN_LENGTH, minLength);
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_MIN_STRING_LENGTH, minLength);
     }
     if (maxLength != NONE) {
-      valueConstraints.put(ModelNodeNames.MAX_LENGTH, maxLength);
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_MAX_STRING_LENGTH, maxLength);
     }
     if (decimalPlace != NONE) {
-      valueConstraints.put(ModelNodeNames.DECIMAL_PLACE, decimalPlace);
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_DECIMAL_PLACE, decimalPlace);
     }
     if (minValue != null) {
-      valueConstraints.put(ModelNodeNames.MIN_NUMBER_VALUE, minValue);
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_MIN_NUMBER_VALUE, minValue);
     }
     if (maxValue != null) {
-      valueConstraints.put(ModelNodeNames.MAX_NUMBER_VALUE, maxValue);
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_MAX_NUMBER_VALUE, maxValue);
     }
     if (numberType != null) {
-      valueConstraints.put(ModelNodeNames.NUMBER_TYPE, numberType);
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_NUMBER_TYPE, numberType);
     }
     if (unitOfMeasure != null) {
-      valueConstraints.put(ModelNodeNames.UNIT_OF_MEASURE, unitOfMeasure);
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_UNIT_OF_MEASURE, unitOfMeasure);
     }
   }
 }
