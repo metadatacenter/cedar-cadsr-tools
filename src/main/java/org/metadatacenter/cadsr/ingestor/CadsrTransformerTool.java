@@ -42,12 +42,12 @@ public class CadsrTransformerTool {
       } else {
         totalCdes = convertCdeFromFile(inputSource, outputDir);
       }
+      storeOntology(outputDir);
       success = true;
     } catch (Exception e) {
       logger.error(e.toString());
       success = false;
     } finally {
-      storeOntologyInTempDir();
       printSummary(stopwatch, totalCdes, success);
     }
   }
@@ -103,9 +103,8 @@ public class CadsrTransformerTool {
     return counter != 0 && counter % 100 == 0;
   }
 
-  private static void storeOntologyInTempDir() {
-    File outputTempDir = Files.createTempDir();
-    File outputOntologyFile = new File(outputTempDir, CDE_VALUESETS_ONTOLOGY_NAME);
+  private static void storeOntology(File outputDir) {
+    File outputOntologyFile = new File(outputDir, CDE_VALUESETS_ONTOLOGY_NAME);
     logger.info("Storing the generated value set ontology at " + outputOntologyFile);
     ValueSetsOntologyManager.saveOntology(outputOntologyFile);
   }
