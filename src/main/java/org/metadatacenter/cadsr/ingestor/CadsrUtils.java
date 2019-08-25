@@ -14,10 +14,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -44,26 +41,27 @@ public class CadsrUtils {
     return fieldMaps;
   }
 
-  public static Collection<Map<String, Object>> getFieldMapsFromInputStream(InputStream is) throws IOException {
+  public static Collection<Map<String, Object>> getFieldMapsFromInputStream(InputStream is) {
     final List<Map<String, Object>> fieldMaps = Lists.newArrayList();
     try {
       DataElementsList del = getDataElementLists(is);
       fieldMaps.addAll(getFieldMapsFromDataElements(del));
-    } catch (JAXBException e) {
-      logger.error("Error while parsing source document: " + e);
     } catch (ClassCastException e) {
       logger.error("Source document is not a list of data elements: " + e);
     } catch (UnsupportedEncodingException e) {
       logger.error("Unsupported encoding: " + e);
+    } catch (JAXBException | IOException e) {
+      logger.error("Error while parsing source document: " + e);
     }
     return fieldMaps;
   }
 
   public static DataElementsList getDataElementLists(InputStream is) throws JAXBException,
-      UnsupportedEncodingException {
+      IOException {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElementsList.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-    return (DataElementsList) jaxbUnmarshaller.unmarshal(new InputStreamReader(is, "UTF-8"));
+    InputStream cleanIs = Util.stripNonValidXMLCharacters(is);
+    return (DataElementsList) jaxbUnmarshaller.unmarshal(new InputStreamReader(cleanIs, "UTF-8"));
   }
 
   public static Map<String, Object> getFieldMapFromDataElement(DataElement de) {
