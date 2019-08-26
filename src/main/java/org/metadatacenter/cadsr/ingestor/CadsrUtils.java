@@ -60,7 +60,7 @@ public class CadsrUtils {
       IOException {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElementsList.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-    InputStream cleanIs = Util.stripNonValidXMLCharacters(is);
+    InputStream cleanIs = Util.processInvalidXMLCharacters(is);
     return (DataElementsList) jaxbUnmarshaller.unmarshal(new InputStreamReader(cleanIs, "UTF-8"));
   }
 

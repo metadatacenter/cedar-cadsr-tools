@@ -35,21 +35,17 @@ public class Util {
     }
   }
 
-  public static InputStream stripNonValidXMLCharacters(InputStream in) throws IOException {
+  public static InputStream processInvalidXMLCharacters(InputStream in) throws IOException {
     StringBuffer out = new StringBuffer(); // Used to hold the output.
     Reader r = new InputStreamReader(in, "UTF-8");
     int intChar;
     while ((intChar = r.read()) != -1) {
       char inputChar = (char) intChar;
-      if ((inputChar == 0x9) ||
-          (inputChar == 0xA) ||
-          (inputChar == 0xD) ||
-          ((inputChar >= 0x20) && (inputChar <= 0xD7FF)) ||
-          ((inputChar >= 0xE000) && (inputChar <= 0xFFFD)) ||
-          ((inputChar >= 0x10000) && (inputChar <= 0x10FFFF)))
-        out.append(inputChar);
+      if (inputChar == 0x13) { // Replace <0x13> by "-"
+        out.append("-");
+      }
       else {
-        logger.info("Found invalid XML character: " + "0x" + Integer.toHexString(intChar));
+        out.append(inputChar);
       }
     }
     return new ByteArrayInputStream(out.toString().getBytes());
