@@ -36,7 +36,7 @@ public class CadsrTransformerTool {
     boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
-      File outputDir = checkOutputDirectoryExists(outputTargetLocation);
+      File outputDir = Util.checkDirectoryExists(outputTargetLocation);
       if (inputSource.isDirectory()) {
         totalCdes = convertCdeFromDirectory(inputSource, outputDir);
       } else {
@@ -52,14 +52,6 @@ public class CadsrTransformerTool {
     }
   }
 
-  public static File checkOutputDirectoryExists(String outputDirectory) throws IOException {
-    File outputDir = new File(outputDirectory);
-    if (!outputDir.exists()) {
-      outputDir.mkdir();
-    }
-    return outputDir;
-  }
-
   private static int convertCdeFromDirectory(File inputDir, File outputDir) throws IOException {
     int totalCdes = 0;
     for (final File inputFile : inputDir.listFiles()) {
@@ -70,7 +62,7 @@ public class CadsrTransformerTool {
 
   public static int convertCdeFromFile(File inputFile, File outputDir) throws IOException {
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
-    File outputSubDir = createDirectoryBasedOnInputFileName(inputFile, outputDir);
+    File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
     Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream(inputFile));
     int totalFields = fieldMaps.size();
     if (totalFields > 0) {
@@ -79,7 +71,7 @@ public class CadsrTransformerTool {
         try {
           String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
           Files.write(fieldJson.getBytes(), new File(outputSubDir, UUID.randomUUID() + ".json"));
-          if (multiplesOfAHundred(counter)) {
+          if (Util.multiplesOfAHundred(counter)) {
             logger.info(String.format("Generating CDEs (%d/%d)", counter, totalFields));
           }
           counter++;
@@ -92,15 +84,6 @@ public class CadsrTransformerTool {
       logger.info(String.format("Generating CDEs (%d/%d)", counter, totalFields));
     }
     return totalFields;
-  }
-
-  private static File createDirectoryBasedOnInputFileName(File sourceFile, File outputDir) throws IOException {
-    String outputLocation = outputDir.getAbsolutePath() + "/" + Files.getNameWithoutExtension(sourceFile.getName());
-    return checkOutputDirectoryExists(outputLocation);
-  }
-
-  private static boolean multiplesOfAHundred(int counter) {
-    return counter != 0 && counter % 100 == 0;
   }
 
   private static void storeOntology(File outputDir) {
