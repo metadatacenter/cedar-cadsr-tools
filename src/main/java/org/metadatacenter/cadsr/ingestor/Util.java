@@ -1,5 +1,6 @@
 package org.metadatacenter.cadsr.ingestor;
 
+import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +36,26 @@ public class Util {
     }
   }
 
+  public static File checkDirectoryExists(String directory) {
+    File outputDir = new File(directory);
+    if (!outputDir.exists()) {
+      outputDir.mkdir();
+    }
+    return outputDir;
+  }
+
+  public static File createDirectoryBasedOnInputFileName(File sourceFile, File outputDir) {
+    String outputLocation = outputDir.getAbsolutePath() + "/" + Files.getNameWithoutExtension(sourceFile.getName());
+    return checkDirectoryExists(outputLocation);
+  }
+
+  public static boolean multiplesOfAHundred(int counter) {
+    return counter != 0 && counter % 100 == 0;
+  }
+
   public static InputStream processInvalidXMLCharacters(InputStream in) throws IOException {
     StringBuffer out = new StringBuffer(); // Used to hold the output.
-    Reader r = new InputStreamReader(in, "UTF-8");
+    Reader r = new InputStreamReader(in, Constants.CHARSET);
     int intChar;
     while ((intChar = r.read()) != -1) {
       char inputChar = (char) intChar;

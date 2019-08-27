@@ -94,7 +94,7 @@ public class CadsrUtils {
   public static DataElement getDataElement(InputStream is) throws JAXBException, UnsupportedEncodingException {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElement.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-    return (DataElement) jaxbUnmarshaller.unmarshal(new InputStreamReader(is, "UTF-8"));
+    return (DataElement) jaxbUnmarshaller.unmarshal(new InputStreamReader(is, Constants.CHARSET));
   }
 
   private static void parseDataElement(DataElement dataElement, final Map<String, Object> fieldMap) throws

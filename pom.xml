@@ -105,6 +105,15 @@
               <mainClass>org.metadatacenter.cadsr.ingestor.CadsrUploaderTool</mainClass>
             </configuration>
           </execution>
+          <execution>
+            <id>transform-categories</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.metadatacenter.cadsr.ingestor.categories.CadsrCategoriesTransformerTool</mainClass>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>

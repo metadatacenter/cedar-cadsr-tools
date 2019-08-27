@@ -2,6 +2,8 @@ package org.metadatacenter.cadsr.ingestor;
 
 public final class Constants {
 
+  public static final String CHARSET = "UTF-8";
+
   // Schema.org URIs
   public static final String SCHEMAORG_IRI = "https://schema.org/";
   public static final String SCHEMAORG_STARTTIME_IRI = SCHEMAORG_IRI + "startTime";
