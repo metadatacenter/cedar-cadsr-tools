@@ -8,7 +8,9 @@ public class Category {
 
   @JsonProperty("schema:identifier")
   private String id;
+  @JsonProperty("schema:name")
   private String name;
+  @JsonProperty("schema:description")
   private String description;
   private String parentCategoryId;
 

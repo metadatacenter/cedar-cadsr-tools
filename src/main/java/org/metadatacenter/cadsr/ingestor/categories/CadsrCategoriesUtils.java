@@ -45,7 +45,7 @@ public class CadsrCategoriesUtils {
         String name1 = cli.getClassificationScheme().getContextName();
         String id1 = "CTX-" + cli.getClassificationScheme().getContextName() + "v"
             + cli.getClassificationScheme().getContextVersion();
-        String description1 = null;
+        String description1 = name1 + " category";
         Category category1 = new Category(id1, name1, description1, Constants.ROOT_CATEGORY_KEY);
         if (!categories.contains(category1)) {
           categories.add(category1);
@@ -54,7 +54,7 @@ public class CadsrCategoriesUtils {
         // Level 2
         String name2 = cli.getClassificationScheme().getPreferredName();
         String id2 = "CS-" + cli.getClassificationScheme().getPublicId() + "v" + cli.getClassificationScheme().getVersion();
-        String description2 = null;
+        String description2 = name2 + " category";;
         Category category2 = new Category(id2, name2, description2, id1);
         if (!categories.contains(category2)) {
           categories.add(category2);
@@ -63,7 +63,7 @@ public class CadsrCategoriesUtils {
         // Level 3
         String name3 = cli.getClassificationSchemeItemName();
         String id3 = "CSI-" + cli.getCsiPublicId() + "v" + cli.getCsiVersion();
-        String description3 = null;
+        String description3 = name3 + " category";;
         Category category3 = new Category(id3, name3, description3, id2);
         if (!categories.contains(category3)) {
           categories.add(category3);
