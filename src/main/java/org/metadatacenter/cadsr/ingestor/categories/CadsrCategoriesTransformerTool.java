@@ -1,11 +1,8 @@
 package org.metadatacenter.cadsr.ingestor.categories;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
-import com.google.common.io.Files;
 import org.metadatacenter.cadsr.CLASSIFICATIONSLISTCATEGORIES;
-import org.metadatacenter.cadsr.ingestor.CadsrUtils;
 import org.metadatacenter.cadsr.ingestor.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +13,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
  * This class reads a caDSR XML file with a <CLASSIFICATIONSLIST> element (which contains a list of
- * <CLASSIFICATIONSLIST_ITEM> elements) and generates a JSON file with a hierarchy of categories.
+ * <CLASSIFICATIONSLIST_ITEM> elements) and generates a JSON file with a list of categories.
  */
 public class CadsrCategoriesTransformerTool {
 

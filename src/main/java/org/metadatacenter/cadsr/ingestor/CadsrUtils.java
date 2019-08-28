@@ -61,7 +61,7 @@ public class CadsrUtils {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElementsList.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
     InputStream cleanIs = Util.processInvalidXMLCharacters(is);
-    return (DataElementsList) jaxbUnmarshaller.unmarshal(new InputStreamReader(cleanIs, "UTF-8"));
+    return (DataElementsList) jaxbUnmarshaller.unmarshal(new InputStreamReader(cleanIs, Constants.CHARSET));
   }
 
   public static Map<String, Object> getFieldMapFromDataElement(DataElement de) {

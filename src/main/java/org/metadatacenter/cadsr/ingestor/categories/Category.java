@@ -10,13 +10,15 @@ public class Category {
   private String id;
   private String name;
   private String description;
-  private String parentId;
+  private String parentCategoryId;
 
-  public Category(String id, String name, String description, String parentId) {
+  public Category() {}
+
+  public Category(String id, String name, String description, String parentCategoryId) {
     this.id = id;
     this.name = name;
     this.description = description;
-    this.parentId = parentId;
+    this.parentCategoryId = parentCategoryId;
   }
 
   public String getId() {
@@ -31,8 +33,12 @@ public class Category {
     return description;
   }
 
-  public String getParentId() {
-    return parentId;
+  public String getParentCategoryId() {
+    return parentCategoryId;
+  }
+
+  public void setParentCategoryId(String parentCategoryId) {
+    this.parentCategoryId = parentCategoryId;
   }
 
   @Override
@@ -45,12 +51,21 @@ public class Category {
     }
     Category category = (Category) o;
     return Objects.equals(getId(), category.getId()) &&
-        Objects.equals(getParentId(), category.getParentId());
+        Objects.equals(getParentCategoryId(), category.getParentCategoryId());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getParentId());
+    return Objects.hash(getId(), getParentCategoryId());
   }
 
+  @Override
+  public String toString() {
+    return "Category{" +
+        "id='" + id + '\'' +
+        ", name='" + name + '\'' +
+        ", description='" + description + '\'' +
+        ", parentCategoryId='" + parentCategoryId + '\'' +
+        '}';
+  }
 }
