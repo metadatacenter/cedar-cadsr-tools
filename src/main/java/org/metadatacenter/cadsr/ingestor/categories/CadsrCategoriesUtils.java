@@ -20,8 +20,6 @@ import java.util.Map;
 
 public class CadsrCategoriesUtils {
 
-  private static final String ROOT_CATEGORY_KEY = "CDE_ROOT";
-
   private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesUtils.class);
 
   public static CLASSIFICATIONSLISTCATEGORIES getClassificationsList(InputStream is) throws JAXBException,
@@ -48,7 +46,7 @@ public class CadsrCategoriesUtils {
         String id1 = "CTX-" + cli.getClassificationScheme().getContextName() + "v"
             + cli.getClassificationScheme().getContextVersion();
         String description1 = null;
-        Category category1 = new Category(id1, name1, description1, ROOT_CATEGORY_KEY);
+        Category category1 = new Category(id1, name1, description1, Constants.ROOT_CATEGORY_KEY);
         if (!categories.contains(category1)) {
           categories.add(category1);
         }
