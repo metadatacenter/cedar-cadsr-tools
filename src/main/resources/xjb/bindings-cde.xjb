@@ -3,10 +3,10 @@
 <jaxb:bindings version="2.0" xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
                xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <jaxb:bindings schemaLocation="../xsd/DataElement_V5.3.4.xsd">
+  <jaxb:bindings schemaLocation="../xsd/cde/DataElement_V5.3.4.xsd">
 
     <jaxb:schemaBindings>
-      <jaxb:package name="org.metadatacenter.ingestor.cadsr"/>
+      <jaxb:package name="org.metadatacenter.ingestor.cadsr.cde.schema"/>
     </jaxb:schemaBindings>
 
     <jaxb:bindings node="//xs:element[@name='LongName']">

@@ -1,6 +1,6 @@
 package org.metadatacenter.cadsr.ingestor;
 
-import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.exception.DuplicatedAxiomException;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
 import org.semanticweb.owlapi.apibinding.OWLManager;

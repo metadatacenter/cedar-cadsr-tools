@@ -1,6 +1,6 @@
 package org.metadatacenter.cadsr.ingestor;
 
-import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
 
 import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY_IRI;

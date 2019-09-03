@@ -1,7 +1,7 @@
 package org.metadatacenter.cadsr.ingestor;
 
 import com.google.common.collect.Maps;
-import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;

@@ -111,7 +111,7 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.categories.CadsrCategoriesTransformerTool</mainClass>
+              <mainClass>org.metadatacenter.cadsr.ingestor.category.CadsrCategoriesTransformerTool</mainClass>
             </configuration>
           </execution>
           <execution>
@@ -120,7 +120,7 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.categories.CadsrCategoriesUploaderTool</mainClass>
+              <mainClass>org.metadatacenter.cadsr.ingestor.category.CadsrCategoriesUploaderTool</mainClass>
             </configuration>
           </execution>
         </executions>
@@ -131,21 +131,42 @@
         <version>2.5.0</version>
         <executions>
           <execution>
-            <id>xjc</id>
+            <id>xjc-cde</id>
             <goals>
               <goal>xjc</goal>
             </goals>
+            <configuration>
+              <!-- Package with generated sources -->
+              <packageName>org.metadatacenter.cadsr.cde.schema</packageName>
+              <sources>
+                <source>src/main/resources/xsd/cde</source>
+              </sources>
+              <xjbSources>
+                <xjbSource>src/main/resources/xjb/bindings-cde.xjb</xjbSource>
+              </xjbSources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>xjc-category</id>
+            <goals>
+              <goal>xjc</goal>
+            </goals>
+            <configuration>
+              <packageName>org.metadatacenter.cadsr.category.schema</packageName>
+              <sources>
+                <source>src/main/resources/xsd/category</source>
+              </sources>
+              <xjbSources>
+                <xjbSource>src/main/resources/xjb/bindings-category.xjb</xjbSource>
+              </xjbSources>
+              <!--
+                    Don't clear the output directory before generating the sources.
+                    Clearing the output directory removes the org.metadatacenter.cadsr.cde.schema schema from above.
+                -->
+              <clearOutputDir>false</clearOutputDir>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <packageName>org.metadatacenter.cadsr</packageName>
-          <sources>
-            <source>src/main/resources/xsd</source>
-          </sources>
-          <xjbSources>
-            <xjbSource>src/main/resources/xjb</xjbSource>
-          </xjbSources>
-        </configuration>
       </plugin>
       <!-- Tell an IDE to include generated code in its compile phase. jsonschema2pojo uses ${basedir}/target/java-gen -->
       <plugin>

@@ -1,8 +1,8 @@
-package org.metadatacenter.cadsr.ingestor.categories;
+package org.metadatacenter.cadsr.ingestor.category;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
-import org.metadatacenter.cadsr.CLASSIFICATIONSLISTCATEGORIES;
+import org.metadatacenter.cadsr.category.schema.Classifications;
 import org.metadatacenter.cadsr.ingestor.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +64,8 @@ public class CadsrCategoriesTransformerTool {
     List<Category> categories = null;
 
     try {
-      CLASSIFICATIONSLISTCATEGORIES classificationsList = CadsrCategoriesUtils.getClassificationsList(new FileInputStream(inputFile));
-      categories = CadsrCategoriesUtils.classificationsListToCategoryList(classificationsList);
+      Classifications classifications = CadsrCategoriesUtils.getClassifications(new FileInputStream(inputFile));
+      categories = CadsrCategoriesUtils.classificationsToCategories(classifications);
       logger.info("Generating categories file...");
       new ObjectMapper().writeValue(new File(outputSubDir, inputFile.getName() + "-transformed.json"), categories);
     } catch (JAXBException e) {

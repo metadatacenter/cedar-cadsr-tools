@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor.categories;
+package org.metadatacenter.cadsr.ingestor.category;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
