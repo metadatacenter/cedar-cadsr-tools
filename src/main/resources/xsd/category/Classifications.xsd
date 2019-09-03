@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="Classifications">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Context" maxOccurs="unbounded"/>
+          </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Context">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="PreferredName" maxOccurs="1"/>
+        <xs:element ref="Version" maxOccurs="1"/>
+        <xs:element ref="ClassificationScheme" maxOccurs="unbounded"/>
+     </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ClassificationScheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="PublicId" maxOccurs="1"/>
+        <xs:element ref="PreferredName" maxOccurs="1"/>
+        <xs:element ref="LongName" maxOccurs="1"/>
+        <xs:element ref="Version" maxOccurs="1"/>
+        <xs:element ref="CSI" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PublicId" type="xs:integer"/>
+  <xs:element name="PreferredName" type="xs:string"/>
+  <xs:element name="LongName" type="xs:string"/>
+  <xs:element name="Version" type="xs:integer"/>
+  <xs:element name="CSI">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ClassificationSchemeItemName"/>
+        <xs:element ref="ClassificationSchemeItemType"/>
+        <xs:element ref="PublicId"/>
+        <xs:element ref="Version"/>
+        <xs:element ref="CSI" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ClassificationSchemeItemName" type="xs:string"/>
+  <xs:element name="ClassificationSchemeItemType" type="xs:string"/>
+ 
+</xs:schema>

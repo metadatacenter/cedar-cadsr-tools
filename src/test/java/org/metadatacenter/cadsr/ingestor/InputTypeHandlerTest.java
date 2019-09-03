@@ -3,7 +3,7 @@ package org.metadatacenter.cadsr.ingestor;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
 
