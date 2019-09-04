@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.List;
 
+@JsonPropertyOrder({"schema:identifier", "schema:name","schema:description", "children"})
 public class CategoryTreeNode {
 
   @JsonProperty("schema:identifier")
