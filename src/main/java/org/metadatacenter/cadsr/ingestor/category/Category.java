@@ -1,26 +1,20 @@
 package org.metadatacenter.cadsr.ingestor.category;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.util.List;
 import java.util.Objects;
 
 public class Category {
 
-  @JsonProperty("schema:identifier")
   private String id;
-  @JsonProperty("schema:name")
   private String name;
-  @JsonProperty("schema:description")
   private String description;
-  private String parentCategoryId;
+  private List<String> path; // Ids from the root to the current node, including the id of the current node.
 
-  public Category() {}
-
-  public Category(String id, String name, String description, String parentCategoryId) {
+  public Category(String id, String name, String description, List<String> path) {
     this.id = id;
     this.name = name;
     this.description = description;
-    this.parentCategoryId = parentCategoryId;
+    this.path = path;
   }
 
   public String getId() {
@@ -35,12 +29,21 @@ public class Category {
     return description;
   }
 
-  public String getParentCategoryId() {
-    return parentCategoryId;
+  public List<String> getPath() {
+    return path;
   }
 
-  public void setParentCategoryId(String parentCategoryId) {
-    this.parentCategoryId = parentCategoryId;
+  public List<String> getParentPath() {
+    return getPath().subList(0, getPath().size()-1);
+  }
+
+//  public String getParentCategoryId() {
+//    // The id of the parent is the second to last path component
+//    return this.path.get(this.path.size() - 2);
+//  }
+
+  public boolean isRoot() {
+    return (this.path.size() == 2);
   }
 
   @Override
@@ -52,13 +55,12 @@ public class Category {
       return false;
     }
     Category category = (Category) o;
-    return Objects.equals(getId(), category.getId()) &&
-        Objects.equals(getParentCategoryId(), category.getParentCategoryId());
+    return Objects.equals(getPath(), category.getPath());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getId(), getParentCategoryId());
+    return Objects.hash(getPath());
   }
 
   @Override
@@ -67,7 +69,7 @@ public class Category {
         "id='" + id + '\'' +
         ", name='" + name + '\'' +
         ", description='" + description + '\'' +
-        ", parentCategoryId='" + parentCategoryId + '\'' +
+        ", path=" + path +
         '}';
   }
 }

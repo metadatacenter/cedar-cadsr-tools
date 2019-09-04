@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class reads a caDSR XML file with a <CLASSIFICATIONSLIST> element (which contains a list of
- * <CLASSIFICATIONSLIST_ITEM> elements) and generates a JSON file with a list of categories.
+ * This class reads a caDSR XML file with a <Classifications> root element and generates a JSON file with a tree of
+ * categories.
  */
 public class CadsrCategoriesTransformerTool {
 
@@ -61,17 +61,18 @@ public class CadsrCategoriesTransformerTool {
   public static int convertCdeCategoriesFromFile(File inputFile, File outputDir) throws IOException {
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
     File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
-    List<Category> categories = null;
+    List<CategoryTreeNode> categoryTree = null;
 
     try {
       Classifications classifications = CadsrCategoriesUtils.getClassifications(new FileInputStream(inputFile));
-      categories = CadsrCategoriesUtils.classificationsToCategories(classifications);
+      categoryTree = CadsrCategoriesUtils.classificationsToCategoryTree(classifications);
       logger.info("Generating categories file...");
-      new ObjectMapper().writeValue(new File(outputSubDir, inputFile.getName() + "-transformed.json"), categories);
+      new ObjectMapper().writeValue(new File(outputSubDir, inputFile.getName() + "-transformed.json"), categoryTree);
     } catch (JAXBException e) {
       e.printStackTrace();
     }
-    return categories.size();
+    // FIX
+    return categoryTree.size();
   }
 
   private static void printSummary(Stopwatch stopwatch, int totalCdes, boolean success) {

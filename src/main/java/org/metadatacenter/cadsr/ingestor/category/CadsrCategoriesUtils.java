@@ -33,58 +33,105 @@ public class CadsrCategoriesUtils {
     return (Classifications) jaxbUnmarshaller.unmarshal(new InputStreamReader(cleanIs, Constants.CHARSET));
   }
 
-  public static List<Category> classificationsToCategories(Classifications classifications) {
+  public static List<CategoryTreeNode> classificationsToCategoryTree(Classifications classifications) {
+    List<Category> categories = classificationsToCategoriesList(classifications);
+    List<CategoryTreeNode> categoryTreeNodes = categoriesListToTree(categories);
+    return categoryTreeNodes;
+  }
+
+  private static List<Category> classificationsToCategoriesList(Classifications classifications) {
 
     List<Category> categories = new ArrayList<>();
 
     for (Context context : classifications.getContext()) {
 
-        // Level 1 (root categories)
-        String name1 = context.getPreferredName();
-        String id1 = "CTX-" + name1 + "v" + context.getVersion();
-        String description1 = name1 + " category";
-        Category category1 = new Category(id1, name1, description1, Constants.ROOT_CATEGORY_KEY);
-        if (!categories.contains(category1)) {
-          categories.add(category1);
+      // Level 1 (root categories)
+      String name1 = context.getPreferredName();
+      String id1 = generateCategoryId("CTX", name1, context.getVersion().toString());
+      String description1 = generateCategoryDescription(name1);
+      List<String> path1 = new ArrayList<>();
+      path1.add(Constants.ROOT_CATEGORY_KEY);
+      path1.add(id1);
+      Category category1 = new Category(id1, name1, description1, path1);
+      if (!categories.contains(category1)) {
+        categories.add(category1);
+      }
+
+      // Level 2
+      for (ClassificationScheme cs : context.getClassificationScheme()) {
+        String name2 = cs.getPreferredName();
+        String id2 = generateCategoryId("CS", cs.getPublicId().toString(), cs.getVersion().toString());
+        String description2 = generateCategoryDescription(cs.getLongName());
+        List<String> path2 = new ArrayList<>();
+        path2.addAll(path1);
+        path2.add(id2);
+        Category category2 = new Category(id2, name2, description2, path2);
+        if (!categories.contains(category2)) {
+          categories.add(category2);
         }
 
-        for (ClassificationScheme cs : context.getClassificationScheme()) {
-
-          // Level 2
-          String name2 = cs.getPreferredName();
-          String id2 = "CS-" + cs.getPublicId() + "v" + cs.getVersion();
-          String description2 = cs.getLongName() + " category";
-          Category category2 = new Category(id2, name2, description2, id1);
-          if (!categories.contains(category2)) {
-            categories.add(category2);
-          }
-
-          // Levels 3 and beyond
-          for (CSI csi : cs.getCSI()) {
-            categories.addAll(classificationSchemeItemToCategories(csi, id2, new ArrayList<>()));
-          }
-
-
+        // Levels 3 and beyond
+        for (CSI csi : cs.getCSI()) {
+          categories.addAll(classificationSchemeItemToCategories(csi, path2, new ArrayList<>()));
         }
-
+      }
     }
     return categories;
   }
 
-  private static List<Category> classificationSchemeItemToCategories(CSI csi, String parentId, List<Category> categories) {
+  private static List<Category> classificationSchemeItemToCategories(CSI csi, List<String> parentPath,
+                                                                     List<Category> categories) {
 
     String name = csi.getClassificationSchemeItemName();
-    String id = "CSI-" + csi.getPublicId() + "v" + csi.getVersion();
-    String description = name + " category";
-    Category category = new Category(id, name, description, parentId);
+    String id = generateCategoryId("CSI", csi.getPublicId().toString(), csi.getVersion().toString());
+    String description = generateCategoryDescription(name);
+    List<String> path = new ArrayList<>();
+    path.addAll(parentPath);
+    path.add(id);
+    Category category = new Category(id, name, description, path);
     categories.add(category);
 
     for (CSI csiChildren : csi.getCSI()) {
-      classificationSchemeItemToCategories(csiChildren, id, categories);
+      classificationSchemeItemToCategories(csiChildren, path, categories);
     }
 
     return categories;
   }
 
+  private static String generateCategoryId(String prefix, String name, String version) {
+    return prefix + "-" + name + "v" + version;
+  }
+
+  private static String generateCategoryDescription(String name) {
+    return name + " category";
+  }
+
+  private static List<CategoryTreeNode> categoriesListToTree(List<Category> categories) {
+
+    List<String> rootPath = new ArrayList<>();
+    rootPath.add(Constants.ROOT_CATEGORY_KEY);
+    List<CategoryTreeNode> nodes = getChildrenNodes(rootPath, categories);
+    return nodes;
+
+  }
+
+  private static List<CategoryTreeNode> getChildrenNodes(List<String> categoryPath, List<Category> categories) {
+
+    List<CategoryTreeNode> childrenNodes = new ArrayList<>();
+
+    for (Category category : categories) {
+
+      List<String> parentPath = category.getParentPath();
+      if (category.getParentPath().equals(categoryPath)) {
+
+        CategoryTreeNode node = new CategoryTreeNode(category.getId(), category.getName(), category.getDescription(),
+            getChildrenNodes(category.getPath(), categories));
+
+        childrenNodes.add(node);
+      }
+    }
+    return childrenNodes;
+
+  }
 
 }
