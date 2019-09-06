@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class CadsrCategoriesUtils {
@@ -47,25 +48,20 @@ public class CadsrCategoriesUtils {
     for (Context context : classifications.getContext()) {
 
       // Level 1 (root categories)
-      String name1 = context.getPreferredName();
-      String id1 = UUID.randomUUID().toString();
-      String description1 = generateCategoryDescription(name1);
-      String parentId1 = Constants.ROOT_CATEGORY_KEY;
-      Category category1 = new Category(id1, name1, description1, parentId1);
+      Category category1 = generateCategory(Constants.CONTEXT_PREFIX, context.getPreferredName(), Optional.empty(),
+          Optional.empty(), Constants.ROOT_CATEGORY_KEY, context.getVersion().toString());
       categories.add(category1);
 
       // Level 2
       for (ClassificationScheme cs : context.getClassificationScheme()) {
-        String name2 = cs.getPreferredName();
-        String id2 = UUID.randomUUID().toString();
-        String description2 = generateCategoryDescription(cs.getLongName());
-        String parentId2 = id1;
-        Category category2 = new Category(id2, name2, description2, parentId2);
+        Category category2 = generateCategory(Constants.CLASSIFICATION_SCHEME_PREFIX, cs.getPreferredName(),
+            Optional.of(cs.getPublicId().toString()), Optional.of(cs.getLongName()), category1.getUniqueId(),
+            cs.getVersion().toString());
         categories.add(category2);
 
         // Levels 3 and beyond
         for (CSI csi : cs.getCSI()) {
-          categories.addAll(classificationSchemeItemToCategories(csi, id2, new ArrayList<>()));
+          categories.addAll(classificationSchemeItemToCategories(csi, category2.getUniqueId(), new ArrayList<>()));
         }
       }
     }
@@ -74,21 +70,23 @@ public class CadsrCategoriesUtils {
 
   private static List<Category> classificationSchemeItemToCategories(CSI csi, String parentId, List<Category> categories) {
 
-    String name = csi.getClassificationSchemeItemName();
-    String id = UUID.randomUUID().toString();
-    String description = generateCategoryDescription(name);
-    Category category = new Category(id, name, description, parentId);
+    Category category = generateCategory(Constants.CLASSIFICATION_SCHEME_ITEM_PREFIX, csi.getClassificationSchemeItemName(),
+        Optional.of(csi.getPublicId().toString()), Optional.empty(), parentId, csi.getVersion().toString());
+
     categories.add(category);
 
     for (CSI csiChildren : csi.getCSI()) {
-      classificationSchemeItemToCategories(csiChildren, id, categories);
+      classificationSchemeItemToCategories(csiChildren, category.getUniqueId(), categories);
     }
 
     return categories;
   }
 
-  private static String generateCategoryDescription(String name) {
-    return name + " category";
+  private static Category generateCategory(String prefix, String name, Optional<String> publicId, Optional<String> longName, String parentId, String version) {
+    String id = generateCategoryId(prefix, name, publicId, version);
+    String uniqueId = UUID.randomUUID().toString();
+    String description = generateCategoryDescription(longName.isPresent() ? longName.get() : name);
+    return new Category(id, uniqueId, name, description, parentId);
   }
 
   private static List<CategoryTreeNode> categoriesListToTree(List<Category> categories) {
@@ -100,11 +98,20 @@ public class CadsrCategoriesUtils {
     for (Category category : categories) {
       if (category.getParentId().equals(parentId)) {
         CategoryTreeNode node = new CategoryTreeNode(category.getId(), category.getName(), category.getDescription(),
-            getChildrenNodes(category.getId(), categories));
+            getChildrenNodes(category.getUniqueId(), categories));
         childrenNodes.add(node);
       }
     }
     return childrenNodes;
+  }
+
+  private static String generateCategoryId(String prefix, String  name, Optional<String> publicId, String version) {
+
+    return prefix + "-" + (publicId.isPresent() ? publicId.get() : name) + "v" + version;
+  }
+
+  private static String generateCategoryDescription(String name) {
+    return name + " category";
   }
 
 }

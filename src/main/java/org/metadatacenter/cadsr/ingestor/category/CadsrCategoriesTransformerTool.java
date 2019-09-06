@@ -67,7 +67,8 @@ public class CadsrCategoriesTransformerTool {
       Classifications classifications = CadsrCategoriesUtils.getClassifications(new FileInputStream(inputFile));
       categoryTree = CadsrCategoriesUtils.classificationsToCategoryTree(classifications);
       logger.info("Generating categories file...");
-      new ObjectMapper().writeValue(new File(outputSubDir, inputFile.getName() + "-transformed.json"), categoryTree);
+      String categoriesFileName = inputFile.getName().substring(0,inputFile.getName().lastIndexOf('.')) + ".json";
+      new ObjectMapper().writeValue(new File(outputSubDir, categoriesFileName), categoryTree);
     } catch (JAXBException e) {
       e.printStackTrace();
     }

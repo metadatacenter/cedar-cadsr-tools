@@ -34,11 +34,18 @@ public class CadsrCategoriesUploaderTool {
 
   //@formatter:off
   private static TrustManager[] trustAllCerts = new TrustManager[1];
+
   static {
     trustAllCerts[0] = new X509TrustManager() {
-      public X509Certificate[] getAcceptedIssuers() { return null; }
-      public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-      public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+      public X509Certificate[] getAcceptedIssuers() {
+        return null;
+      }
+
+      public void checkClientTrusted(X509Certificate[] certs, String authType) {
+      }
+
+      public void checkServerTrusted(X509Certificate[] certs, String authType) {
+      }
     };
   }
   //@formatter:on
@@ -88,7 +95,8 @@ public class CadsrCategoriesUploaderTool {
     throw new RuntimeException("Invalid target server, possible values are 'local', 'staging', 'production'");
   }
 
-  private static int uploadCategoriesFromDirectory(File inputDir, String cedarRootCategoryId, String endpoint, String apiKey) throws IOException {
+  private static int uploadCategoriesFromDirectory(File inputDir, String cedarRootCategoryId, String endpoint,
+                                                   String apiKey) throws IOException {
     int totalCategories = 0;
     for (final File inputFile : inputDir.listFiles()) {
       totalCategories += uploadCategoriesFromFile(inputFile, cedarRootCategoryId, endpoint, apiKey);
@@ -96,24 +104,25 @@ public class CadsrCategoriesUploaderTool {
     return totalCategories;
   }
 
-  public static int uploadCategoriesFromFile(File inputFile, String cedarRootCategoryId, String endpoint, String apiKey) throws IOException {
+  public static int uploadCategoriesFromFile(File inputFile, String cedarRootCategoryId, String endpoint,
+                                             String apiKey) throws IOException {
 
     List<Category> allCategories = readCategoriesFromFile(inputFile);
     int counter = 0;
-    uploadChildrenCategories(allCategories, Constants.ROOT_CATEGORY_KEY, cedarRootCategoryId, endpoint, apiKey, counter);
+    uploadChildrenCategories(allCategories, Constants.ROOT_CATEGORY_KEY, cedarRootCategoryId, endpoint, apiKey,
+        counter);
     return counter;
   }
 
   private static void uploadChildrenCategories(List<Category> allCategories, String parentCategoryId,
-                                       String cedarParentCategoryId, String endpoint, String apiKey,
-                                       int counter) {
+                                               String cedarParentCategoryId, String endpoint, String apiKey,
+                                               int counter) {
 
 //    for (Category category : allCategories) {
 //      if (category.getParentCategoryId().equals(parentCategoryId)) {
 //        uploadCategory(allCategories, category, cedarParentCategoryId, endpoint, apiKey, counter);
 //      }
 //    }
-
 
 
   }
@@ -157,7 +166,8 @@ public class CadsrCategoriesUploaderTool {
   private static List<Category> readCategoriesFromFile(File inputFile) throws IOException {
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
     List<Category> categories =
-        objectMapper.readValue(inputFile, objectMapper.getTypeFactory().constructCollectionType(List.class, Category.class));
+        objectMapper.readValue(inputFile, objectMapper.getTypeFactory().constructCollectionType(List.class,
+            CategoryTreeNode.class));
     return categories;
   }
 
@@ -190,8 +200,7 @@ public class CadsrCategoriesUploaderTool {
     JsonNode node = objectMapper.readTree(json);
     if (node.has(fieldName)) {
       return node.get(fieldName).asText();
-    }
-    else {
+    } else {
       throw new RuntimeException("Json field not found in object: " + fieldName);
     }
   }
