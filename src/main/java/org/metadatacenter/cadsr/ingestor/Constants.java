@@ -26,4 +26,8 @@ public final class Constants {
 
   // Categories
   public static final String ROOT_CATEGORY_KEY = "CDE_ROOT";
+  public static final String CONTEXT_PREFIX = "Context";
+  public static final String CLASSIFICATION_SCHEME_PREFIX = "ClassificationScheme";
+  public static final String CLASSIFICATION_SCHEME_ITEM_PREFIX = "ClassificationSchemeItem";
+
 }
