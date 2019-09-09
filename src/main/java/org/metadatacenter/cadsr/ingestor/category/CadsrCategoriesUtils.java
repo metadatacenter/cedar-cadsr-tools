@@ -84,7 +84,8 @@ public class CadsrCategoriesUtils {
 
   private static Category generateCategory(String prefix, String name, Optional<String> publicId, Optional<String> longName, String parentId, String version) {
     String id = generateCategoryId(prefix, name, publicId, version);
-    String uniqueId = UUID.randomUUID().toString();
+    //String uniqueId = UUID.randomUUID().toString();
+    String uniqueId = generateCategoryUniqueId(id, parentId);
     String description = generateCategoryDescription(longName.isPresent() ? longName.get() : name);
     return new Category(id, uniqueId, name, description, parentId);
   }
@@ -97,7 +98,7 @@ public class CadsrCategoriesUtils {
     List<CategoryTreeNode> childrenNodes = new ArrayList<>();
     for (Category category : categories) {
       if (category.getParentId().equals(parentId)) {
-        CategoryTreeNode node = new CategoryTreeNode(category.getId(), category.getName(), category.getDescription(),
+        CategoryTreeNode node = new CategoryTreeNode(category.getUniqueId(), category.getName(), category.getDescription(),
             getChildrenNodes(category.getUniqueId(), categories));
         childrenNodes.add(node);
       }
@@ -107,7 +108,11 @@ public class CadsrCategoriesUtils {
 
   private static String generateCategoryId(String prefix, String  name, Optional<String> publicId, String version) {
 
-    return prefix + "-" + (publicId.isPresent() ? publicId.get() : name) + "v" + version;
+    return prefix + "_" + (publicId.isPresent() ? publicId.get() : name) + "v" + version;
+  }
+
+  private static String generateCategoryUniqueId(String categoryId, String parentCategoryId) {
+    return parentCategoryId + "/" + categoryId;
   }
 
   private static String generateCategoryDescription(String name) {

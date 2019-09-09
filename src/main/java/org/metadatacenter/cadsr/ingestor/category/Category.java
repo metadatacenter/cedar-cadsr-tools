@@ -1,7 +1,5 @@
 package org.metadatacenter.cadsr.ingestor.category;
 
-import org.metadatacenter.cadsr.ingestor.Constants;
-
 import java.util.Objects;
 
 public class Category {

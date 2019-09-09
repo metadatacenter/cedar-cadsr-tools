@@ -46,31 +46,4 @@ public class CategoryTreeNode {
     this.children = children;
   }
 
-  //  @Override
-//  public boolean equals(Object o) {
-//    if (this == o) {
-//      return true;
-//    }
-//    if (o == null || getClass() != o.getClass()) {
-//      return false;
-//    }
-//    CategoryTreeNode category = (CategoryTreeNode) o;
-//    return Objects.equals(getId(), category.getId()) &&
-//        Objects.equals(getParentCategoryId(), category.getParentCategoryId());
-//  }
-//
-//  @Override
-//  public int hashCode() {
-//    return Objects.hash(getId(), getParentCategoryId());
-//  }
-//
-//  @Override
-//  public String toString() {
-//    return "Category{" +
-//        "id='" + id + '\'' +
-//        ", name='" + name + '\'' +
-//        ", description='" + description + '\'' +
-//        ", parentCategoryId='" + parentCategoryId + '\'' +
-//        '}';
-//  }
 }
