@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
-import org.metadatacenter.cadsr.ingestor.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

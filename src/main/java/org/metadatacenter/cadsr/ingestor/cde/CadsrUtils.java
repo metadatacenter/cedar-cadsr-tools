@@ -6,6 +6,7 @@ import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.DataElementsList;
 import org.metadatacenter.cadsr.ingestor.Constants;
 import org.metadatacenter.cadsr.ingestor.Util;
+import org.metadatacenter.cadsr.ingestor.cde.handler.*;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
@@ -24,8 +25,6 @@ import java.util.Map;
 public class CadsrUtils {
 
   private static final Logger logger = LoggerFactory.getLogger(CadsrUtils.class);
-
-  private static final String CEDAR_SCHEMA_VERSION = "1.5.0";
 
   public static Collection<Map<String, Object>> getFieldMapsFromDataElements(DataElementsList del) {
     final List<Map<String, Object>> fieldMaps = Lists.newArrayList();
@@ -78,20 +77,20 @@ public class CadsrUtils {
     return fieldMap;
   }
 
-  public static Map<String, Object> getFieldMapFromInputStream(InputStream is) {
-    final Map<String, Object> fieldMap = Maps.newHashMap();
-    try {
-      DataElement dataElement = getDataElement(is);
-      fieldMap.putAll(getFieldMapFromDataElement(dataElement));
-    } catch (JAXBException e) {
-      logger.error("Error while parsing source document: " + e);
-    } catch (ClassCastException e) {
-      logger.error("Source document is not a data element: " + e);
-    } catch (UnsupportedEncodingException e) {
-      logger.error("Unsupported encoding: " + e);
-    }
-    return fieldMap;
-  }
+//  public static Map<String, Object> getFieldMapFromInputStream(InputStream is) {
+//    final Map<String, Object> fieldMap = Maps.newHashMap();
+//    try {
+//      DataElement dataElement = getDataElement(is);
+//      fieldMap.putAll(getFieldMapFromDataElement(dataElement));
+//    } catch (JAXBException e) {
+//      logger.error("Error while parsing source document: " + e);
+//    } catch (ClassCastException e) {
+//      logger.error("Source document is not a data element: " + e);
+//    } catch (UnsupportedEncodingException e) {
+//      logger.error("Unsupported encoding: " + e);
+//    }
+//    return fieldMap;
+//  }
 
   public static DataElement getDataElement(InputStream is) throws JAXBException, UnsupportedEncodingException {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElement.class);
@@ -165,6 +164,13 @@ public class CadsrUtils {
     versionHandler.handle(dataElement).apply(fieldMap);
   }
 
+  private static void setCategories(Map<String, Object> fieldMap, DataElement dataElement, VersionHandler
+      versionHandler) throws UnsupportedDataElementException {
+    versionHandler.handle(dataElement).apply(fieldMap);
+  }
+
+
+
   private static void createEmptyField(final Map<String, Object> fieldMap) {
     fieldMap.put(ModelNodeNames.JSON_SCHEMA_SCHEMA, ModelNodeValues.JSON_SCHEMA_IRI);
     fieldMap.put(ModelNodeNames.JSON_LD_ID, null);
@@ -182,7 +188,7 @@ public class CadsrUtils {
     fieldMap.put(ModelNodeNames.PAV_CREATED_BY, null);
     fieldMap.put(ModelNodeNames.PAV_LAST_UPDATED_ON, null);
     fieldMap.put(ModelNodeNames.OSLC_MODIFIED_BY, null);
-    fieldMap.put(ModelNodeNames.SCHEMA_ORG_SCHEMA_VERSION, CEDAR_SCHEMA_VERSION);
+    fieldMap.put(ModelNodeNames.SCHEMA_ORG_SCHEMA_VERSION, Constants.CEDAR_SCHEMA_VERSION);
     fieldMap.put(ModelNodeNames.JSON_SCHEMA_ADDITIONAL_PROPERTIES, ModelNodeValues.FALSE);
   }
 

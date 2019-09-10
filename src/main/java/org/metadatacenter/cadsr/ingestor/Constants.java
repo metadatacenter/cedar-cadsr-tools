@@ -4,6 +4,9 @@ public final class Constants {
 
   public static final String CHARSET = "UTF-8";
 
+  // Version of generated CEDAR CDEs
+  public static final String CEDAR_SCHEMA_VERSION = "1.5.0";
+
   // Schema.org URIs
   public static final String SCHEMAORG_IRI = "https://schema.org/";
   public static final String SCHEMAORG_STARTTIME_IRI = SCHEMAORG_IRI + "startTime";
@@ -25,9 +28,8 @@ public final class Constants {
   public static final String CDE_VALUESETS_ONTOLOGY_NAME = "cadsr-vs.owl";
 
   // Categories
+  public static final String ATTACH_CATEGORIES_OPTION = "-a";
+
   public static final String ROOT_CATEGORY_KEY = "CDE_ROOT";
-  public static final String CATEGORY_TYPE_CONTEXT = "CTX";
-  public static final String CATEGORY_TYPE_CLASSIFICATION_SCHEME = "CS";
-  public static final String CATEGORY_TYPE_CLASSIFICATION_SCHEME_ITEM = "CSI";
 
 }

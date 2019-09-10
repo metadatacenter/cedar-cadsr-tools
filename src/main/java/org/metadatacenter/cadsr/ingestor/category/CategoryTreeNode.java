@@ -4,10 +4,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.List;
 
-@JsonPropertyOrder({"id", "name","description", "children"})
+@JsonPropertyOrder({"id", "cadsrId", "name","description", "children"})
 public class CategoryTreeNode {
 
   private String id;
+  private String cadsrId;
   private String name;
   private String description;
   private List<CategoryTreeNode> children;
@@ -15,8 +16,9 @@ public class CategoryTreeNode {
   public CategoryTreeNode() {
   }
 
-  public CategoryTreeNode(String id, String name, String description, List<CategoryTreeNode> children) {
+  public CategoryTreeNode(String id, String cadsrId, String name, String description, List<CategoryTreeNode> children) {
     this.id = id;
+    this.cadsrId = cadsrId;
     this.name = name;
     this.description = description;
     this.children = children;
@@ -24,6 +26,10 @@ public class CategoryTreeNode {
 
   public String getId() {
     return id;
+  }
+
+  public String getCadsrId() {
+    return cadsrId;
   }
 
   public String getName() {
@@ -37,9 +43,4 @@ public class CategoryTreeNode {
   public List<CategoryTreeNode> getChildren() {
     return children;
   }
-
-  public void setChildren(List<CategoryTreeNode> children) {
-    this.children = children;
-  }
-
 }
