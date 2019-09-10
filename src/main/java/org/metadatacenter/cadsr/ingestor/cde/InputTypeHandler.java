@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.cde;
 
 import com.google.common.collect.Maps;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
