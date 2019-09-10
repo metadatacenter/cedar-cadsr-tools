@@ -132,7 +132,7 @@ public class CadsrCategoriesUploaderTool {
       if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
         logErrorMessage(conn);
       } else {
-        logger.info("Category uploaded: " + category.toString());
+        logger.info("Category uploaded: " + payload);
         String response = readResponseMessage(conn.getInputStream());
         String cedarCategoryId = extractJsonFieldValue(response, "@id");
         counter++;
