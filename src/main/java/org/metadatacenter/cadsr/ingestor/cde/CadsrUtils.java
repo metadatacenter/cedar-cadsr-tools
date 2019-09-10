@@ -110,6 +110,8 @@ public class CadsrUtils {
     setValueConstraints(fieldMap, dataElement, new ValueConstraintsHandler());
     setProperties(fieldMap, dataElement, new PropertiesHandler());
     setVersion(fieldMap, dataElement, new VersionHandler());
+    setCategories(fieldMap, dataElement, new CategoriesHandler());
+    int a = 2;
   }
 
   private static void setFieldIdentifier(final Map<String, Object> fieldMap, String content) {
@@ -164,9 +166,9 @@ public class CadsrUtils {
     versionHandler.handle(dataElement).apply(fieldMap);
   }
 
-  private static void setCategories(Map<String, Object> fieldMap, DataElement dataElement, VersionHandler
-      versionHandler) throws UnsupportedDataElementException {
-    versionHandler.handle(dataElement).apply(fieldMap);
+  private static void setCategories(Map<String, Object> fieldMap, DataElement dataElement, CategoriesHandler
+      categoriesHandler) {
+    categoriesHandler.handle(dataElement).apply(fieldMap);
   }
 
 

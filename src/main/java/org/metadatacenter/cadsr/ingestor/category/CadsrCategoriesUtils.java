@@ -89,7 +89,7 @@ public class CadsrCategoriesUtils {
                                            Optional<String> longName, Optional<String> type, String version, String parentUniqueId) {
 
     String id = generateCategoryId(name, type, publicId, version);
-    String cadsrId = generateCadsrId(id, ctxId, csId);
+    String cadsrId = generateCadsrCategoryId(id, ctxId, csId);
     String uniqueId = UUID.randomUUID().toString();
     String description = longName.isPresent() ? longName.get() : name;
     String categoryType = type.isPresent() ? type.get() : null;
@@ -112,7 +112,7 @@ public class CadsrCategoriesUtils {
     return childrenNodes;
   }
 
-  private static String generateCategoryId(String name, Optional<String> type, Optional<String> publicId, String version) {
+  public static String generateCategoryId(String name, Optional<String> type, Optional<String> publicId, String version) {
     final String sep = "-";
     // Format type_name_id_version_name
     String cleanName = name.replaceAll("\n", "");
@@ -121,7 +121,7 @@ public class CadsrCategoriesUtils {
         + (publicId.isPresent() ? (publicId.get() + sep) : "") + "v" + version;
   }
 
-  private static String generateCadsrId(String categoryId, Optional<String> ctxId, Optional<String> csId) {
+  public static String generateCadsrCategoryId(String categoryId, Optional<String> ctxId, Optional<String> csId) {
     if (ctxId.isPresent()) {
       if (csId.isPresent()) {
         return ctxId.get() + "/" + csId.get() + "/" + categoryId;
