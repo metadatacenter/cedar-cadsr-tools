@@ -1,5 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.cde;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
@@ -19,6 +20,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,8 +59,7 @@ public class CadsrUtils {
     return fieldMaps;
   }
 
-  public static DataElementsList getDataElementLists(InputStream is) throws JAXBException,
-      IOException {
+  public static DataElementsList getDataElementLists(InputStream is) throws JAXBException, IOException {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElementsList.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
     InputStream cleanIs = Util.processInvalidXMLCharacters(is);
@@ -242,4 +243,31 @@ public class CadsrUtils {
     valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_MULTIPLE_CHOICE, ModelNodeValues.FALSE);
     return valueConstraints;
   }
+
+  public static Map<String, String> getCategoryIdsFromCategoryTree(JsonNode cedarCategoryTree) {
+    return getCategoryIds(cedarCategoryTree, new HashMap<>());
+  }
+
+  // Generates a map of categoryId to cedarCategoryId
+  private static Map<String, String> getCategoryIds(JsonNode category, Map<String, String> categoryIds) {
+
+    if (category.hasNonNull(ModelNodeNames.JSON_LD_ID) && category.hasNonNull(ModelNodeNames.SCHEMA_ORG_IDENTIFIER)) {
+      categoryIds.put(category.get(ModelNodeNames.SCHEMA_ORG_IDENTIFIER).asText(),
+          category.get(ModelNodeNames.JSON_LD_ID).asText());
+    }
+
+    if (category.hasNonNull(Constants.CEDAR_CATEGORY_CHILDREN_FIELD_NAME)) {
+      JsonNode children = category.get(Constants.CEDAR_CATEGORY_CHILDREN_FIELD_NAME);
+      if (children.isArray()) {
+        for (JsonNode childCategory : children) {
+          getCategoryIds(childCategory, categoryIds);
+        }
+      }
+    }
+
+    return categoryIds;
+  }
+
+
+
 }
