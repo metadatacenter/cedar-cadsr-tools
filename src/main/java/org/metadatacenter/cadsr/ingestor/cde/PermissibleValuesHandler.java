@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.cde;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;

@@ -88,24 +88,6 @@
         <version>1.2.1</version>
         <executions>
           <execution>
-            <id>transform</id>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.CadsrTransformerTool</mainClass>
-            </configuration>
-          </execution>
-          <execution>
-            <id>upload</id>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.CadsrUploaderTool</mainClass>
-            </configuration>
-          </execution>
-          <execution>
             <id>transform-categories</id>
             <goals>
               <goal>java</goal>
@@ -121,6 +103,24 @@
             </goals>
             <configuration>
               <mainClass>org.metadatacenter.cadsr.ingestor.category.CadsrCategoriesUploaderTool</mainClass>
+            </configuration>
+          </execution>
+          <execution>
+            <id>transform-cdes</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.metadatacenter.cadsr.ingestor.cde.CadsrTransformerTool</mainClass>
+            </configuration>
+          </execution>
+          <execution>
+            <id>upload-cdes</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.metadatacenter.cadsr.ingestor.cde.CadsrUploaderTool</mainClass>
             </configuration>
           </execution>
         </executions>

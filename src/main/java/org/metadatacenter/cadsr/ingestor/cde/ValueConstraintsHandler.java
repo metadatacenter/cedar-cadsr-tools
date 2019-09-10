@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.cde;
 
 import com.google.common.base.Strings;
 import org.metadatacenter.cadsr.cde.schema.DataElement;

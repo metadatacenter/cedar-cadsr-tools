@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.cde;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -52,6 +52,10 @@ public class CadsrUploaderTool {
     String targetServer = args[1];
     String folderId = args[2];
     String apiKey = args[3];
+    boolean attachCategories = false;
+    if ((args.length > 4) && (args[4] != null) && args[4].equals("-a")) {
+      attachCategories = true;
+    }
 
     final Stopwatch stopwatch = Stopwatch.createStarted();
 
