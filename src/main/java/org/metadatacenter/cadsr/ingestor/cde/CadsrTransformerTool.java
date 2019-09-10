@@ -79,9 +79,7 @@ public class CadsrTransformerTool {
             if (categoryIds.size() > 0) {
               fieldMap.remove(Constants.CDE_CATEGORY_IDS_FIELD);
               String categoryIdsJson = mapper.writeValueAsString(categoryIds);
-              String outputCategoriesLocation = outputSubDir.getAbsolutePath() + "/" + Constants.CATEGORIES_FOLDER_NAME;
-              Util.checkDirectoryExists(outputCategoriesLocation);
-              Files.write(categoryIdsJson.getBytes(), new File(outputCategoriesLocation, uuid + Constants.CATEGORIES_FILE_NAME_SUFFIX + ".json"));
+              Files.write(categoryIdsJson.getBytes(), new File(outputSubDir.getAbsolutePath(), uuid + Constants.CATEGORIES_FILE_NAME_SUFFIX + ".json"));
             }
           }
           String fieldJson = mapper.writeValueAsString(fieldMap);

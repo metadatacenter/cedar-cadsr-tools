@@ -3,6 +3,7 @@ package org.metadatacenter.cadsr.ingestor.cde;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
 import org.metadatacenter.cadsr.ingestor.ConnectionUtils;
@@ -14,7 +15,10 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,9 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.metadatacenter.cadsr.ingestor.Constants.*;
@@ -38,8 +40,7 @@ public class CadsrUploaderTool {
 
   private static ObjectMapper objectMapper = new ObjectMapper();
 
-  private static Map<String, List<String>> cedarCdeIdsToCategoryIds;
-  private static Map<String, List<String>> cedarCdeIdsToCedarCategoryIds;
+  private static Map<String, String> categoryIdsToCedarCategoryIds = new HashMap<>();
 
   //@formatter:off
   private static TrustManager[] trustAllCerts = new TrustManager[1];
@@ -63,17 +64,28 @@ public class CadsrUploaderTool {
       attachCategories = true;
     }
 
+    // Read the categoryIds from CEDAR to be able to link CDEs to them
+    if (attachCategories) {
+      String categoryTreeEndpoint = getCategoryTreeEndpoint(targetServer);
+      try {
+        categoryIdsToCedarCategoryIds = getCedarCategoryIds(categoryTreeEndpoint, apiKey);
+      } catch (IOException e) {
+        logger.error(e.getMessage());
+      }
+    }
+
     final Stopwatch stopwatch = Stopwatch.createStarted();
 
     int totalCdes = 0;
     boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
-      String endpoint = getRestEndpoint(targetServer, folderId);
+      String templateFieldsEndpoint = getTemplateFieldsEndpoint(targetServer, folderId);
+      String attachCategoryEndpoint = getAttachCategoryEndpoint(targetServer);
       if (inputSource.isDirectory()) {
-        totalCdes = uploadCdeFromDirectory(inputSource, endpoint, apiKey);
+        totalCdes = uploadCdeFromDirectory(inputSource, attachCategories, templateFieldsEndpoint, attachCategoryEndpoint, apiKey);
       } else {
-        totalCdes = uploadCdeFromFile(inputSource, endpoint, apiKey);
+        totalCdes = uploadCdeFromFile(inputSource, attachCategories, templateFieldsEndpoint, attachCategoryEndpoint, apiKey);
       }
       success = true;
     } catch (Exception e) {
@@ -85,7 +97,7 @@ public class CadsrUploaderTool {
     }
   }
 
-  private static String getRestEndpoint(String targetServer, String folderId) {
+  private static String getTemplateFieldsEndpoint(String targetServer, String folderId) {
     String serverUrl = getServerUrl(targetServer);
     String folderUrl = getFolderUrl(targetServer);
     return serverUrl + "/template-fields?folder_id=" + folderUrl + "%2F" + folderId;
@@ -113,25 +125,132 @@ public class CadsrUploaderTool {
     throw new RuntimeException("Invalid target server, possible values are 'local', 'staging', 'production'");
   }
 
-  private static int uploadCdeFromDirectory(File inputDir, String endpoint, String apiKey) throws IOException {
+  private static String getCategoryTreeEndpoint(String targetServer) {
+    String serverUrl = getServerUrl(targetServer);
+    return serverUrl + "/categories/tree";
+  }
+
+  private static String getAttachCategoryEndpoint(String targetServer) {
+    String serverUrl = getServerUrl(targetServer);
+    return serverUrl + "/command/attach-category";
+  }
+
+  private static int uploadCdeFromDirectory(File inputDir, boolean attachCategories, String templateFieldsEndpoint,
+                                            String attachCategoryEndpoint, String apiKey) throws IOException {
     int totalCdes = 0;
     for (final File inputFile : inputDir.listFiles()) {
-      totalCdes += uploadCdeFromFile(inputFile, endpoint, apiKey);
+      totalCdes += uploadCdeFromFile(inputFile, attachCategories, templateFieldsEndpoint, attachCategoryEndpoint, apiKey);
     }
     return totalCdes;
   }
 
-  public static int uploadCdeFromFile(File inputFile, String endpoint, String apiKey) throws IOException {
-    logger.info("Processing input file at " + inputFile.getAbsolutePath());
-    Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream(inputFile));
-    int totalFields = fieldMaps.size();
-    if (totalFields > 0) {
-      int counter = 0;
-      for (Map<String, Object> fieldMap : fieldMaps) {
+  public static int uploadCdeFromFile(File inputFile, boolean attachCategories, String templateFieldsEndpoint,
+                                      String attachCategoryEndpoint, String apiKey) throws IOException {
+
+      /**********/
+//      templateFieldsEndpoint = "http://www.mocky.io/v2/5d77e1e83200005847924066";
+//      attachCategoryEndpoint = "http://www.mocky.io/v2/5d77e1e83200005847924066";
+      /**********/
+
+      logger.info("Processing input file at " + inputFile.getAbsolutePath());
+      Collection<Map<String, Object>> fieldMaps =
+          CadsrUtils.getFieldMapsFromInputStream(new FileInputStream(inputFile));
+
+      int totalFields = fieldMaps.size();
+      if (totalFields > 0) {
+        int counter = 0;
+        for (Map<String, Object> fieldMap : fieldMaps) {
+          HttpURLConnection conn = null;
+          try {
+
+            // Extract the categories from the map. They are not part of the CEDAR model so we don't want to post them
+            List<String> categoryIds = (List) fieldMap.get(CDE_CATEGORY_IDS_FIELD);
+            fieldMap.remove(CDE_CATEGORY_IDS_FIELD);
+
+            String payload = objectMapper.writeValueAsString(fieldMap);
+            conn = createAndOpenConnection("POST", templateFieldsEndpoint, apiKey);
+            OutputStream os = conn.getOutputStream();
+            os.write(payload.getBytes());
+            os.flush();
+            int responseCode = conn.getResponseCode();
+            if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
+              logErrorMessage(conn);
+            } else {
+              //logger.info("CDE uploaded: " + payload);
+              if (attachCategories) {
+                // Read the CDE @id
+                String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
+                String cedarCdeId = JsonUtils.extractJsonFieldValue(response, "@id");
+                attachCdeToCategories(cedarCdeId, categoryIds, attachCategoryEndpoint, apiKey);
+              }
+            }
+            if (multiplesOfAHundred(counter)) {
+              logger.info(String.format("Uploading CDEs (%d/%d)", counter, totalFields));
+            }
+            counter++;
+          } catch (JsonProcessingException e) {
+            logger.error(e.toString());
+          } catch (IOException e) {
+            logger.error(e.toString());
+          } finally {
+            if (conn != null) {
+              conn.disconnect();
+            }
+          }
+        }
+        logger.info(String.format("Uploading CDEs (%d/%d)", counter, totalFields));
+      }
+    return totalFields;
+  }
+
+  private static Map<String, String> getCedarCategoryIds(String endpoint, String apiKey) throws IOException {
+
+    /**********/
+    //endpoint = "http://www.mocky.io/v2/5d77fe6b3200006f7f9240ee";
+    /***********/
+
+    Map<String, String> categoryIdsMap = null;
+    HttpURLConnection conn = null;
+    try {
+      conn = createAndOpenConnection("GET", endpoint, apiKey);
+      int responseCode = conn.getResponseCode();
+      if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
+        logErrorMessage(conn);
+      } else {
+        // Read the CDE @id
+        String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
+        JsonNode categoryTree = objectMapper.readTree(response);
+        categoryIdsMap = CadsrUtils.getCategoryIdsFromCategoryTree(categoryTree);
+      }
+    } finally {
+      if (conn != null) {
+        conn.disconnect();
+      }
+    }
+    return categoryIdsMap;
+  }
+
+  /**
+   * @param cedarCdeId: CEDAR CDE id
+   * @param categoryIds: list of cadsr category Ids (not CEDAR  ids)
+   */
+  private static void attachCdeToCategories(String cedarCdeId, List<String> categoryIds, String endpoint, String apiKey) {
+
+    for (String categoryId : categoryIds) {
+
+      if (categoryIdsToCedarCategoryIds.containsKey(categoryId)) {
+
+        String cedarCategoryId = categoryIdsToCedarCategoryIds.get(categoryId);
+
+        ObjectNode node = objectMapper.createObjectNode();
+        node.put(CEDAR_CATEGORY_ATTACH_ARTIFACT_ID, cedarCdeId);
+        node.put(CEDAR_CATEGORY_ATTACH_CATEGORY_ID, cedarCategoryId);
+
         HttpURLConnection conn = null;
         try {
-          String payload = new ObjectMapper().writeValueAsString(fieldMap);
-          conn = createAndOpenConnection(endpoint, apiKey);
+          String payload = objectMapper.writeValueAsString(node);
+          logger.info("Attaching CDE to category: " + payload);
+          conn = createAndOpenConnection("POST", endpoint, apiKey);
           OutputStream os = conn.getOutputStream();
           os.write(payload.getBytes());
           os.flush();
@@ -140,22 +259,9 @@ public class CadsrUploaderTool {
             logErrorMessage(conn);
           } else {
             logResponseMessage(conn);
-
-            // Read the CDE @id
-            String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
-            String cedarCdeId = JsonUtils.extractJsonFieldValue(response, "@id");
-
-            List<String> categoryIds = (List) fieldMap.get(CDE_CATEGORY_IDS_FIELD);
-            cedarCdeIdsToCategoryIds.put(cedarCdeId, categoryIds);
-
-
           }
-          if (multiplesOfAHundred(counter)) {
-            logger.info(String.format("Uploading CDEs (%d/%d)", counter, totalFields));
-          }
-          counter++;
         } catch (JsonProcessingException e) {
-          logger.error(e.toString());
+          e.printStackTrace();
         } catch (IOException e) {
           logger.error(e.toString());
         } finally {
@@ -164,13 +270,11 @@ public class CadsrUploaderTool {
           }
         }
       }
-      logger.info(String.format("Uploading CDEs (%d/%d)", counter, totalFields));
+      else {
+        logger.error("Could not find CEDAR Id in map for category id: " + categoryId);
+      }
     }
-    return totalFields;
   }
-
-
-
 
   private static void logErrorMessage(final HttpURLConnection conn) {
     String response = ConnectionUtils.readResponseMessage(conn.getErrorStream());
@@ -191,13 +295,12 @@ public class CadsrUploaderTool {
     return String.format("%s (ID: %s)", fieldName, fieldId);
   }
 
-  private static HttpURLConnection createAndOpenConnection(String endpoint, String apiKey) throws IOException {
+  private static HttpURLConnection createAndOpenConnection(String requestMethod, String endpoint, String apiKey) throws IOException {
     ignoreSSLCheckingByAcceptingAnyCertificates();
     try {
       URL url = new URL(endpoint);
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setDoOutput(true);
-      conn.setRequestMethod("POST");
       conn.setRequestProperty("Content-Type", "application/json");
       conn.setRequestProperty("Authorization", apiKey);
       return conn;

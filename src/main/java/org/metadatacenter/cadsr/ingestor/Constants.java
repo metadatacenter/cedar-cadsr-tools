@@ -33,5 +33,9 @@ public final class Constants {
   public static final String CDE_CATEGORY_IDS_FIELD = "categoryIds"; // This field is not part of the CEDAR model
   public static final String CATEGORIES_FOLDER_NAME = "categories";
   public static final String CATEGORIES_FILE_NAME_SUFFIX = "_categories";
+  public static final String CEDAR_CATEGORY_CHILDREN_FIELD_NAME = "children";
+  public static final String CEDAR_CATEGORY_ATTACH_ARTIFACT_ID = "artifactId";
+  public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_ID = "categoryId";
+
 
 }
