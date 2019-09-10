@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
+import org.metadatacenter.cadsr.ingestor.ConnectionUtils;
+import org.metadatacenter.cadsr.ingestor.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,8 +134,8 @@ public class CadsrCategoriesUploaderTool {
         logErrorMessage(conn);
       } else {
         logger.info("Category uploaded: " + payload);
-        String response = readResponseMessage(conn.getInputStream());
-        String cedarCategoryId = extractJsonFieldValue(response, "@id");
+        String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
+        String cedarCategoryId = JsonUtils.extractJsonFieldValue(response, "@id");
         counter++;
         //logger.info(String.format("Uploading categories (%d/%d)", counter, allCategories.size()));
         for (CategoryTreeNode categoryTreeNode : category.getChildren()) {
@@ -160,37 +162,15 @@ public class CadsrCategoriesUploaderTool {
   }
 
   private static void logErrorMessage(final HttpURLConnection conn) {
-    String response = readResponseMessage(conn.getErrorStream());
+    String response = ConnectionUtils.readResponseMessage(conn.getErrorStream());
     logger.error(response);
     throw new RuntimeException("Unable to upload Category. Reason:\n" + response);
   }
 
-  private static String readResponseMessage(InputStream is) {
-    StringBuffer sb = new StringBuffer();
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-      String messageLine;
-      while ((messageLine = br.readLine()) != null) {
-        sb.append(messageLine);
-      }
-    } catch (IOException e) {
-      logger.error(e.getMessage());
-    }
-    return sb.toString();
-  }
-
   private static void logResponseMessage(final HttpURLConnection conn) throws IOException {
-    String response = readResponseMessage(conn.getInputStream());
+    String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
     String message = createMessageBasedOnFieldNameAndId(response);
     logger.debug("POST 200 OK: " + message);
-  }
-
-  private static String extractJsonFieldValue(String json, String fieldName) throws IOException {
-    JsonNode node = objectMapper.readTree(json);
-    if (node.has(fieldName)) {
-      return node.get(fieldName).asText();
-    } else {
-      throw new RuntimeException("Json field not found in object: " + fieldName);
-    }
   }
 
   private static String createMessageBasedOnFieldNameAndId(String response) throws IOException {

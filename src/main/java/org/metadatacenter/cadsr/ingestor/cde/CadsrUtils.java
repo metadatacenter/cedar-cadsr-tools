@@ -111,7 +111,6 @@ public class CadsrUtils {
     setProperties(fieldMap, dataElement, new PropertiesHandler());
     setVersion(fieldMap, dataElement, new VersionHandler());
     setCategories(fieldMap, dataElement, new CategoriesHandler());
-    int a = 2;
   }
 
   private static void setFieldIdentifier(final Map<String, Object> fieldMap, String content) {

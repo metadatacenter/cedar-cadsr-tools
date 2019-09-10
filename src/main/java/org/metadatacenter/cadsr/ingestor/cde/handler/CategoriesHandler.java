@@ -2,6 +2,7 @@ package org.metadatacenter.cadsr.ingestor.cde.handler;
 
 import org.metadatacenter.cadsr.cde.schema.CLASSIFICATIONSLIST;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
+import org.metadatacenter.cadsr.ingestor.Constants;
 import org.metadatacenter.cadsr.ingestor.category.CadsrCategoriesUtils;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class CategoriesHandler implements ModelHandler {
 
   @Override
   public void apply(Map<String, Object> fieldObject) {
-    fieldObject.put("categoryIds", categoryIds);
+    fieldObject.put(Constants.CDE_CATEGORY_IDS_FIELD, categoryIds);
   }
 }
 

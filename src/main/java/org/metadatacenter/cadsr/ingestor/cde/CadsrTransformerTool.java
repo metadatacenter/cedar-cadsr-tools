@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
+import org.metadatacenter.cadsr.ingestor.Constants;
 import org.metadatacenter.cadsr.ingestor.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +25,8 @@ import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY
 public class CadsrTransformerTool {
 
   private static final Logger logger = LoggerFactory.getLogger(CadsrTransformerTool.class);
-
   private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
+  private static final ObjectMapper mapper = new ObjectMapper();
 
   public static void main(String[] args) {
 
@@ -70,8 +72,20 @@ public class CadsrTransformerTool {
       int counter = 0;
       for (Map<String, Object> fieldMap : fieldMaps) {
         try {
-          String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
-          Files.write(fieldJson.getBytes(), new File(outputSubDir, UUID.randomUUID() + ".json"));
+          // Save categories to a different folder
+          String uuid = UUID.randomUUID().toString();
+          if (fieldMap.containsKey(Constants.CDE_CATEGORY_IDS_FIELD)) {
+            List<String> categoryIds = (List) fieldMap.get(Constants.CDE_CATEGORY_IDS_FIELD);
+            if (categoryIds.size() > 0) {
+              fieldMap.remove(Constants.CDE_CATEGORY_IDS_FIELD);
+              String categoryIdsJson = mapper.writeValueAsString(categoryIds);
+              String outputCategoriesLocation = outputSubDir.getAbsolutePath() + "/" + Constants.CATEGORIES_FOLDER_NAME;
+              Util.checkDirectoryExists(outputCategoriesLocation);
+              Files.write(categoryIdsJson.getBytes(), new File(outputCategoriesLocation, uuid + Constants.CATEGORIES_FILE_NAME_SUFFIX + ".json"));
+            }
+          }
+          String fieldJson = mapper.writeValueAsString(fieldMap);
+          Files.write(fieldJson.getBytes(), new File(outputSubDir, uuid + ".json"));
           if (Util.multiplesOfAHundred(counter)) {
             logger.info(String.format("Generating CDEs (%d/%d)", counter, totalFields));
           }

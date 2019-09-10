@@ -29,7 +29,9 @@ public final class Constants {
 
   // Categories
   public static final String ATTACH_CATEGORIES_OPTION = "-a";
-
   public static final String ROOT_CATEGORY_KEY = "CDE_ROOT";
+  public static final String CDE_CATEGORY_IDS_FIELD = "categoryIds"; // This field is not part of the CEDAR model
+  public static final String CATEGORIES_FOLDER_NAME = "categories";
+  public static final String CATEGORIES_FILE_NAME_SUFFIX = "_categories";
 
 }
