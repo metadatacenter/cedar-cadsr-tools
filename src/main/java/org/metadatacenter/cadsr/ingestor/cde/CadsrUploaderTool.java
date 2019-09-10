@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
+import org.metadatacenter.cadsr.ingestor.ConnectionUtils;
+import org.metadatacenter.cadsr.ingestor.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,11 +24,11 @@ import java.security.cert.X509Certificate;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.metadatacenter.cadsr.ingestor.Constants.ATTACH_CATEGORIES_OPTION;
-import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY_NAME;
+import static org.metadatacenter.cadsr.ingestor.Constants.*;
 
 public class CadsrUploaderTool {
 
@@ -35,6 +37,9 @@ public class CadsrUploaderTool {
   private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
 
   private static ObjectMapper objectMapper = new ObjectMapper();
+
+  private static Map<String, List<String>> cedarCdeIdsToCategoryIds;
+  private static Map<String, List<String>> cedarCdeIdsToCedarCategoryIds;
 
   //@formatter:off
   private static TrustManager[] trustAllCerts = new TrustManager[1];
@@ -135,6 +140,15 @@ public class CadsrUploaderTool {
             logErrorMessage(conn);
           } else {
             logResponseMessage(conn);
+
+            // Read the CDE @id
+            String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
+            String cedarCdeId = JsonUtils.extractJsonFieldValue(response, "@id");
+
+            List<String> categoryIds = (List) fieldMap.get(CDE_CATEGORY_IDS_FIELD);
+            cedarCdeIdsToCategoryIds.put(cedarCdeId, categoryIds);
+
+
           }
           if (multiplesOfAHundred(counter)) {
             logger.info(String.format("Uploading CDEs (%d/%d)", counter, totalFields));
@@ -155,27 +169,17 @@ public class CadsrUploaderTool {
     return totalFields;
   }
 
+
+
+
   private static void logErrorMessage(final HttpURLConnection conn) {
-    String response = readResponseMessage(conn.getErrorStream());
+    String response = ConnectionUtils.readResponseMessage(conn.getErrorStream());
     logger.error(response);
     throw new RuntimeException("Unable to upload CDE. Reason:\n" + response);
   }
 
-  private static String readResponseMessage(InputStream is) {
-    StringBuffer sb = new StringBuffer();
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-      String messageLine;
-      while ((messageLine = br.readLine()) != null) {
-        sb.append(messageLine);
-      }
-    } catch (IOException e) {
-      logger.error(e.getMessage());
-    }
-    return sb.toString();
-  }
-
   private static void logResponseMessage(final HttpURLConnection conn) throws IOException {
-    String response = readResponseMessage(conn.getInputStream());
+    String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
     String message = createMessageBasedOnFieldNameAndId(response);
     logger.debug("POST 200 OK: " + message);
   }
