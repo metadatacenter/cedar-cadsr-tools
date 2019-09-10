@@ -3,7 +3,7 @@ package org.metadatacenter.cadsr.ingestor.category;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"schema:identifier", "schema:name", "schema:description", "parentId"})
+@JsonPropertyOrder({"schema:identifier", "schema:name", "schema:description", "parentCategoryId"})
 public class CedarCategory {
 
   @JsonProperty("schema:identifier")
@@ -12,16 +12,16 @@ public class CedarCategory {
   private String name;
   @JsonProperty("schema:description")
   private String description;
-  private String parentId;
+  private String parentCategoryId;
 
   public CedarCategory() {
   }
 
-  public CedarCategory(String id, String name, String description, String parentId) {
+  public CedarCategory(String id, String name, String description, String parentCategoryId) {
     this.id = id;
     this.name = name;
     this.description = description;
-    this.parentId = parentId;
+    this.parentCategoryId = parentCategoryId;
   }
 
   public String getId() {
@@ -36,8 +36,8 @@ public class CedarCategory {
     return description;
   }
 
-  public String getParentId() {
-    return parentId;
+  public String getParentCategoryId() {
+    return parentCategoryId;
   }
 
   @Override
@@ -46,7 +46,7 @@ public class CedarCategory {
         "id='" + id + '\'' +
         ", name='" + name + '\'' +
         ", description='" + description + '\'' +
-        ", parentId='" + parentId + '\'' +
+        ", parentCategoryId='" + parentCategoryId + '\'' +
         '}';
   }
 
