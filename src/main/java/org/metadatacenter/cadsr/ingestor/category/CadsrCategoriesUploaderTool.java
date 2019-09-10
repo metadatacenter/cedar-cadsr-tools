@@ -118,7 +118,7 @@ public class CadsrCategoriesUploaderTool {
                                      String endpoint, String apiKey, int counter) {
 
     CedarCategory cedarCategory =
-        new CedarCategory(category.getId(), category.getName(), category.getDescription(), cedarParentCategoryId);
+        new CedarCategory(category.getCadsrId(), category.getName(), category.getDescription(), cedarParentCategoryId);
 
     HttpURLConnection conn = null;
     try {
