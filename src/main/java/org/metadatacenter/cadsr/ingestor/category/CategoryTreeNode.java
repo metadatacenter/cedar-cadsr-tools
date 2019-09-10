@@ -1,18 +1,14 @@
 package org.metadatacenter.cadsr.ingestor.category;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.List;
 
-@JsonPropertyOrder({"schema:identifier", "schema:name","schema:description", "children"})
+@JsonPropertyOrder({"id", "name","description", "children"})
 public class CategoryTreeNode {
 
-  @JsonProperty("schema:identifier")
   private String id;
-  @JsonProperty("schema:name")
   private String name;
-  @JsonProperty("schema:description")
   private String description;
   private List<CategoryTreeNode> children;
 
