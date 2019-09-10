@@ -1,8 +1,9 @@
-package org.metadatacenter.cadsr.ingestor.cde;
+package org.metadatacenter.cadsr.ingestor.cde.handler;
 
 import com.google.common.base.Strings;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.VALUEDOMAIN;
+import org.metadatacenter.cadsr.ingestor.cde.CadsrDatatypes;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
 

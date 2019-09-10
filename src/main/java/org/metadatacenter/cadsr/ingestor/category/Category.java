@@ -1,25 +1,38 @@
 package org.metadatacenter.cadsr.ingestor.category;
 
-import java.util.Objects;
-
 public class Category {
 
-  private String id;
+  /**
+   * Note about id generation: We assume that a category is unique inside a context and classification scheme.
+   * Therefore, we don't need to keep track of nesting between classification scheme items and use the following
+   * pattern to identify categories: ContextId/ClassificationSchemeId/ClassificationSchemeItemId
+   */
+
+  private String id; // local id
+  private String cadsrId; // contextId + classificationSchemeId + classificationSchemeItemId
   private String uniqueId; // Unique identifier. It will be used to build the tree
   private String name;
   private String description;
+  private String type;
   private String parentId;
 
-  public Category(String id, String uniqueId, String name, String description, String parentId) {
+  public Category(String id, String cadsrId, String uniqueId, String name, String description, String type,
+                  String parentId) {
     this.id = id;
+    this.cadsrId = cadsrId;
     this.uniqueId = uniqueId;
     this.name = name;
     this.description = description;
+    this.type = type;
     this.parentId = parentId;
   }
 
   public String getId() {
     return id;
+  }
+
+  public String getCadsrId() {
+    return cadsrId;
   }
 
   public String getUniqueId() {
@@ -34,36 +47,12 @@ public class Category {
     return description;
   }
 
+  public String getType() {
+    return type;
+  }
+
   public String getParentId() {
     return parentId;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    Category category = (Category) o;
-    return Objects.equals(getId(), category.getId());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getId());
-  }
-
-  @Override
-  public String toString() {
-    return "Category{" +
-        "id='" + id + '\'' +
-        ", uniqueId='" + uniqueId + '\'' +
-        ", name='" + name + '\'' +
-        ", description='" + description + '\'' +
-        ", parentId='" + parentId + '\'' +
-        '}';
   }
 
 }

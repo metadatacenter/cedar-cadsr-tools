@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static org.metadatacenter.cadsr.ingestor.Constants.ATTACH_CATEGORIES_OPTION;
 import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY_NAME;
 
 public class CadsrUploaderTool {
@@ -53,7 +54,7 @@ public class CadsrUploaderTool {
     String folderId = args[2];
     String apiKey = args[3];
     boolean attachCategories = false;
-    if ((args.length > 4) && (args[4] != null) && args[4].equals("-a")) {
+    if ((args.length > 4) && (args[4] != null) && args[4].equals(ATTACH_CATEGORIES_OPTION)) {
       attachCategories = true;
     }
 
