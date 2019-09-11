@@ -27,10 +27,10 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="PublicId" type="xs:integer"/>
+  <xs:element name="PublicId" type="xs:string"/>
   <xs:element name="PreferredName" type="xs:string"/>
   <xs:element name="LongName" type="xs:string"/>
-  <xs:element name="Version" type="xs:integer"/>
+  <xs:element name="Version" type="xs:string"/>
   <xs:element name="CSI">
     <xs:complexType>
       <xs:sequence>

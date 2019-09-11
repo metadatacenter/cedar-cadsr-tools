@@ -2,6 +2,7 @@ package org.metadatacenter.cadsr.ingestor.category;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
+import org.apache.http.util.ExceptionUtils;
 import org.metadatacenter.cadsr.category.schema.Classifications;
 import org.metadatacenter.cadsr.ingestor.Util;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class CadsrCategoriesTransformerTool {
       }
       success = true;
     } catch (Exception e) {
-      logger.error(e.toString());
+      logger.error(Util.getStackTrace(e));
       success = false;
     } finally {
       printSummary(stopwatch, totalCategories, success);
