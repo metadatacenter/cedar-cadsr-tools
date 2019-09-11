@@ -49,14 +49,14 @@ public class CadsrCategoriesUtils {
 
       // Level 1 (root categories)
       Category ctxCategory = generateCategory(context.getPreferredName(), Optional.empty(), Optional.empty(), Optional.empty(),
-          Optional.empty(), Optional.empty(), context.getVersion().toString(), Constants.ROOT_CATEGORY_KEY);
+          Optional.empty(), Optional.empty(), context.getVersion(), Constants.ROOT_CATEGORY_KEY);
       categories.add(ctxCategory);
 
       // Level 2
       for (ClassificationScheme cs : context.getClassificationScheme()) {
         Category csCategory = generateCategory(cs.getPreferredName(), Optional.of(ctxCategory.getId()), Optional.empty(),
-            Optional.of(cs.getPublicId().toString()), Optional.of(cs.getLongName()), Optional.empty(),
-            cs.getVersion().toString(), ctxCategory.getUniqueId());
+            Optional.of(cs.getPublicId()), Optional.of(cs.getLongName()), Optional.empty(),
+            cs.getVersion(), ctxCategory.getUniqueId());
         categories.add(csCategory);
 
         // Levels 3 and beyond
@@ -73,8 +73,8 @@ public class CadsrCategoriesUtils {
                                                                      Optional<String> csId, String parentUniqueId, List<Category> categories) {
 
     Category category = generateCategory(csi.getClassificationSchemeItemName(), ctxId, csId,
-        Optional.of(csi.getPublicId().toString()), Optional.empty(), Optional.of(csi.getClassificationSchemeItemType()),
-        csi.getVersion().toString(), parentUniqueId);
+        Optional.of(csi.getPublicId()), Optional.empty(), Optional.of(csi.getClassificationSchemeItemType()),
+        csi.getVersion(), parentUniqueId);
 
     categories.add(category);
 

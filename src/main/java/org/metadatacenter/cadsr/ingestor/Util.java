@@ -71,4 +71,11 @@ public class Util {
     return new ByteArrayInputStream(out.toString().getBytes());
   }
 
+  public static String getStackTrace(Exception e) {
+    StringWriter writer = new StringWriter();
+    PrintWriter printWriter= new PrintWriter(writer);
+    e.printStackTrace(printWriter);
+    return writer.toString();
+  }
+
 }
