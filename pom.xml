@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.metadatacenter</groupId>
-  <artifactId>cadsr2cedar</artifactId>
+  <artifactId>cedar-cadsr-tools</artifactId>
   <version>2.4.1-SNAPSHOT</version>
   <name>Project that generates CEDAR template fields from caDSR XML-encoded DataElement instances</name>
 
