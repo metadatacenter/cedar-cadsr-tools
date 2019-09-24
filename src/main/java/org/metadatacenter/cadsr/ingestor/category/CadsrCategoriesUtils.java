@@ -91,9 +91,10 @@ public class CadsrCategoriesUtils {
     String id = generateCategoryId(name, type, publicId, version);
     String cadsrId = generateCadsrCategoryId(id, ctxId, csId);
     String uniqueId = UUID.randomUUID().toString();
-    String description = longName.isPresent() ? longName.get() : name;
+    String categoryName = longName.isPresent() ? longName.get().trim() : name.trim();
+    String description = longName.isPresent() ? longName.get().trim() : name.trim();
     String categoryType = type.isPresent() ? type.get() : null;
-    return new Category(id, cadsrId, uniqueId, name.trim(), description.trim(), categoryType, parentUniqueId);
+    return new Category(id, cadsrId, uniqueId, categoryName, description, categoryType, parentUniqueId);
   }
 
   private static List<CategoryTreeNode> categoriesListToTree(List<Category> categories) {
