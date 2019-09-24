@@ -124,16 +124,19 @@ public class CadsrCategoriesUploaderTool {
 
     HttpURLConnection conn = null;
     try {
+      Thread.sleep(50);
+      logger.info("Trying to upload: " + category.getCadsrId());
       String payload = objectMapper.writeValueAsString(cedarCategory);
       conn = createAndOpenConnection(endpoint, apiKey);
       OutputStream os = conn.getOutputStream();
       os.write(payload.getBytes());
       os.flush();
       int responseCode = conn.getResponseCode();
-      if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
+      if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED) {
+        logger.error("Error creating category: " + category.getCadsrId());
         logErrorMessage(conn);
       } else {
-        logger.info("Category uploaded: " + payload);
+        logger.info("Category created: " + payload);
         String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
         String cedarCategoryId = JsonUtils.extractJsonFieldValue(response, "@id");
         counter++;
@@ -146,6 +149,8 @@ public class CadsrCategoriesUploaderTool {
       logger.error(e.toString());
     } catch (IOException e) {
       logger.error(e.toString());
+    } catch (InterruptedException e) {
+      logger.error(e.getMessage());
     } finally {
       if (conn != null) {
         conn.disconnect();
