@@ -50,14 +50,16 @@ public class CadsrCategoriesUtils {
       // Level 1 (root categories)
       Category ctxCategory = generateCategory(context.getPreferredName(), Optional.empty(), Optional.empty(), Optional.empty(),
           Optional.empty(), Optional.empty(), context.getVersion().toString(), Constants.ROOT_CATEGORY_KEY);
-      categories.add(ctxCategory);
+      //categories.add(ctxCategory);
+      addCategoryToList(ctxCategory, categories);
 
       // Level 2
       for (ClassificationScheme cs : context.getClassificationScheme()) {
         Category csCategory = generateCategory(cs.getPreferredName(), Optional.of(ctxCategory.getId()), Optional.empty(),
             Optional.of(cs.getPublicId().toString()), Optional.of(cs.getLongName()), Optional.empty(),
             cs.getVersion().toString(), ctxCategory.getUniqueId());
-        categories.add(csCategory);
+        //categories.add(csCategory);
+        addCategoryToList(csCategory, categories);
 
         // Levels 3 and beyond
         for (CSI csi : cs.getCSI()) {
@@ -76,7 +78,8 @@ public class CadsrCategoriesUtils {
         Optional.of(csi.getPublicId().toString()), Optional.empty(), Optional.of(csi.getClassificationSchemeItemType()),
         csi.getVersion().toString(), parentUniqueId);
 
-    categories.add(category);
+    //categories.add(category);
+    addCategoryToList(category, categories);
 
     for (CSI csiChildren : csi.getCSI()) {
       classificationSchemeItemToCategories(csiChildren, ctxId, csId, category.getUniqueId(), categories);
@@ -84,6 +87,45 @@ public class CadsrCategoriesUtils {
 
     return categories;
   }
+
+  /**
+   * Category names should be unique at the same level. In order to ensure that, we add a suffix for categories that
+   * have the same name at the same level
+   *
+   * @param newCategory
+   * @param categories
+   * @return
+   */
+  private static List<Category> addCategoryToList(Category newCategory, List<Category> categories) {
+
+    List<Integer> positionsSameCategory = new ArrayList<>();
+
+    for (int i=0; i<categories.size(); i++) {
+      Category category = categories.get(i);
+      if (newCategory.getParentId().equals(category.getParentId()) && newCategory.getName().equals(category.getName())) {
+        positionsSameCategory.add(i);
+      }
+    }
+
+    int index = 1;
+    for (int position : positionsSameCategory) {
+      Category existingCategory = categories.get(position);
+      categories.remove(position);
+      existingCategory.setName(existingCategory.getName() + " (" + index + ")");
+      categories.add(existingCategory);
+      index++;
+    }
+
+    if (!positionsSameCategory.isEmpty()) {
+      newCategory.setName(newCategory.getName() + " (" + index + ")");
+    }
+
+    categories.add(newCategory);
+
+    return categories;
+
+  }
+
 
   private static Category generateCategory(String name, Optional<String> ctxId, Optional<String> csId, Optional<String> publicId,
                                            Optional<String> longName, Optional<String> type, String version, String parentUniqueId) {
