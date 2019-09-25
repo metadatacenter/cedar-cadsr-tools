@@ -36,6 +36,7 @@ public final class Constants {
   public static final String CEDAR_CATEGORY_CHILDREN_FIELD_NAME = "children";
   public static final String CEDAR_CATEGORY_ATTACH_ARTIFACT_ID = "artifactId";
   public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_ID = "categoryId";
+  public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_IDS = "categoryIds";
 
 
 }
