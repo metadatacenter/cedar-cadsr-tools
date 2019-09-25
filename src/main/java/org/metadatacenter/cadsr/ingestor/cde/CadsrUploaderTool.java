@@ -3,9 +3,11 @@ package org.metadatacenter.cadsr.ingestor.cde;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
+import com.google.inject.internal.cglib.proxy.$FixedValue;
 import org.metadatacenter.cadsr.ingestor.ConnectionUtils;
 import org.metadatacenter.cadsr.ingestor.JsonUtils;
 import org.slf4j.Logger;
@@ -81,11 +83,11 @@ public class CadsrUploaderTool {
     try {
       File inputSource = new File(inputSourceLocation);
       String templateFieldsEndpoint = getTemplateFieldsEndpoint(targetServer, folderId);
-      String attachCategoryEndpoint = getAttachCategoryEndpoint(targetServer);
+      String attachCategoriesEndpoint = getAttachCategoriesEndpoint(targetServer);
       if (inputSource.isDirectory()) {
-        totalCdes = uploadCdeFromDirectory(inputSource, attachCategories, templateFieldsEndpoint, attachCategoryEndpoint, apiKey);
+        totalCdes = uploadCdeFromDirectory(inputSource, attachCategories, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
       } else {
-        totalCdes = uploadCdeFromFile(inputSource, attachCategories, templateFieldsEndpoint, attachCategoryEndpoint, apiKey);
+        totalCdes = uploadCdeFromFile(inputSource, attachCategories, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
       }
       success = true;
     } catch (Exception e) {
@@ -133,6 +135,11 @@ public class CadsrUploaderTool {
   private static String getAttachCategoryEndpoint(String targetServer) {
     String serverUrl = getServerUrl(targetServer);
     return serverUrl + "/command/attach-category";
+  }
+
+  private static String getAttachCategoriesEndpoint(String targetServer) {
+    String serverUrl = getServerUrl(targetServer);
+    return serverUrl + "/command/attach-categories";
   }
 
   private static int uploadCdeFromDirectory(File inputDir, boolean attachCategories, String templateFieldsEndpoint,
@@ -231,10 +238,14 @@ public class CadsrUploaderTool {
   }
 
   /**
+   *
+   * Attach a CDE to multiple categories (making multiple REST calls)
+   *
    * @param cedarCdeId: CEDAR CDE id
    * @param categoryIds: list of cadsr category Ids (not CEDAR  ids)
    */
-  private static void attachCdeToCategories(String cedarCdeId, List<String> categoryIds, String endpoint, String apiKey) {
+  private static void attachCdeToCategoriesMultipleCalls(String cedarCdeId, List<String> categoryIds, String endpoint,
+                                                         String apiKey) {
 
     for (String categoryId : categoryIds) {
 
@@ -275,6 +286,63 @@ public class CadsrUploaderTool {
       }
     }
   }
+
+  /**
+   * Attach a CDE to multiple categories (making a single REST call)
+   *
+   * @param cedarCdeId:  CEDAR CDE id
+   * @param categoryIds: list of cadsr category Ids (not CEDAR  ids)
+   */
+  private static void attachCdeToCategories(String cedarCdeId, List<String> categoryIds, String endpoint,
+                                            String apiKey) {
+
+    List<String> cedarCategoryIds = new ArrayList<>();
+    for (String categoryId : categoryIds) {
+      if (categoryIdsToCedarCategoryIds.containsKey(categoryId)) {
+        cedarCategoryIds.add(categoryIdsToCedarCategoryIds.get(categoryId));
+      }
+      else {
+        logger.error("Could not find CEDAR Id in map for category id: " + categoryId);
+      }
+    }
+
+    logger.info("Attaching CDE to the following categories: " + String.join(", ", cedarCategoryIds));
+
+    if (!cedarCategoryIds.isEmpty()) {
+
+      ObjectNode node = objectMapper.createObjectNode();
+      node.put(CEDAR_CATEGORY_ATTACH_ARTIFACT_ID, cedarCdeId);
+      ArrayNode array = objectMapper.valueToTree(cedarCategoryIds);
+      node.putArray(CEDAR_CATEGORY_ATTACH_CATEGORY_IDS).addAll(array);
+
+      HttpURLConnection conn = null;
+      try {
+        String payload = objectMapper.writeValueAsString(node);
+        logger.info("Attaching CDE to category: " + payload);
+        conn = createAndOpenConnection("POST", endpoint, apiKey);
+        OutputStream os = conn.getOutputStream();
+        os.write(payload.getBytes());
+        os.flush();
+        int responseCode = conn.getResponseCode();
+        if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
+          logErrorMessage(conn);
+        } else {
+          logResponseMessage(conn);
+        }
+      } catch (JsonProcessingException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        logger.error(e.toString());
+      } finally {
+        if (conn != null) {
+          conn.disconnect();
+        }
+      }
+    } else {
+
+    }
+  }
+
 
   private static void logErrorMessage(final HttpURLConnection conn) {
     String response = ConnectionUtils.readResponseMessage(conn.getErrorStream());
