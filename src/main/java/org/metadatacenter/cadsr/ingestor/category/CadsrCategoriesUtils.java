@@ -107,17 +107,15 @@ public class CadsrCategoriesUtils {
       }
     }
 
-    int index = 1;
     for (int position : positionsSameCategory) {
       Category existingCategory = categories.get(position);
       categories.remove(position);
-      existingCategory.setName(existingCategory.getName() + " (" + index + ")");
+      existingCategory.setName(existingCategory.getName() + " " + existingCategory.getVersion());
       categories.add(existingCategory);
-      index++;
     }
 
     if (!positionsSameCategory.isEmpty()) {
-      newCategory.setName(newCategory.getName() + " (" + index + ")");
+      newCategory.setName(newCategory.getName() + " " + newCategory.getVersion());
     }
 
     categories.add(newCategory);
@@ -136,7 +134,7 @@ public class CadsrCategoriesUtils {
     String categoryName = longName.isPresent() ? longName.get().trim() : name.trim();
     String description = longName.isPresent() ? longName.get().trim() : name.trim();
     String categoryType = type.isPresent() ? type.get() : null;
-    return new Category(id, cadsrId, uniqueId, categoryName, description, categoryType, parentUniqueId);
+    return new Category(id, cadsrId, uniqueId, categoryName, description, categoryType, parentUniqueId, version);
   }
 
   private static List<CategoryTreeNode> categoriesListToTree(List<Category> categories) {

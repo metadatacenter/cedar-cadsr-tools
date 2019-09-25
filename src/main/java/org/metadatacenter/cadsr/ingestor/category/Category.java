@@ -15,9 +15,10 @@ public class Category {
   private String description;
   private String type;
   private String parentId;
+  private String version;
 
   public Category(String id, String cadsrId, String uniqueId, String name, String description, String type,
-                  String parentId) {
+                  String parentId, String version) {
     this.id = id;
     this.cadsrId = cadsrId;
     this.uniqueId = uniqueId;
@@ -25,6 +26,7 @@ public class Category {
     this.description = description;
     this.type = type;
     this.parentId = parentId;
+    this.version = version;
   }
 
   public String getId() {
@@ -43,8 +45,6 @@ public class Category {
     return name;
   }
 
-  public void setName(String name) { this.name = name; }
-
   public String getDescription() {
     return description;
   }
@@ -57,4 +57,11 @@ public class Category {
     return parentId;
   }
 
+  public String getVersion() {
+    return version;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
 }
