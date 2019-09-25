@@ -32,8 +32,7 @@ public class Util {
   public static String getValueOrNull(String input) {
     if (input != null & input.trim().length() > 0) {
       return input;
-    }
-    else {
+    } else {
       return null;
     }
   }
@@ -61,19 +60,36 @@ public class Util {
     int intChar;
     while ((intChar = r.read()) != -1) {
       char inputChar = (char) intChar;
-      if (inputChar == 0x13) { // Replace <0x13> by "-"
-        out.append("-");
+      if (isValidXMLCharacter(inputChar)) {
+        out.append(inputChar);
       }
       else {
-        out.append(inputChar);
+        out.append(" ");
       }
     }
     return new ByteArrayInputStream(out.toString().getBytes());
   }
 
+  /**
+   * Check if the XML character is valid as specified by the XML 1.0 standard. For reference, please see
+   * <a href="http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char">the standard</a>.
+   */
+  private static boolean isValidXMLCharacter(char character) {
+    if ((character == 0x9) ||
+        (character == 0xA) ||
+        (character == 0xD) ||
+        ((character >= 0x20) && (character <= 0xD7FF)) ||
+        ((character >= 0xE000) && (character <= 0xFFFD)) ||
+        ((character >= 0x10000) && (character <= 0x10FFFF))) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   public static String getStackTrace(Exception e) {
     StringWriter writer = new StringWriter();
-    PrintWriter printWriter= new PrintWriter(writer);
+    PrintWriter printWriter = new PrintWriter(writer);
     e.printStackTrace(printWriter);
     return writer.toString();
   }
