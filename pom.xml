@@ -8,9 +8,9 @@
   <name>Project that generates CEDAR template fields from caDSR XML-encoded DataElement instances</name>
 
   <scm>
-    <connection>scm:git:git@github.com:metadatacenter/cadsr2cedar.git</connection>
-    <developerConnection>scm:git:git@github.com:metadatacenter/cadsr2cedar.git</developerConnection>
-    <url>https://github.com/metadatacenter/cadsr2cedar</url>
+    <connection>scm:git:git@github.com:metadatacenter/cedar-cadsr-tools.git</connection>
+    <developerConnection>scm:git:git@github.com:metadatacenter/cedar-cadsr-tools.git</developerConnection>
+    <url>https://github.com/metadatacenter/cedar-cadsr-tools</url>
   </scm>
 
   <dependencies>

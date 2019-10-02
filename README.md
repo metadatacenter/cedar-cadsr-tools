@@ -6,8 +6,9 @@ This project contains several command-line tools to:
 - Transform XML-encoded caDSR contexts, classification schemes, and classification scheme items to a tree of CEDAR categories.
 - Upload CEDAR CDE fields and a CEDAR category tree to the CEDAR system, and attach the uploaded CDEs to their corresponding categories.
 
-The format of the caDSR CDEs is described by an [XML Schema document]
-(https://github.com/metadatacenter/cadsr2cedar/blob/master/src/main/resources/xsd/DataElement_V4.0.xsd).
+### Common Data Elements
+
+The format of the caDSR CDEs is described by an [XML Schema document](https://github.com/metadatacenter/cedar-cadsr-tools/blob/develop/src/main/resources/xsd/cde/DataElement_V5.3.4.xsd).
 The [JAXB](http://www.oracle.com/technetwork/articles/javase/index-140168.html) library uses this document to generate Java classes to read the XML-encoded instances of caDSR CDEs.
 
 Similarly, the [jsonchema2pojo](http://www.jsonschema2pojo.org/) library uses a
@@ -18,10 +19,14 @@ The [core translation routines](https://github.com/metadatacenter/cadsr2cedar/bl
 extract information from the JAXB-generated Java objects and insert the information into the jsonschema2pojo-generated Java objects.
 These latter objects are then serialized into CEDAR-conformant JSON instances.
 
-Note that the [caDSR CDE XML Schema](https://github.com/metadatacenter/cadsr2cedar/blob/master/src/main/resources/xsd/DataElement_V4.0.xsd)
-was produced semi-automatically from the caDSR-supplied [DTD-encoded schema](https://github.com/metadatacenter/cadsr2cedar/blob/master/src/main/resources/dtd/DataElement_V4.0.dtd).
-[JAXB bindings](https://github.com/metadatacenter/cadsr2cedar/blob/master/src/main/resources/xjb/bindings.xjb)
+Note that the [caDSR CDE XML Schema](https://github.com/metadatacenter/cedar-cadsr-tools/blob/develop/src/main/resources/xsd/cde/DataElement_V5.3.4.xsd)
+was produced semi-automatically from the caDSR-supplied [DTD-encoded schema](https://github.com/metadatacenter/cedar-cadsr-tools/blob/develop/src/main/resources/dtd/DataElement_V5.3.4.dtd).
+[JAXB bindings](https://github.com/metadatacenter/cedar-cadsr-tools/blob/develop/src/main/resources/xjb/bindings-cde.xjb)
 were required to rename some generated classes and these bindings do not seem to work with DTD-based documents.
+
+### Categories
+
+The NCI provided us with [an XML file](https://github.com/metadatacenter/cedar-cadsr-tools/blob/develop/src/main/resources/files-used/categories/ContextCsCsi_09192019.xml) containing caDSR contexts, classification schemes, and classification items. The format of this file is specified by an [XML Schema document](https://github.com/metadatacenter/cedar-cadsr-tools/blob/develop/src/main/resources/xsd/category/ContextCsCsi_0923_mmr.xsd).
 
 #### Building and Running
 
@@ -48,7 +53,7 @@ Then build it with Maven:
     mvn exec:java@transform-categories -Dexec.args="/path/to/input /path/to/output"
 
 where:
-- `/path/to/input` is the input caDSR categories file. The most recent file used can be found at src/main/resources/files-used/categories.
+- `/path/to/input` is the input caDSR categories file. The categories file used can be found in the folder [src/main/resources/files-used/categories](https://github.com/metadatacenter/cedar-cadsr-tools/tree/develop/src/main/resources/files-used/categories).
 - `/path/to/output` is the directory location to store the category tree generated.
 
 ## 2. Upload JSON category tree to CEDAR
@@ -66,7 +71,7 @@ where:
     mvn exec:java@upload-cdes -Dexec.args="/path/to/input target-server folder-id 'cedar-apikey' [-a]"
 
 where:
-- `/path/to/input` is the input [caDSR XML file](https://wiki.nci.nih.gov/display/caDSR/caDSR+Hosted+Data+Standards%2C+Downloads%2C+and+Transformation+Utilities) location in your local machine, which can be either a directory or a file.
+- `/path/to/input` is the input [caDSR XML file](https://wiki.nci.nih.gov/display/caDSR/caDSR+Hosted+Data+Standards%2C+Downloads%2C+and+Transformation+Utilities) location in your local machine, which can be either a directory or a file. A sample caDSR XML file is available in the folder [src/main/resources/files-used/cdes](https://github.com/metadatacenter/cedar-cadsr-tools/blob/develop/src/main/resources/files-used/cdes/xml_cde_20198153730.zip).
 - `target-server` is the CEDAR server types and the options are "local", "staging", "production".
 - `folder-id` is the short identifier of the CEDAR folder where the CDEs will be stored (e.g., `4aabbfc6-f953-4779-b667-e0d6a1234ce8`).
 - `cedar-apikey` is your CEDAR API key that will give the permission to upload files to the server (e.g., `'apiKey 0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff'`).
