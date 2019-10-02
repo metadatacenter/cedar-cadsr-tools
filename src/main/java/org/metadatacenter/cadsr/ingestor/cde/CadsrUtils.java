@@ -103,7 +103,7 @@ public class CadsrUtils {
       UnsupportedDataElementException, UnknownSeparatorException {
     createEmptyField(fieldMap);
     setFieldIdentifier(fieldMap, dataElement.getPUBLICID().getContent());
-    setFieldName(fieldMap, dataElement.getLONGNAME().getContent());
+    setFieldName(fieldMap, dataElement.getLONGNAME().getContent(), dataElement.getPUBLICID().getContent());
     setFieldDescription(fieldMap, dataElement.getPREFERREDDEFINITION().getContent());
     setFieldQuestions(fieldMap, dataElement, new UserQuestionsHandler());
     setInputType(fieldMap, dataElement, new InputTypeHandler());
@@ -118,10 +118,14 @@ public class CadsrUtils {
     fieldMap.put(ModelNodeNames.SCHEMA_ORG_IDENTIFIER, content);
   }
 
-  private static void setFieldName(final Map<String, Object> fieldMap, String content) {
-    fieldMap.put(ModelNodeNames.SCHEMA_ORG_NAME, content);
-    fieldMap.put(ModelNodeNames.JSON_SCHEMA_TITLE, asJsonSchemaTitle(content));
-    fieldMap.put(ModelNodeNames.JSON_SCHEMA_DESCRIPTION, asJsonSchemaDescription(content));
+  private static void setFieldName(final Map<String, Object> fieldMap, String nameContent, String idContent) {
+    fieldMap.put(ModelNodeNames.SCHEMA_ORG_NAME, asJsonSchemaName(nameContent, idContent));
+    fieldMap.put(ModelNodeNames.JSON_SCHEMA_TITLE, asJsonSchemaTitle(nameContent));
+    fieldMap.put(ModelNodeNames.JSON_SCHEMA_DESCRIPTION, asJsonSchemaDescription(nameContent));
+  }
+
+  private static Object asJsonSchemaName(String nameContent, String idContent) {
+    return String.format("%s (%s)", nameContent, idContent);
   }
 
   private static Object asJsonSchemaTitle(String content) {
