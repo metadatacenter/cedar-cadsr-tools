@@ -1,7 +1,8 @@
 package org.metadatacenter.cadsr.ingestor;
 
 import com.google.common.io.Resources;
-import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
+import org.metadatacenter.cadsr.ingestor.cde.CadsrUtils;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;

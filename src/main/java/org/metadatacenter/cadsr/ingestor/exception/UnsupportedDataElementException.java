@@ -1,6 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.exception;
 
-import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
