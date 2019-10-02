@@ -1,9 +1,11 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.cde;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
+import org.metadatacenter.cadsr.ingestor.Constants;
+import org.metadatacenter.cadsr.ingestor.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -22,8 +25,8 @@ import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY
 public class CadsrTransformerTool {
 
   private static final Logger logger = LoggerFactory.getLogger(CadsrTransformerTool.class);
-
   private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
+  private static final ObjectMapper mapper = new ObjectMapper();
 
   public static void main(String[] args) {
 
@@ -36,28 +39,20 @@ public class CadsrTransformerTool {
     boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
-      File outputDir = checkOutputDirectoryExists(outputTargetLocation);
+      File outputDir = Util.checkDirectoryExists(outputTargetLocation);
       if (inputSource.isDirectory()) {
         totalCdes = convertCdeFromDirectory(inputSource, outputDir);
       } else {
         totalCdes = convertCdeFromFile(inputSource, outputDir);
       }
+      storeOntology(outputDir);
       success = true;
     } catch (Exception e) {
       logger.error(e.toString());
       success = false;
     } finally {
-      storeOntologyInTempDir();
       printSummary(stopwatch, totalCdes, success);
     }
-  }
-
-  public static File checkOutputDirectoryExists(String outputDirectory) throws IOException {
-    File outputDir = new File(outputDirectory);
-    if (!outputDir.exists()) {
-      outputDir.mkdir();
-    }
-    return outputDir;
   }
 
   private static int convertCdeFromDirectory(File inputDir, File outputDir) throws IOException {
@@ -70,16 +65,26 @@ public class CadsrTransformerTool {
 
   public static int convertCdeFromFile(File inputFile, File outputDir) throws IOException {
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
-    File outputSubDir = createDirectoryBasedOnInputFileName(inputFile, outputDir);
+    File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
     Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream(inputFile));
     int totalFields = fieldMaps.size();
     if (totalFields > 0) {
       int counter = 0;
       for (Map<String, Object> fieldMap : fieldMaps) {
         try {
-          String fieldJson = new ObjectMapper().writeValueAsString(fieldMap);
-          Files.write(fieldJson.getBytes(), new File(outputSubDir, UUID.randomUUID() + ".json"));
-          if (multiplesOfAHundred(counter)) {
+          // Save categories to a different folder
+          String uuid = UUID.randomUUID().toString();
+          if (fieldMap.containsKey(Constants.CDE_CATEGORY_IDS_FIELD)) {
+            List<String> categoryIds = (List) fieldMap.get(Constants.CDE_CATEGORY_IDS_FIELD);
+            if (categoryIds.size() > 0) {
+              fieldMap.remove(Constants.CDE_CATEGORY_IDS_FIELD);
+              String categoryIdsJson = mapper.writeValueAsString(categoryIds);
+              Files.write(categoryIdsJson.getBytes(), new File(outputSubDir.getAbsolutePath(), uuid + Constants.CATEGORIES_FILE_NAME_SUFFIX + ".json"));
+            }
+          }
+          String fieldJson = mapper.writeValueAsString(fieldMap);
+          Files.write(fieldJson.getBytes(), new File(outputSubDir, uuid + ".json"));
+          if (Util.multiplesOfAHundred(counter)) {
             logger.info(String.format("Generating CDEs (%d/%d)", counter, totalFields));
           }
           counter++;
@@ -94,18 +99,8 @@ public class CadsrTransformerTool {
     return totalFields;
   }
 
-  private static File createDirectoryBasedOnInputFileName(File sourceFile, File outputDir) throws IOException {
-    String outputLocation = outputDir.getAbsolutePath() + "/" + Files.getNameWithoutExtension(sourceFile.getName());
-    return checkOutputDirectoryExists(outputLocation);
-  }
-
-  private static boolean multiplesOfAHundred(int counter) {
-    return counter != 0 && counter % 100 == 0;
-  }
-
-  private static void storeOntologyInTempDir() {
-    File outputTempDir = Files.createTempDir();
-    File outputOntologyFile = new File(outputTempDir, CDE_VALUESETS_ONTOLOGY_NAME);
+  private static void storeOntology(File outputDir) {
+    File outputOntologyFile = new File(outputDir, CDE_VALUESETS_ONTOLOGY_NAME);
     logger.info("Storing the generated value set ontology at " + outputOntologyFile);
     ValueSetsOntologyManager.saveOntology(outputOntologyFile);
   }

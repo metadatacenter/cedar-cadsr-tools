@@ -2,7 +2,8 @@ package org.metadatacenter.cadsr.ingestor;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
+import org.metadatacenter.cadsr.ingestor.cde.handler.PermissibleValuesHandler;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 

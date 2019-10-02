@@ -1,8 +1,9 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.cde.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.metadatacenter.cadsr.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
+import org.metadatacenter.cadsr.ingestor.cde.CadsrDatatypes;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
@@ -40,8 +41,8 @@ public class PropertiesHandler implements ModelHandler {
   private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
     String datatype = dataElement.getVALUEDOMAIN().getDatatype().getContent();
     if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
-      typeProperty.put(ModelNodeNames.LD_TYPE, setOneOfStringOrArray());
-      idProperty.put(ModelNodeNames.LD_ID, setUriString());
+      typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setOneOfStringOrArray());
+      idProperty.put(ModelNodeNames.JSON_LD_ID, setUriString());
       rdfsLabelProperty.put(ModelNodeNames.RDFS_LABEL, setTypeStringOrNull());
       skosNotationProperty.put(ModelNodeNames.SKOS_NOTATION, setTypeStringOrNull());
     } else {
@@ -53,14 +54,14 @@ public class PropertiesHandler implements ModelHandler {
   private void handleNonEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
     String datatype = dataElement.getVALUEDOMAIN().getDatatype().getContent();
     if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
-      typeProperty.put(ModelNodeNames.LD_TYPE, setOneOfStringOrArray());
-      valueProperty.put(ModelNodeNames.LD_VALUE, setTypeStringOrNull());
+      typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setOneOfStringOrArray());
+      valueProperty.put(ModelNodeNames.JSON_LD_VALUE, setTypeStringOrNull());
     } else if (CadsrDatatypes.NUMERIC_LIST.contains(datatype)) {
-      typeProperty.put(ModelNodeNames.LD_TYPE, setUriString());
-      valueProperty.put(ModelNodeNames.LD_VALUE, setTypeStringOrNull());
+      typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setUriString());
+      valueProperty.put(ModelNodeNames.JSON_LD_VALUE, setTypeStringOrNull());
     } else if (CadsrDatatypes.DATE_LIST.contains(datatype)) {
-      typeProperty.put(ModelNodeNames.LD_TYPE, setUriString());
-      valueProperty.put(ModelNodeNames.LD_VALUE, setTypeStringOrNull());
+      typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setUriString());
+      valueProperty.put(ModelNodeNames.JSON_LD_VALUE, setTypeStringOrNull());
     } else {
       String reason = String.format("A non-enumerated %s is not supported (Unsupported)", datatype);
       throw new UnsupportedDataElementException(dataElement, reason);
@@ -72,29 +73,29 @@ public class PropertiesHandler implements ModelHandler {
     List<Map<String, Object>> listOfStringAndArray = Lists.newArrayList();
     listOfStringAndArray.add(setUriString());
     listOfStringAndArray.add(setUriStringArray());
-    oneOf.put(ModelNodeNames.ONE_OF, listOfStringAndArray);
+    oneOf.put(ModelNodeNames.JSON_SCHEMA_ONE_OF, listOfStringAndArray);
     return oneOf;
   }
 
   private static Map<String, Object> setUriString() {
     Map<String, Object> uriString = Maps.newHashMap();
-    uriString.put(ModelNodeNames.TYPE, ModelNodeValues.STRING);
-    uriString.put(ModelNodeNames.FORMAT, ModelNodeValues.URI);
+    uriString.put(ModelNodeNames.JSON_SCHEMA_TYPE, ModelNodeValues.STRING);
+    uriString.put(ModelNodeNames.JSON_SCHEMA_FORMAT, ModelNodeValues.URI);
     return uriString;
   }
 
   private static Map<String, Object> setUriStringArray() {
     Map<String, Object> uriStringArray = Maps.newHashMap();
-    uriStringArray.put(ModelNodeNames.TYPE, ModelNodeValues.ARRAY);
-    uriStringArray.put(ModelNodeNames.MIN_ITEMS, 1);
-    uriStringArray.put(ModelNodeNames.ITEMS, setUriString());
-    uriStringArray.put(ModelNodeNames.UNIQUE_ITEMS, ModelNodeValues.TRUE);
+    uriStringArray.put(ModelNodeNames.JSON_SCHEMA_TYPE, ModelNodeValues.ARRAY);
+    uriStringArray.put(ModelNodeNames.JSON_SCHEMA_MIN_ITEMS, 1);
+    uriStringArray.put(ModelNodeNames.JSON_SCHEMA_ITEMS, setUriString());
+    uriStringArray.put(ModelNodeNames.JSON_SCHEMA_UNIQUE_ITEMS, ModelNodeValues.TRUE);
     return uriStringArray;
   }
 
   private Object setTypeStringOrNull() {
     Map<String, Object> typeStringOrNull = Maps.newHashMap();
-    typeStringOrNull.put(ModelNodeNames.TYPE,
+    typeStringOrNull.put(ModelNodeNames.JSON_SCHEMA_TYPE,
         Lists.newArrayList(ModelNodeValues.STRING, ModelNodeValues.NULL));
     return typeStringOrNull;
   }
@@ -137,9 +138,9 @@ public class PropertiesHandler implements ModelHandler {
 
   @Override
   public void apply(final Map<String, Object> fieldObject) {
-    fieldObject.put(ModelNodeNames.PROPERTIES, getPropertiesObject());
+    fieldObject.put(ModelNodeNames.JSON_SCHEMA_PROPERTIES, getPropertiesObject());
     if (!getRequiredList().isEmpty()) {
-      fieldObject.put(ModelNodeNames.REQUIRED, getRequiredList());
+      fieldObject.put(ModelNodeNames.JSON_SCHEMA_REQUIRED, getRequiredList());
     }
   }
 
@@ -160,7 +161,7 @@ public class PropertiesHandler implements ModelHandler {
 
   private List<String> getRequiredList() {
     List<String> requiredList = Lists.newArrayList();
-    addIfNotNull(requiredList, ModelNodeNames.LD_VALUE, getValueProperty());
+    addIfNotNull(requiredList, ModelNodeNames.JSON_LD_VALUE, getValueProperty());
     return requiredList;
   }
 

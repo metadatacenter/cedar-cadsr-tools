@@ -2,6 +2,11 @@ package org.metadatacenter.cadsr.ingestor;
 
 public final class Constants {
 
+  public static final String CHARSET = "UTF-8";
+
+  // Version of generated CEDAR CDEs
+  public static final String CEDAR_SCHEMA_VERSION = "1.5.0";
+
   // Schema.org URIs
   public static final String SCHEMAORG_IRI = "https://schema.org/";
   public static final String SCHEMAORG_STARTTIME_IRI = SCHEMAORG_IRI + "startTime";
@@ -21,4 +26,17 @@ public final class Constants {
   public static final String CDE_VALUESETS_ONTOLOGY_ID = "CADSR-VS";
   public static final String CDE_VALUESETS_ONTOLOGY_IRI = "https://cadsr.nci.nih.gov/metadata/" + CDE_VALUESETS_ONTOLOGY_ID;
   public static final String CDE_VALUESETS_ONTOLOGY_NAME = "cadsr-vs.owl";
+
+  // Categories
+  public static final String ATTACH_CATEGORIES_OPTION = "-a";
+  public static final String ROOT_CATEGORY_KEY = "CDE_ROOT";
+  public static final String CDE_CATEGORY_IDS_FIELD = "categoryIds"; // This field is not part of the CEDAR model
+  public static final String CATEGORIES_FOLDER_NAME = "categories";
+  public static final String CATEGORIES_FILE_NAME_SUFFIX = "_categories";
+  public static final String CEDAR_CATEGORY_CHILDREN_FIELD_NAME = "children";
+  public static final String CEDAR_CATEGORY_ATTACH_ARTIFACT_ID = "artifactId";
+  public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_ID = "categoryId";
+  public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_IDS = "categoryIds";
+
+
 }

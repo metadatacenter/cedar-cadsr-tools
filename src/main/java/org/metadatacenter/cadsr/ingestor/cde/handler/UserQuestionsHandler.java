@@ -1,9 +1,9 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.cde.handler;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import org.metadatacenter.cadsr.DataElement;
-import org.metadatacenter.cadsr.REFERENCEDOCUMENTSLIST;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
+import org.metadatacenter.cadsr.cde.schema.REFERENCEDOCUMENTSLIST;
 import org.metadatacenter.model.ModelNodeNames;
 
 import java.util.Map;
