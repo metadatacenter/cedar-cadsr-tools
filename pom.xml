@@ -4,7 +4,7 @@
 
   <groupId>org.metadatacenter</groupId>
   <artifactId>cedar-cadsr-tools</artifactId>
-  <version>2.4.1-SNAPSHOT</version>
+  <version>2.4.2-SNAPSHOT</version>
   <name>Project that generates CEDAR template fields from caDSR XML-encoded DataElement instances</name>
 
   <scm>
@@ -27,7 +27,7 @@
     <dependency>
       <groupId>org.metadatacenter</groupId>
       <artifactId>cedar-server-globals</artifactId>
-      <version>2.4.1-SNAPSHOT</version>
+      <version>2.4.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
