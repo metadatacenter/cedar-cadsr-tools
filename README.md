@@ -4,7 +4,8 @@ caDSR to CEDAR Converter
 This project contains several command-line tools to:
 - Transform XML-encoded [caDSR](https://wiki.nci.nih.gov/display/caDSR/caDSR+Wiki) [11179-based](http://metadata-standards.org/11179/) common data elements (CDEs) to CEDAR CDE fields.
 - Transform XML-encoded caDSR contexts, classification schemes, and classification scheme items to a tree of CEDAR categories.
-- Upload CEDAR CDE fields and a CEDAR category tree to the CEDAR system, and attach the uploaded CDEs to their corresponding categories.
+- Upload a CEDAR category tree to the CEDAR system.
+- Upload CEDAR CDE fields to the CEDAR system and, optionally, attach the uploaded CDEs to their corresponding categories in the category tree.
 
 ### Common Data Elements
 
