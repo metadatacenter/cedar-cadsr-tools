@@ -78,7 +78,7 @@ where:
 - `cedar-apikey` is your CEDAR API key that will give the permission to upload files to the server (e.g., `'apiKey 0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff'`).
 - `-a` is an option to attach the uploaded CDEs to the corresponding CEDAR categories.
 
-## 4. Transform XML caDSR CDEs to CEDAR fields (not required, since it is part of #3) 
+## 4. Transform XML caDSR CDEs to CEDAR fields (optional, since it is part of #3) 
    
     mvn exec:java@transform-cdes -Dexec.args="/path/to/input /path/to/output"
 
