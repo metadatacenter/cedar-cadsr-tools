@@ -15,7 +15,7 @@ public class InputTypeHandler implements ModelHandler {
   private static final String ENUMERATED = "Enumerated";
   private static final String NON_ENUMERATED = "NonEnumerated";
 
-  private static final int MAX_LENGTH_FOR_TEXTFIELD = 255;
+  //private static final int MAX_LENGTH_FOR_TEXTFIELD = 255;
 
   private final Map<String, Object> inputType = Maps.newHashMap();
 
