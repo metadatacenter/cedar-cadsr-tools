@@ -52,6 +52,7 @@ public class InputTypeHandler implements ModelHandler {
     } else if (CadsrDatatypes.DATE_LIST.contains(datatype)) {
       inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.DATE);
     } else {
+      System.out.println("Non-enumerated not supported: " + datatype);
       String reason = String.format("A non-enumerated %s is not supported (Unsupported)", datatype);
       throw new UnsupportedDataElementException(dataElement, reason);
     }
