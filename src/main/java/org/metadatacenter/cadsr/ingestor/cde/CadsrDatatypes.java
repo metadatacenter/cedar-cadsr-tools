@@ -1,7 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.cde;
 
 import com.google.common.collect.Lists;
-
 import java.util.List;
 
 public class CadsrDatatypes {
@@ -17,17 +16,17 @@ public class CadsrDatatypes {
   public static final String JAVA_LONG = "java.lang.Long";
   public static final String JAVA_STRING = "java.lang.String";
   public static final String NUMBER = "NUMBER";
-  // caDSR datatypes mapped in the 2nd iteration
+  // caDSR datatypes mapped in the 2nd iteration (December 2019)
   public static final String ALPHA_DVG = "Alpha DVG";
-  public static final String ANY_CLASS = "anyClass";
-  public static final String BINARY = "binary";
+  public static final String ANY_CLASS = "anyClass"; // Agreed to skip it
+  public static final String BINARY = "binary"; // Agreed to skip it
   public static final String BOOLEAN = "BOOLEAN";
   public static final String CLOB = "CLOB";
   public static final String DATE_ALPHA_DVG = "Date Alpha DVG";
   public static final String DATE_TIME = "DATE/TIME";
   public static final String DATETIME = "DATETIME";
-  public static final String DERIVED = "Derived";
-  public static final String HL7CDV3 = "HL7CDv3";
+  public static final String DERIVED = "Derived"; // Agreed to skip it
+  public static final String HL7CDV3 = "HL7CDv3"; // Agreed to skip it
   public static final String HL7EDV3 = "HL7EDv3";
   public static final String HL7INTV3 = "HL7INTv3";
   public static final String HL7PNV3 = "HL7PNv3";
@@ -101,29 +100,67 @@ public class CadsrDatatypes {
   public static final String XSD_DATETIME = "xsd:dateTime";
   public static final String XSD_STRING = "xsd:string";
 
+  /* String */
   public static final List<String> STRING_LIST = Lists.newArrayList(
-      CHARACTER, JAVA_STRING, ALPHANUMERIC, ISO21090CD, ALPHA_DVG, BOOLEAN, CLOB, DATE_ALPHA_DVG, DERIVED, HL7CDV3,
+      CHARACTER, JAVA_STRING, ALPHANUMERIC, ISO21090CD, ALPHA_DVG, BOOLEAN, CLOB, DATE_ALPHA_DVG,
       HL7EDV3, HL7PNV3, HL7STV3, HL7TELV3, ISO21090ADPARTV1, ISO21090ADV1, ISO21090ADXPALV1, ISO21090ADXPCNTV1,
       ISO21090ADXPCTYV1, ISO21090ADXPDALV1, ISO21090ADXPSTAV1, ISO21090ADXPV1, ISO21090ADXPZIPV1, ISO21090ANYV1,
       ISO21090BAGV1, ISO21090BLV1, ISO21090DSETV1, ISO21090EDTEXTV1, ISO21090EDV1, ISO21090ENONV1, ISO21090ENPNV1,
-      ISO21090ENTNV1, ISO21090ENXPV1, ISO21090IIV1
-
+      ISO21090ENTNV1, ISO21090ENXPV1, ISO21090IIV1, ISO21090STSIMV1, ISO21090STV1, ISO21090TELURLV1, ISO21090TELV1,
+      JAVA_BOOLEAN, JAVA_OBJECT, JAVA_COLLECTION, JAVA_MAP, NUMERIC_ALPHA_DVG, OBJECT, UMLCODEV1, UMLUIDV1, UMLURIV1,
+      UMLXMLV1, VARCHAR, XSD_STRING
   );
+  public static final List<String> STRING_MAX_LENGTH_1_LIST = Lists.newArrayList(JAVA_CHARACTER);
 
-  public static final List<String> NUMERIC_LIST = Lists.newArrayList(
-      NUMBER, JAVA_LONG, JAVA_INTEGER, JAVA_DOUBLE, HL7INTV3, HL7REALV3, INTEGER, ISO21090INTNTNEGV1,
-      ISO21090INTPOSV1, ISO21090INTV1, ISO21090PQV1, ISO21090QTYV1, ISO21090REALV1, ISO21090RTOV1
-  );
+  /* Numeric */
+  public static final List<String> NUMERIC_ANY_LIST = Lists.newArrayList();
+  public static final List<String> NUMERIC_INTEGER_LIST = Lists.newArrayList(
+      HL7INTV3, INTEGER, ISO21090TV1, JAVA_INTEGER, SAS_DATE, SAS_TIME);
+  public static final List<String> NUMERIC_POSITIVE_INTEGER_LIST = Lists.newArrayList(
+      ISO21090INTNTNEGV1, ISO21090INTPOSV1, ISO21090INTV1);
+  public static final List<String> NUMERIC_BYTE_LIST = Lists.newArrayList(JAVA_BYTE);
+  public static final List<String> NUMERIC_OCTET_LIST = Lists.newArrayList(UMLOCTETV1);
+  public static final List<String> NUMERIC_SHORT_INTEGER_LIST = Lists.newArrayList(JAVA_SHORT);
+  public static final List<String> NUMERIC_LONG_INTEGER_LIST = Lists.newArrayList(JAVA_LONG);
+  public static final List<String> NUMERIC_FLOAT_LIST = Lists.newArrayList(
+      JAVA_FLOAT, HL7REALV3, ISO21090PQV1, ISO21090QTYV1, ISO21090REALV1, ISO21090RTOV1, ISO21090URGV1, NUMBER);
+  public static final List<String> NUMERIC_DOUBLE_LIST = Lists.newArrayList(JAVA_DOUBLE);
 
-  public static final List<String> DATE_LIST = Lists.newArrayList(
-      DATE, JAVA_DATE
-  );
+  /* Date */
+  public static final List<String> DATE_LIST = Lists.newArrayList(DATE, JAVA_DATE);
 
-  public static final List<String> ALL_DATATYPES = Lists.newArrayList();
+  /* Groups */
+  public static final List<String> ALL_STRING_LIST = Lists.newArrayList();
+  public static final List<String> ALL_NUMERIC_LIST = Lists.newArrayList();
+  public static final List<String> ALL_DATATYPES_LIST = Lists.newArrayList();
 
+  // Populate groups
   static {
-    ALL_DATATYPES.addAll(STRING_LIST);
-    ALL_DATATYPES.addAll(NUMERIC_LIST);
-    ALL_DATATYPES.addAll(DATE_LIST);
+    // String
+    ALL_STRING_LIST.addAll(STRING_LIST);
+    ALL_STRING_LIST.addAll(STRING_MAX_LENGTH_1_LIST);
+    // Numeric
+    ALL_NUMERIC_LIST.addAll(NUMERIC_ANY_LIST);
+    ALL_NUMERIC_LIST.addAll(NUMERIC_INTEGER_LIST);
+    ALL_NUMERIC_LIST.addAll(NUMERIC_POSITIVE_INTEGER_LIST);
+    ALL_NUMERIC_LIST.addAll(NUMERIC_BYTE_LIST);
+    ALL_NUMERIC_LIST.addAll(NUMERIC_OCTET_LIST);
+    ALL_NUMERIC_LIST.addAll(NUMERIC_SHORT_INTEGER_LIST);
+    ALL_NUMERIC_LIST.addAll(NUMERIC_LONG_INTEGER_LIST);
+    ALL_NUMERIC_LIST.addAll(NUMERIC_FLOAT_LIST);
+    ALL_NUMERIC_LIST.addAll(NUMERIC_DOUBLE_LIST);
+    // All datatypes
+    ALL_DATATYPES_LIST.addAll(STRING_LIST);
+    ALL_DATATYPES_LIST.addAll(STRING_MAX_LENGTH_1_LIST);
+    ALL_DATATYPES_LIST.addAll(NUMERIC_ANY_LIST);
+    ALL_DATATYPES_LIST.addAll(NUMERIC_INTEGER_LIST);
+    ALL_DATATYPES_LIST.addAll(NUMERIC_POSITIVE_INTEGER_LIST);
+    ALL_DATATYPES_LIST.addAll(NUMERIC_BYTE_LIST);
+    ALL_DATATYPES_LIST.addAll(NUMERIC_OCTET_LIST);
+    ALL_DATATYPES_LIST.addAll(NUMERIC_SHORT_INTEGER_LIST);
+    ALL_DATATYPES_LIST.addAll(NUMERIC_LONG_INTEGER_LIST);
+    ALL_DATATYPES_LIST.addAll(NUMERIC_FLOAT_LIST);
+    ALL_DATATYPES_LIST.addAll(NUMERIC_DOUBLE_LIST);
+    ALL_DATATYPES_LIST.addAll(DATE_LIST);
   }
 }

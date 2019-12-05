@@ -21,7 +21,7 @@ public class ValueConstraintsHandler implements ModelHandler {
   private static final String XSD_INT = "xsd:int";
   private static final String XSD_DOUBLE = "xsd:double";
 
-  private static final int NONE = -1;
+  private static final Integer NONE = null;
 
   private int minLength = NONE;
   private int maxLength = NONE;
@@ -44,21 +44,29 @@ public class ValueConstraintsHandler implements ModelHandler {
     return this;
   }
 
-  private void handleValueDomain(final VALUEDOMAIN valueDomain) throws UnsupportedDataElementException {
+  private void handleValueDomain(VALUEDOMAIN valueDomain) throws UnsupportedDataElementException {
     String datatype = valueDomain.getDatatype().getContent();
-    if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
-      handleStringValueConstraints(valueDomain);
-    } else if (CadsrDatatypes.NUMERIC_LIST.contains(datatype)) {
-      handleNumericValueConstraints(valueDomain);
+    if (CadsrDatatypes.ALL_STRING_LIST.contains(datatype)) {
+      handleStringValueConstraints(datatype, valueDomain);
+    } else if (CadsrDatatypes.ALL_NUMERIC_LIST.contains(datatype)) {
+      handleNumericValueConstraints(datatype, valueDomain);
     }
   }
 
-  private void handleStringValueConstraints(final VALUEDOMAIN valueDomain) {
-    minLength = getMinimumLength(valueDomain);
-    maxLength = getMaximumLength(valueDomain);
+  private void handleStringValueConstraints(String datatype, VALUEDOMAIN valueDomain) {
+    if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
+      minLength = getMinimumLength(valueDomain);
+      maxLength = getMaximumLength(valueDomain);
+    }
+    else if (CadsrDatatypes.STRING_MAX_LENGTH_1_LIST.contains(datatype)) {
+      maxLength = 1;
+    }
+    else {
+      throw new InternalError("Unexpected String datatype: " + datatype);
+    }
   }
 
-  private void handleNumericValueConstraints(final VALUEDOMAIN valueDomain) {
+  private void handleNumericValueConstraints(String datatype, VALUEDOMAIN valueDomain) {
     numberType = getNumberType(valueDomain);
     minValue = getMinimumValue(valueDomain, numberType);
     maxValue = getMaximumValue(valueDomain, numberType);
@@ -66,7 +74,7 @@ public class ValueConstraintsHandler implements ModelHandler {
     unitOfMeasure = getUnitOfMeasure(valueDomain);
   }
 
-  private static int getMinimumLength(final VALUEDOMAIN valueDomain) {
+  private static int getMinimumLength(VALUEDOMAIN valueDomain) {
     String value = valueDomain.getMinimumLength().getContent();
     if (!Strings.isNullOrEmpty(value)) {
       return Integer.parseInt(value);
@@ -75,7 +83,7 @@ public class ValueConstraintsHandler implements ModelHandler {
     }
   }
 
-  private static int getMaximumLength(final VALUEDOMAIN valueDomain) {
+  private static int getMaximumLength(VALUEDOMAIN valueDomain) {
     String value = valueDomain.getMaximumLength().getContent();
     if (!Strings.isNullOrEmpty(value)) {
       return Integer.parseInt(value);
@@ -103,7 +111,7 @@ public class ValueConstraintsHandler implements ModelHandler {
   }
 
   @Nullable
-  private static Number getMinimumValue(final VALUEDOMAIN valueDomain, String numberType) {
+  private static Number getMinimumValue(VALUEDOMAIN valueDomain, String numberType) {
     String value = valueDomain.getMinimumValue().getContent();
     return getNumber(value, numberType);
   }
