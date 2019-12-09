@@ -40,7 +40,7 @@ public class PropertiesHandler implements ModelHandler {
 
   private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
     String datatype = dataElement.getVALUEDOMAIN().getDatatype().getContent();
-    if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
+    if (CadsrDatatypes.ALL_STRING_LIST.contains(datatype)) {
       typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setOneOfStringOrArray());
       idProperty.put(ModelNodeNames.JSON_LD_ID, setUriString());
       rdfsLabelProperty.put(ModelNodeNames.RDFS_LABEL, setTypeStringOrNull());
@@ -53,15 +53,18 @@ public class PropertiesHandler implements ModelHandler {
 
   private void handleNonEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
     String datatype = dataElement.getVALUEDOMAIN().getDatatype().getContent();
-    if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
+    if (CadsrDatatypes.ALL_STRING_LIST.contains(datatype)) {
       typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setOneOfStringOrArray());
       valueProperty.put(ModelNodeNames.JSON_LD_VALUE, setTypeStringOrNull());
-    } else if (CadsrDatatypes.NUMERIC_LIST.contains(datatype)) {
+    } else if (CadsrDatatypes.ALL_NUMERIC_LIST.contains(datatype)) {
       typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setUriString());
       valueProperty.put(ModelNodeNames.JSON_LD_VALUE, setTypeStringOrNull());
-    } else if (CadsrDatatypes.DATE_LIST.contains(datatype)) {
+    } else if (CadsrDatatypes.ALL_DATE_LIST.contains(datatype)) {
       typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setUriString());
       valueProperty.put(ModelNodeNames.JSON_LD_VALUE, setTypeStringOrNull());
+    } else if (CadsrDatatypes.ALL_URI_LIST.contains(datatype)) {
+      typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setOneOfStringOrArray());
+      idProperty.put(ModelNodeNames.JSON_LD_ID, setUriString());
     } else {
       String reason = String.format("A non-enumerated %s is not supported (Unsupported)", datatype);
       throw new UnsupportedDataElementException(dataElement, reason);
