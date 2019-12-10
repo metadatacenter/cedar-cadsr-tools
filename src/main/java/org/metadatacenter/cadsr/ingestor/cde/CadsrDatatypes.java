@@ -5,6 +5,8 @@ import java.util.List;
 
 public class CadsrDatatypes {
 
+  // The reasons behind the following caDSR-to-CEDAR datatype mappings are available at https://stanfordmedicine.app.box.com/file/571026362915
+
   // caDSR datatypes mapped in the 1st iteration
   public static final String ALPHANUMERIC = "ALPHANUMERIC";
   public static final String CHARACTER = "CHARACTER";
@@ -26,7 +28,7 @@ public class CadsrDatatypes {
   public static final String DATE_TIME = "DATE/TIME";
   public static final String DATETIME = "DATETIME";
   public static final String DERIVED = "Derived"; // Agreed to skip it
-  public static final String HL7CDV3 = "HL7CDv3"; // Agreed to skip it
+  public static final String HL7CDV3 = "HL7CDv3";
   public static final String HL7EDV3 = "HL7EDv3";
   public static final String HL7INTV3 = "HL7INTv3";
   public static final String HL7PNV3 = "HL7PNv3";
@@ -108,7 +110,7 @@ public class CadsrDatatypes {
       ISO21090BAGV1, ISO21090BLV1, ISO21090DSETV1, ISO21090EDTEXTV1, ISO21090EDV1, ISO21090ENONV1, ISO21090ENPNV1,
       ISO21090ENTNV1, ISO21090ENXPV1, ISO21090IIV1, ISO21090STSIMV1, ISO21090STV1, ISO21090TELURLV1, ISO21090TELV1,
       JAVA_BOOLEAN, JAVA_OBJECT, JAVA_COLLECTION, JAVA_MAP, NUMERIC_ALPHA_DVG, OBJECT, UMLCODEV1, UMLUIDV1,
-      UMLXMLV1, VARCHAR, XSD_STRING
+      UMLXMLV1, VARCHAR, XSD_STRING, HL7CDV3, ISO21090IVLV1
   );
   public static final List<String> STRING_MAX_LENGTH_1_LIST = Lists.newArrayList(JAVA_CHARACTER);
 
@@ -138,7 +140,7 @@ public class CadsrDatatypes {
   public static final List<String> ALL_DATE_LIST = Lists.newArrayList();
   public static final List<String> ALL_URI_LIST = Lists.newArrayList();
 
-  public static final List<String> ALL_DATATYPES_LIST = Lists.newArrayList();
+//  public static final List<String> ALL_DATATYPES_LIST = Lists.newArrayList();
 
   // Populate groups
   static {

@@ -139,6 +139,8 @@ public class ValueConstraintsHandler implements ModelHandler {
     if (Strings.isNullOrEmpty(minValue)) { // If the XML does not specify a minimum value
       if (CadsrDatatypes.NUMERIC_POSITIVE_INTEGER_LIST.contains(numericDataType)) {
         minValue = "0";
+      } else if (CadsrDatatypes.NUMERIC_BYTE_LIST.contains(numericDataType)) {
+        minValue = "-128";
       } else if (CadsrDatatypes.NUMERIC_OCTET_LIST.contains(numericDataType)) {
         minValue = "0";
       }
@@ -150,7 +152,9 @@ public class ValueConstraintsHandler implements ModelHandler {
   private static Number getMaximumValue(String maxValue, String numericDataType, String numberType)
       throws UnsupportedDataTypeException {
     if (Strings.isNullOrEmpty(maxValue)) { // If the XML does not specify a maximum value
-      if (CadsrDatatypes.NUMERIC_OCTET_LIST.contains(numericDataType)) {
+      if (CadsrDatatypes.NUMERIC_BYTE_LIST.contains(numericDataType)) {
+        maxValue = "127";
+      } else if (CadsrDatatypes.NUMERIC_OCTET_LIST.contains(numericDataType)) {
         maxValue = "255";
       }
     }
