@@ -18,55 +18,136 @@ import static org.hamcrest.core.IsNull.nullValue;
 
 public class CadsrUtilsTest {
 
-  @Ignore
+  private final String TEMPLATE_FIELD_TYPE = "https://schema.metadatacenter.org/core/TemplateField";
+
   @Test
-  public void shouldProduceFieldMap_ENUMERATED_CHARACTER() throws Exception {
+  public void shouldProduceFieldMap_STRING_ENUMERATED() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-5873923.xml");
     Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
     // Assert
     assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_SCHEMA), is(ModelNodeValues.JSON_SCHEMA_IRI));
     assertThat(fieldMap.get(ModelNodeNames.JSON_LD_ID), is(nullValue()));
-    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_TYPE), is("https://schema.metadatacenter.org/core/TemplateField"));
+    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_TYPE), is(TEMPLATE_FIELD_TYPE));
     assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_TYPE), is(ModelNodeValues.OBJECT));
     assertThat(getInputType(fieldMap), is(ModelNodeValues.TEXT_FIELD));
-    assertThat(getClassesConstraintMap(fieldMap).size(), is(2));
-    assertThat(getClassConstraint(fieldMap, 0), is("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C49488"));
-    assertThat(getClassConstraint(fieldMap, 1), is("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C49487"));
+    assertThat(getValueSetsConstraintMap(fieldMap).size(), is(1));
+    assertThat(getValueSetName(fieldMap, 0), is("Yes No Indicator"));
+    assertThat(getValueSetNumTerms(fieldMap, 0), is(2));
+    assertThat(getValueSetVsCollection(fieldMap, 0), is("CADSR-VS"));
+    assertThat(getValueSetUri(fieldMap, 0), is("https://cadsr.nci.nih.gov/metadata/CADSR-VS/VD3506068v1"));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_TYPE), is(not(nullValue())));
+    assertThat(getProperties(fieldMap).get(ModelNodeNames.RDFS_LABEL), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_ID), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_VALUE), is(nullValue()));
-    assertThat(getProperties(fieldMap).get(ModelNodeNames.RDFS_LABEL), is(not(nullValue())));
-    assertThat(getRequiredList(fieldMap).size(), is(1));
-    assertThat(getRequired(fieldMap, 0), is(ModelNodeNames.JSON_LD_ID));
+    assertThat(fieldMap.containsKey(ModelNodeNames.JSON_SCHEMA_REQUIRED), is(false));
   }
 
-  @Ignore
   @Test
-  public void shouldProduceFieldMap_NON_ENUMERATED_CHARACTER() throws Exception {
+  public void shouldProduceFieldMap_STRING_NON_ENUMERATED() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2182451.xml");
     Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
-    // Assert
-    assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_SCHEMA), is(ModelNodeValues.JSON_SCHEMA_IRI));
-    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_ID), is(nullValue()));
-    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_TYPE), is("https://schema.metadatacenter.org/core/TemplateField"));
-    assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_TYPE), is(ModelNodeValues.OBJECT));
-    assertThat(getInputType(fieldMap), is(ModelNodeValues.TEXT_AREA));
-    assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_TYPE), is(not(nullValue())));
-    assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_ID), is(nullValue()));
-    assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_VALUE), is(not(nullValue())));
-    assertThat(getProperties(fieldMap).get(ModelNodeNames.RDFS_LABEL), is(nullValue()));
-    assertThat(getRequiredList(fieldMap).size(), is(1));
-    assertThat(getRequired(fieldMap, 0), is(ModelNodeNames.JSON_LD_VALUE));
+    // Assertions
+    shouldProduceStringNonEnumerated(fieldMap);
   }
 
   @Test
-  public void shouldProduceFieldMap_NON_ENUMERATED_DATE() throws Exception {
+  public void shouldProduceFieldMap_STRING_MAX_LENGTH_1() throws Exception {
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2752716.xml");
+    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
+    // Assert
+    shouldProduceStringNonEnumerated(fieldMap);
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_MAX_STRING_LENGTH), is(1));
+  }
+
+  @Ignore // Ignored because there are no CDEs that use this data type
+  @Test
+  public void shouldProduceFieldMap_NUMERIC_ANY() throws Exception { }
+
+  @Test
+  public void shouldProduceFieldMap_NUMERIC_INTEGER() throws Exception {
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-3017383.xml");
+    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
+    // Assert
+    shouldProduceBasicNumeric(fieldMap);
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_NUMBER_TYPE), is("xsd:int"));
+  }
+
+  @Test
+  public void shouldProduceFieldMap_NUMERIC_POSITIVE_INTEGER() throws Exception {
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-3176123.xml");
+    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
+    // Assert
+    shouldProduceBasicNumeric(fieldMap);
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_NUMBER_TYPE), is("xsd:int"));
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_MIN_NUMBER_VALUE), is(0));
+  }
+
+  @Test
+  public void shouldProduceFieldMap_NUMERIC_BYTE() throws Exception {
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2903311.xml");
+    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
+    // Assert
+    shouldProduceBasicNumeric(fieldMap);
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_NUMBER_TYPE), is("xsd:byte"));
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_MIN_NUMBER_VALUE), is(Byte.valueOf("-128")));
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_MAX_NUMBER_VALUE), is(Byte.valueOf("127")));
+  }
+
+  @Test
+  public void shouldProduceFieldMap_NUMERIC_OCTET() throws Exception {
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2930238.xml");
+    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
+    // Assert
+    shouldProduceBasicNumeric(fieldMap);
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_NUMBER_TYPE), is("xsd:int"));
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_MIN_NUMBER_VALUE), is(0));
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_MAX_NUMBER_VALUE), is(255));
+  }
+
+  @Test
+  public void shouldProduceFieldMap_NUMERIC_SHORT_INTEGER() throws Exception {
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2771274.xml");
+    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
+    // Assert
+    shouldProduceBasicNumeric(fieldMap);
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_NUMBER_TYPE), is("xsd:short"));
+  }
+
+  @Test
+  public void shouldProduceFieldMap_NUMERIC_LONG_INTEGER() throws Exception {
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2544997.xml");
+    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
+    // Assert
+    shouldProduceBasicNumeric(fieldMap);
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_NUMBER_TYPE), is("xsd:long"));
+  }
+
+  @Test
+  public void shouldProduceFieldMap_NUMERIC_FLOAT() throws Exception {
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2002061.xml");
+    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
+    // Assert
+    shouldProduceBasicNumeric(fieldMap);
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_NUMBER_TYPE), is("xsd:float"));
+  }
+
+  @Test
+  public void shouldProduceFieldMap_NUMERIC_DOUBLE() throws Exception {
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2711953.xml");
+    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
+    // Assert
+    shouldProduceBasicNumeric(fieldMap);
+    assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_NUMBER_TYPE), is("xsd:double"));
+  }
+
+  @Test
+  public void shouldProduceFieldMap_DATE() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2001826.xml");
     Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
     // Assert
     assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_SCHEMA), is(ModelNodeValues.JSON_SCHEMA_IRI));
     assertThat(fieldMap.get(ModelNodeNames.JSON_LD_ID), is(nullValue()));
-    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_TYPE), is("https://schema.metadatacenter.org/core/TemplateField"));
+    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_TYPE), is(TEMPLATE_FIELD_TYPE));
     assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_TYPE), is(ModelNodeValues.OBJECT));
     assertThat(getInputType(fieldMap), is(ModelNodeValues.DATE));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_TYPE), is(not(nullValue())));
@@ -77,17 +158,33 @@ public class CadsrUtilsTest {
     assertThat(getRequired(fieldMap, 0), is(ModelNodeNames.JSON_LD_VALUE));
   }
 
+  @Ignore // Ignored because there are no CDEs that use this type
   @Test
-  public void shouldProduceFieldMap_NON_ENUMERATED_NUMBER() throws Exception {
-    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2002061.xml");
-    Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
-    // Assert
+  public void shouldProduceFieldMap_URI() throws Exception { }
+
+  /* Helpers */
+
+  public void shouldProduceStringNonEnumerated(Map<String, Object> fieldMap) {
     assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_SCHEMA), is(ModelNodeValues.JSON_SCHEMA_IRI));
     assertThat(fieldMap.get(ModelNodeNames.JSON_LD_ID), is(nullValue()));
-    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_TYPE), is("https://schema.metadatacenter.org/core/TemplateField"));
+    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_TYPE), is(TEMPLATE_FIELD_TYPE));
+    assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_TYPE), is(ModelNodeValues.OBJECT));
+    assertThat(getInputType(fieldMap), is(ModelNodeValues.TEXT_FIELD));
+    assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_TYPE), is(not(nullValue())));
+    assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_ID), is(nullValue()));
+    assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_VALUE), is(not(nullValue())));
+    assertThat(getProperties(fieldMap).get(ModelNodeNames.RDFS_LABEL), is(nullValue()));
+    assertThat(getRequiredList(fieldMap).size(), is(1));
+    assertThat(getRequired(fieldMap, 0), is(ModelNodeNames.JSON_LD_VALUE));
+  }
+
+  // Basic numeric definition. It does not require the @type field
+  public void shouldProduceBasicNumeric(Map<String, Object> fieldMap) {
+    assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_SCHEMA), is(ModelNodeValues.JSON_SCHEMA_IRI));
+    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_ID), is(nullValue()));
+    assertThat(fieldMap.get(ModelNodeNames.JSON_LD_TYPE), is(TEMPLATE_FIELD_TYPE));
     assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_TYPE), is(ModelNodeValues.OBJECT));
     assertThat(getInputType(fieldMap), is(ModelNodeValues.NUMERIC));
-    assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_TYPE), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_ID), is(nullValue()));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_VALUE), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.RDFS_LABEL), is(nullValue()));
@@ -100,14 +197,38 @@ public class CadsrUtilsTest {
     return (String) uiMap.get(ModelNodeNames.UI_FIELD_INPUT_TYPE);
   }
 
+  private Map<String, Object> getValueConstraints(Map<String, Object> fieldMap) {
+    return (Map<String, Object>) fieldMap.get(ModelNodeNames.VALUE_CONSTRAINTS);
+  }
+
+  private List<Map<String, Object>> getValueSetsConstraintMap(Map<String, Object> fieldMap) {
+    Map<String, Object> valueConstraints = getValueConstraints(fieldMap);
+    return (List<Map<String, Object>>) valueConstraints.get(ModelNodeNames.VALUE_CONSTRAINTS_VALUE_SETS);
+  }
+
+  private String getValueSetName(Map<String, Object> fieldMap, int position) {
+    Map<String, Object> vsConstraints = getValueSetsConstraintMap(fieldMap).get(position);
+    return (String) vsConstraints.get(ModelNodeNames.VALUE_CONSTRAINTS_NAME);
+  }
+
+  private int getValueSetNumTerms(Map<String, Object> fieldMap, int position) {
+    Map<String, Object> vsConstraints = getValueSetsConstraintMap(fieldMap).get(position);
+    return (Integer) vsConstraints.get(ModelNodeNames.VALUE_CONSTRAINTS_NUM_TERMS);
+  }
+
+  private String getValueSetVsCollection(Map<String, Object> fieldMap, int position) {
+    Map<String, Object> vsConstraints = getValueSetsConstraintMap(fieldMap).get(position);
+    return (String) vsConstraints.get(ModelNodeNames.VALUE_CONSTRAINTS_VS_COLLECTION);
+  }
+
+  private String getValueSetUri(Map<String, Object> fieldMap, int position) {
+    Map<String, Object> vsConstraints = getValueSetsConstraintMap(fieldMap).get(position);
+    return (String) vsConstraints.get(ModelNodeNames.VALUE_CONSTRAINTS_URI);
+  }
+
   private List<Map<String, Object>> getClassesConstraintMap(Map<String, Object> fieldMap) {
     Map<String, Object> valueConstraints = (Map<String, Object>) fieldMap.get(ModelNodeNames.VALUE_CONSTRAINTS);
     return (List<Map<String, Object>>) valueConstraints.get(ModelNodeNames.VALUE_CONSTRAINTS_CLASSES);
-  }
-
-  private String getClassConstraint(Map<String, Object> fieldMap, int i) {
-    Map<String, Object> classConstraint = (Map<String, Object>) getClassesConstraintMap(fieldMap).get(i);
-    return (String) classConstraint.get(ModelNodeNames.VALUE_CONSTRAINTS_URI);
   }
 
   private Map<String, Object> getProperties(Map<String, Object> fieldMap) {
