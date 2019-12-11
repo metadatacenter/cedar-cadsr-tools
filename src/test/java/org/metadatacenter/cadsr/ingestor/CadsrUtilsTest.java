@@ -160,7 +160,7 @@ public class CadsrUtilsTest {
 
   @Test
   public void shouldProduceFieldMap_BOOLEAN_ENUMERATED() throws Exception {
-    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2611972.xml");
+    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2968037.xml");
     Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
     // Assert
     assertThat(fieldMap.get(ModelNodeNames.JSON_SCHEMA_SCHEMA), is(ModelNodeValues.JSON_SCHEMA_IRI));
