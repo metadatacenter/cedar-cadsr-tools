@@ -20,16 +20,11 @@ public class CadsrDatatypes {
   public static final String JAVA_LONG = "java.lang.Long";
   public static final String JAVA_STRING = "java.lang.String";
   public static final String NUMBER = "NUMBER";
-  // caDSR datatypes mapped in the 2nd iteration (December 2019)
+  // caDSR datatypes mapped on December 2019 as part of the 2nd iteration (Phase IIb)
   public static final String ALPHA_DVG = "Alpha DVG";
-  public static final String ANY_CLASS = "anyClass"; // Agreed to skip it
-  public static final String BINARY = "binary"; // Agreed to skip it
   public static final String BOOLEAN = "BOOLEAN";
   public static final String CLOB = "CLOB";
   public static final String DATE_ALPHA_DVG = "Date Alpha DVG";
-  public static final String DATE_TIME = "DATE/TIME";
-  public static final String DATETIME = "DATETIME";
-  public static final String DERIVED = "Derived"; // Agreed to skip it
   public static final String HL7CDV3 = "HL7CDv3";
   public static final String HL7EDV3 = "HL7EDv3";
   public static final String HL7INTV3 = "HL7INTv3";
@@ -37,7 +32,6 @@ public class CadsrDatatypes {
   public static final String HL7REALV3 = "HL7REALv3";
   public static final String HL7STV3 = "HL7STv3";
   public static final String HL7TELV3 = "HL7TELv3";
-  public static final String HL7TSV3 = "HL7TSv3";
   public static final String INTEGER = "Integer";
   public static final String ISO21090ADPARTV1 = "ISO21090ADPartv1.0";
   public static final String ISO21090ADV1 = "ISO21090ADv1.0";
@@ -63,7 +57,6 @@ public class CadsrDatatypes {
   public static final String ISO21090INTPOSV1 = "ISO21090INTPOSv1.0";
   public static final String ISO21090INTV1 = "ISO21090INTv1.0";
   public static final String ISO21090IVLV1 = "ISO21090IVLv1.0";
-  public static final String ISO21090PQTIMEV1 = "ISO21090PQTIMEv1.0";
   public static final String ISO21090PQV1 = "ISO21090PQv1.0";
   public static final String ISO21090QTYV1 = "ISO21090QTYv1.0";
   public static final String ISO21090REALV1 = "ISO21090REALv1.0";
@@ -72,9 +65,6 @@ public class CadsrDatatypes {
   public static final String ISO21090STV1 = "ISO21090STv1.0";
   public static final String ISO21090TELURLV1 = "ISO21090TELURLv1.0";
   public static final String ISO21090TELV1 = "ISO21090TELv1.0";
-  public static final String ISO21090TSDATFLV1 = "ISO21090TSDATFLv1.0";
-  public static final String ISO21090TSDTTIV1 = "ISO21090TSDTTIv1.0";
-  public static final String ISO21090TSV1 = "ISO21090TSv1.0";
   public static final String ISO21090TV1 = "ISO21090Tv1.0";
   public static final String ISO21090URGV1 = "ISO21090URGv1.0";
   public static final String JAVA_BOOLEAN = "java.lang.Boolean";
@@ -85,15 +75,12 @@ public class CadsrDatatypes {
   public static final String JAVA_OBJECT = "java.lang.Object";
   public static final String JAVA_SHORT = "java.lang.Short";
   public static final String JAVA_STRING_ARRAY = "java.lang.String[]";
-  public static final String JAVA_TIMESTAMP = "java.sql.Timestamp";
   public static final String JAVA_COLLECTION = "java.util.Collection";
   public static final String JAVA_MAP = "java.util.Map";
   public static final String NUMERIC_ALPHA_DVG = "Numeric Alpha DVG";
   public static final String OBJECT = "OBJECT";
   public static final String SAS_DATE = "SAS Date";
   public static final String SAS_TIME = "SAS Time";
-  public static final String TIME = "TIME";
-  public static final String UMLBINARYV1 = "UMLBinaryv1.0";
   public static final String UMLCODEV1 = "UMLCodev1.0";
   public static final String UMLOCTETV1 = "UMLOctetv1.0";
   public static final String UMLUIDV1 = "UMLUidv1.0";
@@ -101,8 +88,23 @@ public class CadsrDatatypes {
   public static final String UMLXMLV1 = "UMLXMLv1.0";
   public static final String VARCHAR = "varchar";
   public static final String XSD_BOOLEAN = "xsd:boolean";
-  public static final String XSD_DATETIME = "xsd:dateTime";
   public static final String XSD_STRING = "xsd:string";
+  // Mappings pending to be implemented as part of Phase IIb
+  public static final String DATE_TIME = "DATE/TIME";
+  public static final String DATETIME = "DATETIME";
+  public static final String HL7TSV3 = "HL7TSv3";
+  public static final String ISO21090PQTIMEV1 = "ISO21090PQTIMEv1.0";
+  public static final String ISO21090TSDATFLV1 = "ISO21090TSDATFLv1.0";
+  public static final String ISO21090TSDTTIV1 = "ISO21090TSDTTIv1.0";
+  public static final String ISO21090TSV1 = "ISO21090TSv1.0";
+  public static final String JAVA_TIMESTAMP = "java.sql.Timestamp";
+  public static final String TIME = "TIME";
+  public static final String XSD_DATETIME = "xsd:dateTime";
+  // Data types that we agreed to skip
+  public static final String ANY_CLASS = "anyClass";
+  public static final String BINARY = "binary";
+  public static final String DERIVED = "Derived";
+  public static final String UMLBINARYV1 = "UMLBinaryv1.0";
 
   /* String */
   public static final List<String> STRING_LIST = Lists.newArrayList(
@@ -112,7 +114,7 @@ public class CadsrDatatypes {
       ISO21090BAGV1, ISO21090DSETV1, ISO21090EDTEXTV1, ISO21090EDV1, ISO21090ENONV1, ISO21090ENPNV1,
       ISO21090ENTNV1, ISO21090ENXPV1, ISO21090IIV1, ISO21090STSIMV1, ISO21090STV1, ISO21090TELURLV1, ISO21090TELV1,
       JAVA_OBJECT, JAVA_COLLECTION, JAVA_MAP, NUMERIC_ALPHA_DVG, OBJECT, UMLCODEV1, UMLUIDV1,
-      UMLXMLV1, VARCHAR, XSD_STRING, HL7CDV3, ISO21090IVLV1
+      UMLXMLV1, VARCHAR, XSD_STRING, HL7CDV3, ISO21090IVLV1, JAVA_INTEGER_ARRAY, JAVA_STRING_ARRAY
   );
   public static final List<String> STRING_MAX_LENGTH_1_LIST = Lists.newArrayList(JAVA_CHARACTER);
 
