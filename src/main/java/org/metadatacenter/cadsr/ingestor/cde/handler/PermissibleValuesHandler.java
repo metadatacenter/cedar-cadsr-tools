@@ -180,19 +180,19 @@ public class PermissibleValuesHandler implements ModelHandler {
   }
 
   public List<Map<String, Object>> getOntologies() {
-    return Collections.unmodifiableList(ontologies);
+    return (ontologies != null ? Collections.unmodifiableList(ontologies) : null);
   }
 
   public List<Map<String, Object>> getValueSets() {
-    return Collections.unmodifiableList(valueSets);
+    return (valueSets != null ? Collections.unmodifiableList(valueSets) : null);
   }
 
   public List<Map<String, Object>> getClasses() {
-    return Collections.unmodifiableList(classes);
+    return (classes != null ? Collections.unmodifiableList(classes) : null);
   }
 
   public List<Map<String, Object>> getBranches() {
-    return Collections.unmodifiableList(branches);
+    return (branches != null ? Collections.unmodifiableList(branches) : null);
   }
 
   @Override

@@ -164,8 +164,9 @@ public class CadsrDatatypes {
     ALL_NUMERIC_LIST.addAll(NUMERIC_FLOAT_LIST);
     ALL_NUMERIC_LIST.addAll(NUMERIC_DOUBLE_LIST);
     // Date
-    ALL_BOOLEAN_LIST.addAll(BOOLEAN_LIST);
+    ALL_DATE_LIST.addAll(DATE_LIST);
     // Boolean
+    ALL_BOOLEAN_LIST.addAll(BOOLEAN_LIST);
     // Uri
     ALL_URI_LIST.addAll(URI_LIST);
     // All datatypes
