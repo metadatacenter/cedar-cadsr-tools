@@ -40,12 +40,13 @@ public class PropertiesHandler implements ModelHandler {
 
   private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
     String datatype = dataElement.getVALUEDOMAIN().getDatatype().getContent();
-    if (CadsrDatatypes.ALL_STRING_LIST.contains(datatype)) {
+    if (CadsrDatatypes.ALL_STRING_LIST.contains(datatype) || CadsrDatatypes.ALL_BOOLEAN_LIST.contains(datatype)) {
       typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setOneOfStringOrArray());
       idProperty.put(ModelNodeNames.JSON_LD_ID, setUriString());
       rdfsLabelProperty.put(ModelNodeNames.RDFS_LABEL, setTypeStringOrNull());
       skosNotationProperty.put(ModelNodeNames.SKOS_NOTATION, setTypeStringOrNull());
-    } else {
+    }
+    else {
       String reason = String.format("An enumerated %s is not supported (Unsupported)", datatype);
       throw new UnsupportedDataElementException(dataElement, reason);
     }
@@ -60,6 +61,9 @@ public class PropertiesHandler implements ModelHandler {
       typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setUriString());
       valueProperty.put(ModelNodeNames.JSON_LD_VALUE, setTypeStringOrNull());
     } else if (CadsrDatatypes.ALL_DATE_LIST.contains(datatype)) {
+      typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setUriString());
+      valueProperty.put(ModelNodeNames.JSON_LD_VALUE, setTypeStringOrNull());
+    } else if (CadsrDatatypes.ALL_BOOLEAN_LIST.contains(datatype)) {
       typeProperty.put(ModelNodeNames.JSON_LD_TYPE, setUriString());
       valueProperty.put(ModelNodeNames.JSON_LD_VALUE, setTypeStringOrNull());
     } else if (CadsrDatatypes.ALL_URI_LIST.contains(datatype)) {

@@ -1,6 +1,7 @@
 package org.metadatacenter.cadsr.ingestor.cde.handler;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.VALUEDOMAIN;
 import org.metadatacenter.cadsr.ingestor.cde.CadsrDatatypes;
@@ -10,6 +11,8 @@ import org.metadatacenter.model.ModelNodeNames;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class ValueConstraintsHandler implements ModelHandler {
@@ -32,6 +35,7 @@ public class ValueConstraintsHandler implements ModelHandler {
   private Number maxValue;
   private String unitOfMeasure;
   private String numberType;
+  private List<Map<String, String>> literals;
 
   public ValueConstraintsHandler handle(DataElement dataElement) throws UnsupportedDataElementException {
     final VALUEDOMAIN valueDomain = dataElement.getVALUEDOMAIN();
@@ -56,11 +60,11 @@ public class ValueConstraintsHandler implements ModelHandler {
       handleStringValueConstraints(datatype, valueDomain);
     } else if (CadsrDatatypes.ALL_NUMERIC_LIST.contains(datatype)) {
       handleNumericValueConstraints(datatype, valueDomain);
-    }
-    else if (CadsrDatatypes.ALL_DATE_LIST.contains(datatype)) {
+    } else if (CadsrDatatypes.ALL_DATE_LIST.contains(datatype)) {
       // Do nothing. There is no need to set value constraints for date fields
-    }
-    else if (CadsrDatatypes.ALL_URI_LIST.contains(datatype)) {
+    } else if (CadsrDatatypes.ALL_BOOLEAN_LIST.contains(datatype)) {
+      handleBooleanValueConstraints();
+    } else if (CadsrDatatypes.ALL_URI_LIST.contains(datatype)) {
       // Do nothing. There is no need to set value constraints for URI fields
     } else {
       throw new UnsupportedDataTypeException(datatype);
@@ -84,6 +88,14 @@ public class ValueConstraintsHandler implements ModelHandler {
     maxValue = getMaximumValue(valueDomain.getMaximumValue().getContent(), datatype, numberType);
     decimalPlace = getDecimalPlace(valueDomain);
     unitOfMeasure = getUnitOfMeasure(valueDomain);
+  }
+
+  private void handleBooleanValueConstraints() {
+    Map<String, String> yesOption = Maps.newHashMap();
+    yesOption.put("label", "True");
+    Map<String, String> noOption = Maps.newHashMap();
+    noOption.put("label", "False");
+    literals = Arrays.asList(yesOption, noOption);
   }
 
   private static Integer getMinimumLength(VALUEDOMAIN valueDomain) {
@@ -229,5 +241,9 @@ public class ValueConstraintsHandler implements ModelHandler {
     if (unitOfMeasure != null) {
       valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_UNIT_OF_MEASURE, unitOfMeasure);
     }
+    if (literals != null) {
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_LITERALS, literals);
+    }
+
   }
 }
