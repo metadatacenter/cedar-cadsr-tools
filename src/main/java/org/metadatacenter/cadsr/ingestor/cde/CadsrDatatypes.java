@@ -1,11 +1,13 @@
 package org.metadatacenter.cadsr.ingestor.cde;
 
 import com.google.common.collect.Lists;
+
 import java.util.List;
 
 public class CadsrDatatypes {
 
-  // The reasons behind the following caDSR-to-CEDAR datatype mappings are available at https://stanfordmedicine.app.box.com/file/571026362915
+  // The reasons behind the following caDSR-to-CEDAR datatype mappings are available at https://stanfordmedicine.app
+  // .box.com/file/571026362915
 
   // caDSR datatypes mapped in the 1st iteration
   public static final String ALPHANUMERIC = "ALPHANUMERIC";
@@ -104,12 +106,12 @@ public class CadsrDatatypes {
 
   /* String */
   public static final List<String> STRING_LIST = Lists.newArrayList(
-      CHARACTER, JAVA_STRING, ALPHANUMERIC, ISO21090CD, ALPHA_DVG, BOOLEAN, CLOB, DATE_ALPHA_DVG,
+      CHARACTER, JAVA_STRING, ALPHANUMERIC, ISO21090CD, ALPHA_DVG, CLOB, DATE_ALPHA_DVG,
       HL7EDV3, HL7PNV3, HL7STV3, HL7TELV3, ISO21090ADPARTV1, ISO21090ADV1, ISO21090ADXPALV1, ISO21090ADXPCNTV1,
       ISO21090ADXPCTYV1, ISO21090ADXPDALV1, ISO21090ADXPSTAV1, ISO21090ADXPV1, ISO21090ADXPZIPV1, ISO21090ANYV1,
-      ISO21090BAGV1, ISO21090BLV1, ISO21090DSETV1, ISO21090EDTEXTV1, ISO21090EDV1, ISO21090ENONV1, ISO21090ENPNV1,
+      ISO21090BAGV1, ISO21090DSETV1, ISO21090EDTEXTV1, ISO21090EDV1, ISO21090ENONV1, ISO21090ENPNV1,
       ISO21090ENTNV1, ISO21090ENXPV1, ISO21090IIV1, ISO21090STSIMV1, ISO21090STV1, ISO21090TELURLV1, ISO21090TELV1,
-      JAVA_BOOLEAN, JAVA_OBJECT, JAVA_COLLECTION, JAVA_MAP, NUMERIC_ALPHA_DVG, OBJECT, UMLCODEV1, UMLUIDV1,
+      JAVA_OBJECT, JAVA_COLLECTION, JAVA_MAP, NUMERIC_ALPHA_DVG, OBJECT, UMLCODEV1, UMLUIDV1,
       UMLXMLV1, VARCHAR, XSD_STRING, HL7CDV3, ISO21090IVLV1
   );
   public static final List<String> STRING_MAX_LENGTH_1_LIST = Lists.newArrayList(JAVA_CHARACTER);
@@ -131,6 +133,9 @@ public class CadsrDatatypes {
   /* Date */
   public static final List<String> DATE_LIST = Lists.newArrayList(DATE, JAVA_DATE);
 
+  /* Boolean */
+  public static final List<String> BOOLEAN_LIST = Lists.newArrayList(BOOLEAN, JAVA_BOOLEAN, ISO21090BLV1, XSD_BOOLEAN);
+
   /* URI */
   public static final List<String> URI_LIST = Lists.newArrayList(UMLURIV1);
 
@@ -138,6 +143,7 @@ public class CadsrDatatypes {
   public static final List<String> ALL_STRING_LIST = Lists.newArrayList();
   public static final List<String> ALL_NUMERIC_LIST = Lists.newArrayList();
   public static final List<String> ALL_DATE_LIST = Lists.newArrayList();
+  public static final List<String> ALL_BOOLEAN_LIST = Lists.newArrayList();
   public static final List<String> ALL_URI_LIST = Lists.newArrayList();
 
 //  public static final List<String> ALL_DATATYPES_LIST = Lists.newArrayList();
@@ -158,7 +164,8 @@ public class CadsrDatatypes {
     ALL_NUMERIC_LIST.addAll(NUMERIC_FLOAT_LIST);
     ALL_NUMERIC_LIST.addAll(NUMERIC_DOUBLE_LIST);
     // Date
-    ALL_DATE_LIST.addAll(DATE_LIST);
+    ALL_BOOLEAN_LIST.addAll(BOOLEAN_LIST);
+    // Boolean
     // Uri
     ALL_URI_LIST.addAll(URI_LIST);
     // All datatypes
