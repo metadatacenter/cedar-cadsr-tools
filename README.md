@@ -4,7 +4,8 @@ caDSR to CEDAR Converter
 This project contains several command-line tools to:
 - Transform XML-encoded [caDSR](https://wiki.nci.nih.gov/display/caDSR/caDSR+Wiki) [11179-based](http://metadata-standards.org/11179/) common data elements (CDEs) to CEDAR CDE fields.
 - Transform XML-encoded caDSR contexts, classification schemes, and classification scheme items to a tree of CEDAR categories.
-- Upload CEDAR CDE fields and a CEDAR category tree to the CEDAR system, and attach the uploaded CDEs to their corresponding categories.
+- Upload a CEDAR category tree to the CEDAR system.
+- Upload CEDAR CDE fields to the CEDAR system and, optionally, attach the uploaded CDEs to their corresponding categories in the category tree.
 
 ### Common Data Elements
 
@@ -77,7 +78,7 @@ where:
 - `cedar-apikey` is your CEDAR API key that will give the permission to upload files to the server (e.g., `'apiKey 0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff'`).
 - `-a` is an option to attach the uploaded CDEs to the corresponding CEDAR categories.
 
-## 4. Transform XML caDSR CDEs to CEDAR fields (not required, since it is part of #3) 
+## 4. Transform XML caDSR CDEs to CEDAR fields (optional, since it is part of #3) 
    
     mvn exec:java@transform-cdes -Dexec.args="/path/to/input /path/to/output"
 

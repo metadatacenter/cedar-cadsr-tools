@@ -42,7 +42,6 @@ public class CategoriesHandler implements ModelHandler {
           categoryIds.add(categoryId);
         }
 
-
       });
     }
     return this;

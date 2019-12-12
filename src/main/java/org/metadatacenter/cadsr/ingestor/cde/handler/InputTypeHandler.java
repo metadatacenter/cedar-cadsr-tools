@@ -15,14 +15,14 @@ public class InputTypeHandler implements ModelHandler {
   private static final String ENUMERATED = "Enumerated";
   private static final String NON_ENUMERATED = "NonEnumerated";
 
-  private static final int MAX_LENGTH_FOR_TEXTFIELD = 255;
+  //private static final int MAX_LENGTH_FOR_TEXTFIELD = 255;
 
   private final Map<String, Object> inputType = Maps.newHashMap();
 
   public InputTypeHandler handle(DataElement dataElement) throws UnsupportedDataElementException {
     String valueDomainType = dataElement.getVALUEDOMAIN().getValueDomainType().getContent();
     if (ENUMERATED.equals(valueDomainType)) {
-      handleEnumeratedType(dataElement);
+      handleEnumeratedType();
     } else if (NON_ENUMERATED.equals(valueDomainType)) {
       handleNonEnumeratedType(dataElement);
     } else {
@@ -33,24 +33,22 @@ public class InputTypeHandler implements ModelHandler {
     return this;
   }
 
-  private void handleEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
-    String datatype = dataElement.getVALUEDOMAIN().getDatatype().getContent();
-    if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
-      inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.TEXT_FIELD);
-    } else {
-      String reason = String.format("An enumerated %s is not supported (Unsupported)", datatype);
-      throw new UnsupportedDataElementException(dataElement, reason);
-    }
+  private void handleEnumeratedType() {
+    inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.TEXT_FIELD);
   }
 
   private void handleNonEnumeratedType(DataElement dataElement) throws UnsupportedDataElementException {
     String datatype = dataElement.getVALUEDOMAIN().getDatatype().getContent();
-    if (CadsrDatatypes.STRING_LIST.contains(datatype)) {
+    if (CadsrDatatypes.ALL_STRING_LIST.contains(datatype)) {
       inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.TEXT_FIELD);
-    } else if (CadsrDatatypes.NUMERIC_LIST.contains(datatype)) {
+    } else if (CadsrDatatypes.ALL_NUMERIC_LIST.contains(datatype)) {
       inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.NUMERIC);
-    } else if (CadsrDatatypes.DATE_LIST.contains(datatype)) {
+    } else if (CadsrDatatypes.ALL_DATE_LIST.contains(datatype)) {
       inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.DATE);
+    } else if (CadsrDatatypes.ALL_BOOLEAN_LIST.contains(datatype)) {
+      inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.RADIO);
+    } else if (CadsrDatatypes.ALL_URI_LIST.contains(datatype)) {
+      inputType.put(ModelNodeNames.UI_FIELD_INPUT_TYPE, ModelNodeValues.LINK);
     } else {
       String reason = String.format("A non-enumerated %s is not supported (Unsupported)", datatype);
       throw new UnsupportedDataElementException(dataElement, reason);
