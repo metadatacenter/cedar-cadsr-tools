@@ -12,6 +12,7 @@ public class CadsrConceptOrigins {
   public static final String CTCAE_ONTOLOGY_LABEL = "CTCAE";
 
   public static final Map<String, String> ONTOLOGY_IRI_MAP = Maps.newHashMap();
+
   static {
     ONTOLOGY_IRI_MAP.put("NCI Thesaurus", NCIT_IRI);
     ONTOLOGY_IRI_MAP.put("NCI Thesaurus,NCI Thesaurus", NCIT_IRI);
@@ -21,6 +22,7 @@ public class CadsrConceptOrigins {
   }
 
   public static final Map<String, String> ONTOLOGY_LABEL_MAP = Maps.newHashMap();
+
   static {
     ONTOLOGY_LABEL_MAP.put("NCI Thesaurus", NCIT_ONTOLOGY_LABEL);
     ONTOLOGY_LABEL_MAP.put("NCI Thesaurus,NCI Thesaurus", NCIT_ONTOLOGY_LABEL);

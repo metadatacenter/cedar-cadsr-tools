@@ -34,10 +34,10 @@ public class PermissibleValuesHandler implements ModelHandler {
   private static final String ENUMERATED = "Enumerated";
   private static final String NON_ENUMERATED = "NonEnumerated";
 
-  private final List<Map<String, Object>> ontologies = Lists.newArrayList();
-  private final List<Map<String, Object>> valueSets = Lists.newArrayList();
-  private final List<Map<String, Object>> classes = Lists.newArrayList();
-  private final List<Map<String, Object>> branches = Lists.newArrayList();
+  private List<Map<String, Object>> ontologies;
+  private List<Map<String, Object>> valueSets;
+  private List<Map<String, Object>> classes;
+  private List<Map<String, Object>> branches;
 
   public PermissibleValuesHandler handle(DataElement dataElement) throws UnsupportedDataElementException,
       UnknownSeparatorException {
@@ -55,6 +55,11 @@ public class PermissibleValuesHandler implements ModelHandler {
   }
 
   private void handleEnumeratedType(DataElement dataElement) throws UnknownSeparatorException {
+
+    ontologies = Lists.newArrayList();
+    valueSets = Lists.newArrayList();
+    classes = Lists.newArrayList();
+    branches = Lists.newArrayList();
 
     PermissibleValues permissibleValues = dataElement.getVALUEDOMAIN().getPermissibleValues();
     Set<Value> values = getValues(permissibleValues);
@@ -175,27 +180,35 @@ public class PermissibleValuesHandler implements ModelHandler {
   }
 
   public List<Map<String, Object>> getOntologies() {
-    return Collections.unmodifiableList(ontologies);
+    return (ontologies != null ? Collections.unmodifiableList(ontologies) : null);
   }
 
   public List<Map<String, Object>> getValueSets() {
-    return Collections.unmodifiableList(valueSets);
+    return (valueSets != null ? Collections.unmodifiableList(valueSets) : null);
   }
 
   public List<Map<String, Object>> getClasses() {
-    return Collections.unmodifiableList(classes);
+    return (classes != null ? Collections.unmodifiableList(classes) : null);
   }
 
   public List<Map<String, Object>> getBranches() {
-    return Collections.unmodifiableList(branches);
+    return (branches != null ? Collections.unmodifiableList(branches) : null);
   }
 
   @Override
   public void apply(Map<String, Object> fieldObject) {
     Map<String, Object> valueConstraints = (Map<String, Object>) fieldObject.get(ModelNodeNames.VALUE_CONSTRAINTS);
-    valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_ONTOLOGIES, getOntologies());
-    valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_VALUE_SETS, getValueSets());
-    valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_CLASSES, getClasses());
-    valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_BRANCHES, getBranches());
+    if (ontologies != null) {
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_ONTOLOGIES, getOntologies());
+    }
+    if (valueSets != null) {
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_VALUE_SETS, getValueSets());
+    }
+    if (classes != null) {
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_CLASSES, getClasses());
+    }
+    if (branches != null) {
+      valueConstraints.put(ModelNodeNames.VALUE_CONSTRAINTS_BRANCHES, getBranches());
+    }
   }
 }

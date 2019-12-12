@@ -46,11 +46,6 @@
     <appender-ref ref="STDOUT"/>
   </logger>
 
-  <!-- Additionally, save error messages to a different file -->
-<!--  <logger name="org.metadatacenter.cadsr" level="ERROR" additivity="false">-->
-<!--    <appender-ref ref="FILE-ERROR"/>-->
-<!--  </logger>-->
-
   <root level="DEBUG">
     <appender-ref ref="STDOUT" />
   </root>

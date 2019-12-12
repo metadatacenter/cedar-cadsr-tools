@@ -12,6 +12,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 public class ValueConstraintsHandlerTest {
 
@@ -110,14 +111,15 @@ public class ValueConstraintsHandlerTest {
   private void assertNonEnumeratedType(DataElement dataElement) throws Exception {
     PermissibleValuesHandler newHandler = null;
     newHandler = handler.handle(dataElement);
+
     List<Map<String, Object>> ontologies = newHandler.getOntologies();
     List<Map<String, Object>> valueSets = newHandler.getValueSets();
     List<Map<String, Object>> branches = newHandler.getBranches();
     List<Map<String, Object>> classes = newHandler.getClasses();
     // Assert
-    assertThat(ontologies.isEmpty(), is(true));
-    assertThat(valueSets.isEmpty(), is(true));
-    assertThat(branches.isEmpty(), is(true));
-    assertThat(classes.isEmpty(), is(true));
+    assertThat(ontologies, is(nullValue()));
+    assertThat(valueSets, is(nullValue()));
+    assertThat(branches, is(nullValue()));
+    assertThat(classes, is(nullValue()));
   }
 }
