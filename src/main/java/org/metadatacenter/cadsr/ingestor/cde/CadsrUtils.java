@@ -36,8 +36,10 @@ public class CadsrUtils {
         parseDataElement(dataElement, field);
         fieldMaps.add(field);
       } catch (UnsupportedDataElementException e) {
+        CadsrTransformationStats.getInstance().addSkipped(e.getReason());
         logger.warn(e.getMessage());
       } catch (UnknownSeparatorException e) {
+        CadsrTransformationStats.getInstance().addFailed(e.getMessage());
         logger.error(e.getMessage());
       }
     }
@@ -48,6 +50,7 @@ public class CadsrUtils {
     final List<Map<String, Object>> fieldMaps = Lists.newArrayList();
     try {
       DataElementsList del = getDataElementLists(is);
+      CadsrTransformationStats.getInstance().numberOfInputCdes += del.getDataElement().size();
       fieldMaps.addAll(getFieldMapsFromDataElements(del));
     } catch (ClassCastException e) {
       logger.error("Source document is not a list of data elements: " + e);
@@ -77,21 +80,6 @@ public class CadsrUtils {
     }
     return fieldMap;
   }
-
-//  public static Map<String, Object> getFieldMapFromInputStream(InputStream is) {
-//    final Map<String, Object> fieldMap = Maps.newHashMap();
-//    try {
-//      DataElement dataElement = getDataElement(is);
-//      fieldMap.putAll(getFieldMapFromDataElement(dataElement));
-//    } catch (JAXBException e) {
-//      logger.error("Error while parsing source document: " + e);
-//    } catch (ClassCastException e) {
-//      logger.error("Source document is not a data element: " + e);
-//    } catch (UnsupportedEncodingException e) {
-//      logger.error("Unsupported encoding: " + e);
-//    }
-//    return fieldMap;
-//  }
 
   public static DataElement getDataElement(InputStream is) throws JAXBException, UnsupportedEncodingException {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElement.class);

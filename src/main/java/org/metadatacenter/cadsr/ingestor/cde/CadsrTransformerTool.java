@@ -35,15 +35,14 @@ public class CadsrTransformerTool {
 
     final Stopwatch stopwatch = Stopwatch.createStarted();
 
-    int totalCdes = 0;
     boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
       File outputDir = Util.checkDirectoryExists(outputTargetLocation);
       if (inputSource.isDirectory()) {
-        totalCdes = convertCdeFromDirectory(inputSource, outputDir);
+        convertCdeFromDirectory(inputSource, outputDir);
       } else {
-        totalCdes = convertCdeFromFile(inputSource, outputDir);
+        convertCdeFromFile(inputSource, outputDir);
       }
       storeOntology(outputDir);
       success = true;
@@ -51,23 +50,23 @@ public class CadsrTransformerTool {
       logger.error(e.toString());
       success = false;
     } finally {
-      printSummary(stopwatch, totalCdes, success);
+      printSummary(stopwatch, success);
     }
   }
 
-  private static int convertCdeFromDirectory(File inputDir, File outputDir) throws IOException {
-    int totalCdes = 0;
+  private static void convertCdeFromDirectory(File inputDir, File outputDir) throws IOException {
     for (final File inputFile : inputDir.listFiles()) {
-      totalCdes += convertCdeFromFile(inputFile, outputDir);
+      convertCdeFromFile(inputFile, outputDir);
     }
-    return totalCdes;
   }
 
-  public static int convertCdeFromFile(File inputFile, File outputDir) throws IOException {
+  public static void convertCdeFromFile(File inputFile, File outputDir) throws IOException {
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
     File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
     Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream(inputFile));
     int totalFields = fieldMaps.size();
+    CadsrTransformationStats.getInstance().numberOfCdesProcessedOk += totalFields;
+
     if (totalFields > 0) {
       int counter = 0;
       for (Map<String, Object> fieldMap : fieldMaps) {
@@ -79,7 +78,8 @@ public class CadsrTransformerTool {
             if (categoryIds.size() > 0) {
               fieldMap.remove(Constants.CDE_CATEGORY_IDS_FIELD);
               String categoryIdsJson = mapper.writeValueAsString(categoryIds);
-              Files.write(categoryIdsJson.getBytes(), new File(outputSubDir.getAbsolutePath(), uuid + Constants.CATEGORIES_FILE_NAME_SUFFIX + ".json"));
+              Files.write(categoryIdsJson.getBytes(), new File(outputSubDir.getAbsolutePath(),
+                  uuid + Constants.CATEGORIES_FILE_NAME_SUFFIX + ".json"));
             }
           }
           String fieldJson = mapper.writeValueAsString(fieldMap);
@@ -96,7 +96,6 @@ public class CadsrTransformerTool {
       }
       logger.info(String.format("Generating CDEs (%d/%d)", counter, totalFields));
     }
-    return totalFields;
   }
 
   private static void storeOntology(File outputDir) {
@@ -105,7 +104,7 @@ public class CadsrTransformerTool {
     ValueSetsOntologyManager.saveOntology(outputOntologyFile);
   }
 
-  private static void printSummary(Stopwatch stopwatch, int totalCdes, boolean success) {
+  private static void printSummary(Stopwatch stopwatch, boolean success) {
     logger.info("----------------------------------------------------------");
     if (success) {
       logger.info("TRANSFORMATION SUCCESS");
@@ -113,7 +112,30 @@ public class CadsrTransformerTool {
       logger.info("TRANSFORMATION FAILED (see error.log for details)");
     }
     logger.info("----------------------------------------------------------");
-    logger.info("Total number of generated CDEs: " + countFormat.format(totalCdes));
+    logger.info("Summary of results:");
+    logger.info("- Number of input caDSR CDEs: " + countFormat.format(CadsrTransformationStats.getInstance().numberOfInputCdes));
+    logger.info("- Number of CEDAR CDEs generated: "
+        + countFormat.format(CadsrTransformationStats.getInstance().numberOfCdesProcessedOk)
+        + " (" + calculatePercentage(CadsrTransformationStats.getInstance().numberOfCdesProcessedOk,
+        CadsrTransformationStats.getInstance().numberOfInputCdes) + ")");
+    logger.info("- Number of CEDAR CDEs skipped: "
+        + countFormat.format(CadsrTransformationStats.getInstance().numberOfCdesSkipped)
+        + " (" + calculatePercentage(CadsrTransformationStats.getInstance().numberOfCdesSkipped,
+        CadsrTransformationStats.getInstance().numberOfInputCdes) + ")");
+    logger.info("- Number of CEDAR CDEs that failed to process: "
+        + countFormat.format(CadsrTransformationStats.getInstance().numberOfCdesFailed)
+        + " (" + calculatePercentage(CadsrTransformationStats.getInstance().numberOfCdesFailed,
+        CadsrTransformationStats.getInstance().numberOfInputCdes) + ")");
+    logger.info("- Breakdown of skipped CDEs: ");
+    for (Map.Entry<String,Integer> entry : CadsrTransformationStats.getInstance().getSkippedReasons().entrySet()) {
+      logger.info("  - " + entry.getKey() + ": " + entry.getValue());
+    }
+    if (CadsrTransformationStats.getInstance().numberOfCdesFailed > 0) {
+      logger.info("- Breakdown of failed CDEs: ");
+      for (Map.Entry<String, Integer> entry : CadsrTransformationStats.getInstance().getFailedReasons().entrySet()) {
+        logger.info("  - " + entry.getKey() + ": " + entry.getValue());
+      }
+    }
     long elapsedTimeInSeconds = stopwatch.elapsed(TimeUnit.SECONDS);
     long hours = elapsedTimeInSeconds / 3600;
     long minutes = (elapsedTimeInSeconds % 3600) / 60;
@@ -121,6 +143,11 @@ public class CadsrTransformerTool {
     logger.info("Total time: " + String.format("%02d:%02d:%02d", hours, minutes, seconds));
     logger.info("Finished at: " + LocalDateTime.now());
     logger.info("----------------------------------------------------------");
+  }
+
+  private static String calculatePercentage(int amount, int total) {
+    final DecimalFormat percentFormat = new DecimalFormat("###.##%");
+    return percentFormat.format(((float) amount / (float) total));
   }
 
 }
