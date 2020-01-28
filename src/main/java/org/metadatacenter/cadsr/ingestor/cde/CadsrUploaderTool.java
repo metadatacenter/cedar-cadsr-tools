@@ -195,9 +195,7 @@ public class CadsrUploaderTool {
               logger.info(String.format("Uploading CDEs (%d/%d)", counter, totalFields));
             }
             counter++;
-          } catch (JsonProcessingException e) {
-            logger.error(e.toString());
-          } catch (IOException e) {
+          } catch (Exception e) {
             logger.error(e.toString());
           } finally {
             if (conn != null) {
