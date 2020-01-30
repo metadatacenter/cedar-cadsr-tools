@@ -37,6 +37,7 @@ public class CadsrUtilsTest {
     assertThat(getValueSetUri(fieldMap, 0), is("https://cadsr.nci.nih.gov/metadata/CADSR-VS/VD3506068v1"));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_TYPE), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.RDFS_LABEL), is(not(nullValue())));
+    assertThat(getProperties(fieldMap).get(ModelNodeNames.SKOS_NOTATION), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_ID), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_VALUE), is(nullValue()));
     assertThat(fieldMap.containsKey(ModelNodeNames.JSON_SCHEMA_REQUIRED), is(false));
@@ -174,6 +175,7 @@ public class CadsrUtilsTest {
     assertThat(getValueSetVsCollection(fieldMap, 0), is("CADSR-VS"));
     assertThat(getValueSetUri(fieldMap, 0), is("https://cadsr.nci.nih.gov/metadata/CADSR-VS/VD2321242v1.1"));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_TYPE), is(not(nullValue())));
+    assertThat(getProperties(fieldMap).get(ModelNodeNames.SKOS_NOTATION), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.RDFS_LABEL), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_ID), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_VALUE), is(nullValue()));

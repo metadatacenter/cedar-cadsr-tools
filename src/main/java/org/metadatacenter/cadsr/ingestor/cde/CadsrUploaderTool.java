@@ -289,7 +289,7 @@ public class CadsrUploaderTool {
    * Attach a CDE to multiple categories (making a single REST call)
    *
    * @param cedarCdeId:  CEDAR CDE id
-   * @param categoryIds: list of cadsr category Ids (not CEDAR  ids)
+   * @param categoryIds: list of cadsr category Ids (not CEDAR ids)
    */
   private static void attachCdeToCategories(String cedarCdeId, List<String> categoryIds, String endpoint,
                                             String apiKey) {
