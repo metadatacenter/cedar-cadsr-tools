@@ -136,6 +136,15 @@ public class PropertiesHandler implements ModelHandler {
     return toReturn;
   }
 
+  @Nullable
+  public Map<String, Object> getSkosNotationProperty() {
+    Map<String, Object> toReturn = null;
+    if (!skosNotationProperty.isEmpty()) {
+      toReturn = Collections.unmodifiableMap(skosNotationProperty);
+    }
+    return toReturn;
+  }
+
   @Override
   public void apply(final Map<String, Object> fieldObject) {
     fieldObject.put(ModelNodeNames.JSON_SCHEMA_PROPERTIES, getPropertiesObject());
@@ -150,6 +159,7 @@ public class PropertiesHandler implements ModelHandler {
     putIfNotNull(properties, getValueProperty());
     putIfNotNull(properties, getIdProperty());
     putIfNotNull(properties, getRdfsLabelProperty());
+    putIfNotNull(properties, getSkosNotationProperty());
     return properties;
   }
 
