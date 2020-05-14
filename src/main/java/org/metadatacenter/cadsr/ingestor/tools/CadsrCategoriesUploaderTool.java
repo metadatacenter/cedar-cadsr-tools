@@ -1,11 +1,13 @@
-package org.metadatacenter.cadsr.ingestor.category;
+package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
-import org.metadatacenter.cadsr.ingestor.ConnectionUtils;
-import org.metadatacenter.cadsr.ingestor.JsonUtils;
+import org.metadatacenter.cadsr.ingestor.ConnectionUtil;
+import org.metadatacenter.cadsr.ingestor.JsonUtil;
+import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
+import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,8 +139,8 @@ public class CadsrCategoriesUploaderTool {
         logErrorMessage(conn);
       } else {
         logger.info("Category created: " + payload);
-        String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
-        String cedarCategoryId = JsonUtils.extractJsonFieldValue(response, "@id");
+        String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
+        String cedarCategoryId = JsonUtil.extractJsonFieldValue(response, "@id");
         counter++;
         //logger.info(String.format("Uploading categories (%d/%d)", counter, allCategories.size()));
         for (CategoryTreeNode categoryTreeNode : category.getChildren()) {
@@ -167,13 +169,13 @@ public class CadsrCategoriesUploaderTool {
   }
 
   private static void logErrorMessage(final HttpURLConnection conn) {
-    String response = ConnectionUtils.readResponseMessage(conn.getErrorStream());
+    String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
     logger.error(response);
     throw new RuntimeException("Unable to upload Category. Reason:\n" + response);
   }
 
   private static void logResponseMessage(final HttpURLConnection conn) throws IOException {
-    String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
+    String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
     String message = createMessageBasedOnFieldNameAndId(response);
     logger.debug("POST 200 OK: " + message);
   }

@@ -1,5 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.category;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.metadatacenter.cadsr.category.schema.CSI;
 import org.metadatacenter.cadsr.category.schema.ClassificationScheme;
 import org.metadatacenter.cadsr.category.schema.Classifications;
@@ -12,9 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +22,22 @@ import java.util.UUID;
 public class CadsrCategoriesUtils {
 
   private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesUtils.class);
+
+  public static void convertCdeCategoriesFromFile(File inputFile, File outputDir) throws IOException {
+    logger.info("Processing input file at " + inputFile.getAbsolutePath());
+    File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
+    List<CategoryTreeNode> categoryTree = null;
+
+    try {
+      Classifications classifications = CadsrCategoriesUtils.getClassifications(new FileInputStream(inputFile));
+      categoryTree = CadsrCategoriesUtils.classificationsToCategoryTree(classifications);
+      logger.info("Generating categories file...");
+      String categoriesFileName = inputFile.getName().substring(0,inputFile.getName().lastIndexOf('.')) + ".json";
+      new ObjectMapper().writeValue(new File(outputSubDir, categoriesFileName), categoryTree);
+    } catch (JAXBException e) {
+      e.printStackTrace();
+    }
+  }
 
   public static Classifications getClassifications(InputStream is) throws JAXBException,
       IOException {

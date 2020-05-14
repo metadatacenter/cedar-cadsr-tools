@@ -38,5 +38,7 @@ public final class Constants {
   public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_ID = "categoryId";
   public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_IDS = "categoryIds";
 
+  public static final String CATEGORIES_FTP_URL = "https://cadsr.nci.nih.gov/ftp/caDSR_Downloads/Classifications/XML/";
+  public static final String CDES_FTP_URL = "https://cadsr.nci.nih.gov/ftp/caDSR_Downloads/CDE/XML/";
 
 }
