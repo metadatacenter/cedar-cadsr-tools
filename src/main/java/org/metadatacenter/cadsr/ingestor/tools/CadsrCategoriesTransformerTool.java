@@ -1,10 +1,11 @@
-package org.metadatacenter.cadsr.ingestor.category;
+package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
-import org.apache.http.util.ExceptionUtils;
 import org.metadatacenter.cadsr.category.schema.Classifications;
 import org.metadatacenter.cadsr.ingestor.Util;
+import org.metadatacenter.cadsr.ingestor.category.CadsrCategoriesUtils;
+import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

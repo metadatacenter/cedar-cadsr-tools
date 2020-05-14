@@ -46,6 +46,18 @@ public class CadsrUtils {
     return fieldMaps;
   }
 
+  public static Map<String, Object> getFieldMapFromDataElement(DataElement de) {
+    final Map<String, Object> fieldMap = Maps.newHashMap();
+    try {
+      parseDataElement(de, fieldMap);
+    } catch (UnsupportedDataElementException e) {
+      logger.warn(e.getMessage());
+    } catch (UnknownSeparatorException e) {
+      logger.error(e.getMessage());
+    }
+    return fieldMap;
+  }
+
   public static Collection<Map<String, Object>> getFieldMapsFromInputStream(InputStream is) {
     final List<Map<String, Object>> fieldMaps = Lists.newArrayList();
     try {
@@ -67,18 +79,6 @@ public class CadsrUtils {
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
     InputStream cleanIs = Util.processInvalidXMLCharacters(is);
     return (DataElementsList) jaxbUnmarshaller.unmarshal(new InputStreamReader(cleanIs, Constants.CHARSET));
-  }
-
-  public static Map<String, Object> getFieldMapFromDataElement(DataElement de) {
-    final Map<String, Object> fieldMap = Maps.newHashMap();
-    try {
-      parseDataElement(de, fieldMap);
-    } catch (UnsupportedDataElementException e) {
-      logger.warn(e.getMessage());
-    } catch (UnknownSeparatorException e) {
-      logger.error(e.getMessage());
-    }
-    return fieldMap;
   }
 
   public static DataElement getDataElement(InputStream is) throws JAXBException, UnsupportedEncodingException {

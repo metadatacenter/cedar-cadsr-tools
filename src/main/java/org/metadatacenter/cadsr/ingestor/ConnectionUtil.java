@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ConnectionUtils {
+public class ConnectionUtil {
 
-  private static final Logger logger = LoggerFactory.getLogger(ConnectionUtils.class);
+  private static final Logger logger = LoggerFactory.getLogger(ConnectionUtil.class);
 
   public static String readResponseMessage(InputStream is) {
     StringBuffer sb = new StringBuffer();

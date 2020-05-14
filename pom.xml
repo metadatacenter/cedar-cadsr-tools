@@ -69,6 +69,11 @@
       <artifactId>jakarta.activation</artifactId>
       <version>1.2.1</version>
     </dependency>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <version>3.6</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -93,7 +98,7 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.category.CadsrCategoriesTransformerTool</mainClass>
+              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrCategoriesTransformerTool</mainClass>
             </configuration>
           </execution>
           <execution>
@@ -102,7 +107,7 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.category.CadsrCategoriesUploaderTool</mainClass>
+              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrCategoriesUploaderTool</mainClass>
             </configuration>
           </execution>
           <execution>
@@ -111,7 +116,7 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.cde.CadsrTransformerTool</mainClass>
+              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrTransformerTool</mainClass>
             </configuration>
           </execution>
           <execution>
@@ -120,7 +125,7 @@
               <goal>java</goal>
             </goals>
             <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.cde.CadsrUploaderTool</mainClass>
+              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrUploaderTool</mainClass>
             </configuration>
           </execution>
         </executions>

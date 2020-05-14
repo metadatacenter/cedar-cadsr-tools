@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor.cde;
+package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,9 +7,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
-import com.google.inject.internal.cglib.proxy.$FixedValue;
-import org.metadatacenter.cadsr.ingestor.ConnectionUtils;
-import org.metadatacenter.cadsr.ingestor.JsonUtils;
+import org.metadatacenter.cadsr.ingestor.ConnectionUtil;
+import org.metadatacenter.cadsr.ingestor.JsonUtil;
+import org.metadatacenter.cadsr.ingestor.cde.CadsrUtils;
+import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -186,8 +187,8 @@ public class CadsrUploaderTool {
               //logger.info("CDE uploaded: " + payload);
               if (attachCategories) {
                 // Read the CDE @id
-                String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
-                String cedarCdeId = JsonUtils.extractJsonFieldValue(response, "@id");
+                String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
+                String cedarCdeId = JsonUtil.extractJsonFieldValue(response, "@id");
                 attachCdeToCategories(cedarCdeId, categoryIds, attachCategoryEndpoint, apiKey);
               }
             }
@@ -223,7 +224,7 @@ public class CadsrUploaderTool {
         logErrorMessage(conn);
       } else {
         // Read the CDE @id
-        String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
+        String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
         JsonNode categoryTree = objectMapper.readTree(response);
         categoryIdsMap = CadsrUtils.getCategoryIdsFromCategoryTree(categoryTree);
       }
@@ -343,13 +344,13 @@ public class CadsrUploaderTool {
 
 
   private static void logErrorMessage(final HttpURLConnection conn) {
-    String response = ConnectionUtils.readResponseMessage(conn.getErrorStream());
+    String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
     logger.error(response);
     throw new RuntimeException("Unable to upload CDE. Reason:\n" + response);
   }
 
   private static void logResponseMessage(final HttpURLConnection conn) throws IOException {
-    String response = ConnectionUtils.readResponseMessage(conn.getInputStream());
+    String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
     String message = createMessageBasedOnFieldNameAndId(response);
     logger.debug("POST 200 OK: " + message);
   }

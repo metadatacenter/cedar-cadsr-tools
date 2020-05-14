@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 
-public class JsonUtils {
+public class JsonUtil {
 
   public static String extractJsonFieldValue(String json, String fieldName) throws IOException {
     JsonNode node = new ObjectMapper().readTree(json);
