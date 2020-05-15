@@ -3,7 +3,7 @@ package org.metadatacenter.cadsr.ingestor;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
-import org.metadatacenter.cadsr.ingestor.cde.CadsrUtils;
+import org.metadatacenter.cadsr.ingestor.Util.CadsrUtils;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
 

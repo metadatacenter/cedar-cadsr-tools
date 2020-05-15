@@ -1,14 +1,12 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.Util;
 
 import com.google.common.io.Files;
-import org.metadatacenter.cadsr.ingestor.cde.CadsrUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Optional;
 
 public class Util {
 
@@ -93,5 +91,4 @@ public class Util {
     e.printStackTrace(printWriter);
     return writer.toString();
   }
-
 }

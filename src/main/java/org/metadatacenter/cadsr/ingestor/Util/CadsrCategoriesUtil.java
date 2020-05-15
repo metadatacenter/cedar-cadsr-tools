@@ -1,12 +1,15 @@
-package org.metadatacenter.cadsr.ingestor.category;
+package org.metadatacenter.cadsr.ingestor.Util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.metadatacenter.cadsr.category.schema.CSI;
 import org.metadatacenter.cadsr.category.schema.ClassificationScheme;
 import org.metadatacenter.cadsr.category.schema.Classifications;
 import org.metadatacenter.cadsr.category.schema.Context;
-import org.metadatacenter.cadsr.ingestor.Constants;
-import org.metadatacenter.cadsr.ingestor.Util;
+import org.metadatacenter.cadsr.ingestor.category.Category;
+import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
+import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,29 +17,144 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class CadsrCategoriesUtils {
+public class CadsrCategoriesUtil {
 
-  private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesUtils.class);
+  private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesUtil.class);
 
-  public static void convertCdeCategoriesFromFile(File inputFile, File outputDir) throws IOException {
+  private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
+
+  private static ObjectMapper objectMapper = new ObjectMapper();
+
+  /**
+   *
+   * @param inputFile
+   * @param outputDir
+   * @return Category Tree file
+   * @throws IOException
+   */
+  public static File convertCdeCategoriesFromFile(File inputFile, File outputDir) throws IOException {
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
-    File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
-    List<CategoryTreeNode> categoryTree = null;
-
+    //File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
+    List<CategoryTreeNode> categoryTree;
+    File categoryTreeFile = null;
     try {
-      Classifications classifications = CadsrCategoriesUtils.getClassifications(new FileInputStream(inputFile));
-      categoryTree = CadsrCategoriesUtils.classificationsToCategoryTree(classifications);
+      Classifications classifications = CadsrCategoriesUtil.getClassifications(new FileInputStream(inputFile));
+      categoryTree = CadsrCategoriesUtil.classificationsToCategoryTree(classifications);
       logger.info("Generating categories file...");
       String categoriesFileName = inputFile.getName().substring(0,inputFile.getName().lastIndexOf('.')) + ".json";
-      new ObjectMapper().writeValue(new File(outputSubDir, categoriesFileName), categoryTree);
+      categoryTreeFile = new File(outputDir, categoriesFileName);
+      new ObjectMapper().writeValue(categoryTreeFile, categoryTree);
     } catch (JAXBException e) {
       e.printStackTrace();
     }
+    return categoryTreeFile;
+  }
+
+  public static void convertCdeCategoriesFromDirectory(File inputDir, File outputDir) throws IOException {
+    for (final File inputFile : inputDir.listFiles()) {
+      convertCdeCategoriesFromFile(inputFile, outputDir);
+    }
+  }
+
+  public static int uploadCategoriesFromDirectory(File inputDir, String cedarRootCategoryId, String endpoint,
+                                                   String apiKey) throws IOException {
+    int totalCategories = 0;
+    for (final File inputFile : inputDir.listFiles()) {
+      totalCategories += uploadCategoriesFromFile(inputFile, cedarRootCategoryId, endpoint, apiKey);
+    }
+    return totalCategories;
+  }
+
+  public static int uploadCategoriesFromFile(File inputFile, String cedarRootCategoryId, String endpoint,
+                                             String apiKey) throws IOException {
+
+    List<CategoryTreeNode> categoryTreeNodes = readCategoriesFromFile(inputFile);
+    int counter = 0;
+    for (CategoryTreeNode categoryTreeNode : categoryTreeNodes) {
+      uploadCategory(categoryTreeNode, cedarRootCategoryId, endpoint, apiKey, counter);
+    }
+    return counter;
+  }
+
+//  public static String getCedarRootCategoryId(CedarEnvironment targetEnvironment) {
+//    ServerUtil.getRootCategoryRestEndpoint(targetEnvironment);
+//
+//  }
+
+  private static void uploadCategory(CategoryTreeNode category, String cedarParentCategoryId,
+                                     String endpoint, String apiKey, int counter) {
+
+    CedarCategory cedarCategory =
+        new CedarCategory(category.getCadsrId(), category.getName(), category.getDescription(), cedarParentCategoryId);
+
+    HttpURLConnection conn = null;
+    try {
+      Thread.sleep(50);
+      logger.info("Trying to upload: " + category.getCadsrId());
+      String payload = objectMapper.writeValueAsString(cedarCategory);
+      conn = ConnectionUtil.createAndOpenConnection("POST", endpoint, apiKey);
+      OutputStream os = conn.getOutputStream();
+      os.write(payload.getBytes());
+      os.flush();
+      int responseCode = conn.getResponseCode();
+      if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED) {
+        logger.error("Error creating category: " + category.getCadsrId());
+        logErrorMessage(conn);
+      } else {
+        logger.info("Category created: " + payload);
+        String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
+        String cedarCategoryId = JsonUtil.extractJsonFieldValue(response, "@id");
+        counter++;
+        //logger.info(String.format("Uploading categories (%d/%d)", counter, allCategories.size()));
+        for (CategoryTreeNode categoryTreeNode : category.getChildren()) {
+          uploadCategory(categoryTreeNode, cedarCategoryId, endpoint, apiKey, counter);
+        }
+      }
+    } catch (JsonProcessingException e) {
+      logger.error(e.toString());
+    } catch (IOException e) {
+      logger.error(e.toString());
+    } catch (InterruptedException e) {
+      logger.error(e.getMessage());
+    } finally {
+      if (conn != null) {
+        conn.disconnect();
+      }
+    }
+  }
+
+  private static List<CategoryTreeNode> readCategoriesFromFile(File inputFile) throws IOException {
+    logger.info("Processing input file at " + inputFile.getAbsolutePath());
+    List<CategoryTreeNode> categories =
+        objectMapper.readValue(inputFile, objectMapper.getTypeFactory().constructCollectionType(List.class,
+            CategoryTreeNode.class));
+    return categories;
+  }
+
+  private static void logErrorMessage(final HttpURLConnection conn) {
+    String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
+    logger.error(response);
+    throw new RuntimeException("Unable to upload Category. Reason:\n" + response);
+  }
+
+  private static void logResponseMessage(final HttpURLConnection conn) throws IOException {
+    String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
+    String message = createMessageBasedOnFieldNameAndId(response);
+    logger.debug("POST 200 OK: " + message);
+  }
+
+  private static String createMessageBasedOnFieldNameAndId(String response) throws IOException {
+    JsonNode responseNode = objectMapper.readTree(response);
+    String fieldName = responseNode.get("schema:name").asText();
+    String fieldId = responseNode.get("@id").asText();
+    return String.format("%s (ID: %s)", fieldName, fieldId);
   }
 
   public static Classifications getClassifications(InputStream is) throws JAXBException,
@@ -86,7 +204,7 @@ public class CadsrCategoriesUtils {
     return categories;
   }
 
-  private static List<Category> classificationSchemeItemToCategories(CSI csi, Optional<String> ctxId,
+  public static List<Category> classificationSchemeItemToCategories(CSI csi, Optional<String> ctxId,
                                                                      Optional<String> csId, String parentUniqueId, List<Category> categories) {
 
     Category category = generateCategory(csi.getClassificationSchemeItemName(), ctxId, csId,
@@ -111,7 +229,7 @@ public class CadsrCategoriesUtils {
    * @param categories
    * @return
    */
-  private static List<Category> addCategoryToList(Category newCategory, List<Category> categories) {
+  public static List<Category> addCategoryToList(Category newCategory, List<Category> categories) {
 
     List<Integer> positionsSameCategory = new ArrayList<>();
 
@@ -152,11 +270,11 @@ public class CadsrCategoriesUtils {
     return new Category(id, cadsrId, uniqueId, categoryName, description, categoryType, parentUniqueId, version);
   }
 
-  private static List<CategoryTreeNode> categoriesListToTree(List<Category> categories) {
+  public static List<CategoryTreeNode> categoriesListToTree(List<Category> categories) {
     return getChildrenNodes(Constants.ROOT_CATEGORY_KEY, categories);
   }
 
-  private static List<CategoryTreeNode> getChildrenNodes(String parentId, List<Category> categories) {
+  public static List<CategoryTreeNode> getChildrenNodes(String parentId, List<Category> categories) {
     List<CategoryTreeNode> childrenNodes = new ArrayList<>();
     for (Category category : categories) {
       if (category.getParentId().equals(parentId)) {
@@ -190,4 +308,5 @@ public class CadsrCategoriesUtils {
       return categoryId;
     }
   }
+
 }
