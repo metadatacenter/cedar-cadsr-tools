@@ -1,10 +1,11 @@
-package org.metadatacenter.cadsr.ingestor.cde;
+package org.metadatacenter.cadsr.ingestor.Util;
 
 import org.metadatacenter.cadsr.cde.schema.DataElement;
-import org.metadatacenter.cadsr.ingestor.Util;
+import org.metadatacenter.cadsr.ingestor.Util.Util;
+import org.metadatacenter.cadsr.ingestor.cde.Value;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
 
-import static org.metadatacenter.cadsr.ingestor.Constants.CDE_VALUESETS_ONTOLOGY_IRI;
+import static org.metadatacenter.cadsr.ingestor.Util.Constants.CDE_VALUESETS_ONTOLOGY_IRI;
 
 public class ValueSetsUtil {
 

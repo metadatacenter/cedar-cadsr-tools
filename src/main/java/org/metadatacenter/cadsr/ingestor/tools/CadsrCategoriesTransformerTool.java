@@ -1,21 +1,14 @@
 package org.metadatacenter.cadsr.ingestor.tools;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
-import org.metadatacenter.cadsr.category.schema.Classifications;
-import org.metadatacenter.cadsr.ingestor.Util;
-import org.metadatacenter.cadsr.ingestor.category.CadsrCategoriesUtils;
-import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
+import org.metadatacenter.cadsr.ingestor.Util.Util;
+import org.metadatacenter.cadsr.ingestor.Util.CadsrCategoriesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBException;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,9 +32,9 @@ public class CadsrCategoriesTransformerTool {
       File inputSource = new File(inputSourceLocation);
       File outputDir = Util.checkDirectoryExists(outputTargetLocation);
       if (inputSource.isDirectory()) {
-        totalCategories = convertCdeCategoriesFromDirectory(inputSource, outputDir);
+        CadsrCategoriesUtil.convertCdeCategoriesFromDirectory(inputSource, outputDir);
       } else {
-        totalCategories = convertCdeCategoriesFromFile(inputSource, outputDir);
+        CadsrCategoriesUtil.convertCdeCategoriesFromFile(inputSource, outputDir);
       }
       success = true;
     } catch (Exception e) {
@@ -50,32 +43,6 @@ public class CadsrCategoriesTransformerTool {
     } finally {
       printSummary(stopwatch, totalCategories, success);
     }
-  }
-
-  private static int convertCdeCategoriesFromDirectory(File inputDir, File outputDir) throws IOException {
-    int totalCategories = 0;
-    for (final File inputFile : inputDir.listFiles()) {
-      totalCategories += convertCdeCategoriesFromFile(inputFile, outputDir);
-    }
-    return totalCategories;
-  }
-
-  public static int convertCdeCategoriesFromFile(File inputFile, File outputDir) throws IOException {
-    logger.info("Processing input file at " + inputFile.getAbsolutePath());
-    File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
-    List<CategoryTreeNode> categoryTree = null;
-
-    try {
-      Classifications classifications = CadsrCategoriesUtils.getClassifications(new FileInputStream(inputFile));
-      categoryTree = CadsrCategoriesUtils.classificationsToCategoryTree(classifications);
-      logger.info("Generating categories file...");
-      String categoriesFileName = inputFile.getName().substring(0,inputFile.getName().lastIndexOf('.')) + ".json";
-      new ObjectMapper().writeValue(new File(outputSubDir, categoriesFileName), categoryTree);
-    } catch (JAXBException e) {
-      e.printStackTrace();
-    }
-    // FIX
-    return categoryTree.size();
   }
 
   private static void printSummary(Stopwatch stopwatch, int totalCdes, boolean success) {

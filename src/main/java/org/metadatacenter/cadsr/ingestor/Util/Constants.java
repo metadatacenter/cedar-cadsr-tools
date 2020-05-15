@@ -1,6 +1,16 @@
-package org.metadatacenter.cadsr.ingestor;
+package org.metadatacenter.cadsr.ingestor.Util;
 
 public final class Constants {
+
+  public enum CedarEnvironment {LOCAL, STAGING, PRODUCTION}
+
+  public static final String LOCAL_RESOURCE_SERVER_URL = "https://resource.metadatacenter.orgx";
+  public static final String STAGING_RESOURCE_SERVER_URL = "https://resource.staging.metadatacenter.org";
+  public static final String PRODUCTION_RESOURCE_SERVER_URL = "https://resource.metadatacenter.org";
+
+  public static final String LOCAL_REPO_SERVER_URL = "https://repo.metadatacenter.orgx";
+  public static final String STAGING_REPO_SERVER_URL = "https://repo.staging.metadatacenter.org";
+  public static final String PRODUCTION_REPO_SERVER_URL = "https://repo.metadatacenter.org";
 
   public static final String CHARSET = "UTF-8";
 

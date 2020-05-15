@@ -1,32 +1,15 @@
 package org.metadatacenter.cadsr.ingestor.tools;
 
-import com.google.common.base.Stopwatch;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.metadatacenter.cadsr.category.schema.Classifications;
-import org.metadatacenter.cadsr.cde.schema.DataElement;
-import org.metadatacenter.cadsr.cde.schema.DataElementsList;
-import org.metadatacenter.cadsr.ingestor.UnzipUtility;
-import org.metadatacenter.cadsr.ingestor.Util;
-import org.metadatacenter.cadsr.ingestor.category.CadsrCategoriesUtils;
-import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
-import org.metadatacenter.cadsr.ingestor.cde.CadsrUtils;
-import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
+import org.metadatacenter.cadsr.ingestor.Util.UnzipUtility;
+import org.metadatacenter.cadsr.ingestor.Util.Util;
+import org.metadatacenter.cadsr.ingestor.Util.CadsrCategoriesUtil;
+import org.metadatacenter.cadsr.ingestor.Util.Constants.CedarEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public class CadsrCategoriesAndCdesUpdaterTool {
 
@@ -48,8 +31,8 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite.zip";
     final String cdesUnzippedFolderPath = cdesFolderPath + "/unzipped";
 
-    final String cedarCadsrUserApiKey = "";
-
+    final String cedarCadsrUserApiKey = "58c4f22b9ea1548047682f3112f2f1bcedcb5e40443ddb5e6a11bda0629c2f20"; // In my local system I'm using the cedar-admin api key
+    final CedarEnvironment targetEnvironment = CedarEnvironment.LOCAL;
 
     /*** OUTPUTS ***/
     final String categoryTreeFolderPath = categoriesFolderPath + "/tree";
@@ -71,13 +54,21 @@ public class CadsrCategoriesAndCdesUpdaterTool {
       /*** Transform XML caDSR classifications to a CEDAR JSON category tree ***/
       File classificationsFile = (new File(categoriesUnzippedFolderPath)).listFiles()[0];
       File categoryTreeFolder = Util.checkDirectoryExists(categoryTreeFolderPath);
-      CadsrCategoriesUtils.convertCdeCategoriesFromFile(classificationsFile, categoryTreeFolder);
+      File categoryTreeFile = CadsrCategoriesUtil.convertCdeCategoriesFromFile(classificationsFile, categoryTreeFolder);
 
       /*** Upload JSON Category Tree to CEDAR ***/
-      String inputSourceLocation = args[0];
-      String cedarRootCategoryId = args[1];
-      String targetServer = args[2];
-      String apiKey = args[3];
+//      ServerUtil.getRoo
+//
+//      String categoryEndPoint = CadsrCategoriesUtils.getRestEndpoint(resourceServerUrl);
+//      CadsrCategoriesUtils.uploadCategoriesFromFile(categoryTreeFile, )
+
+//      public static int uploadCategoriesFromFile(File inputFile, String cedarRootCategoryId, String endpoint,
+//          String apiKey) throws IOException {
+
+//      String inputSourceLocation = args[0];
+//      String cedarRootCategoryId = args[1];
+//      String targetServer = args[2];
+//      String apiKey = args[3];
 
       /* 2. Generate CEDAR CDE Actions */
 

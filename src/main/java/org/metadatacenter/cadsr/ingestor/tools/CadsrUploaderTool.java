@@ -7,33 +7,27 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
-import org.metadatacenter.cadsr.ingestor.ConnectionUtil;
-import org.metadatacenter.cadsr.ingestor.JsonUtil;
-import org.metadatacenter.cadsr.ingestor.cde.CadsrUtils;
+import org.metadatacenter.cadsr.ingestor.Util.ConnectionUtil;
+import org.metadatacenter.cadsr.ingestor.Util.JsonUtil;
+import org.metadatacenter.cadsr.ingestor.Util.ServerUtil;
+import org.metadatacenter.cadsr.ingestor.Util.CadsrUtils;
 import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static org.metadatacenter.cadsr.ingestor.Constants.*;
+import static org.metadatacenter.cadsr.ingestor.Util.Constants.*;
 
 public class CadsrUploaderTool {
 
@@ -45,21 +39,10 @@ public class CadsrUploaderTool {
 
   private static Map<String, String> categoryIdsToCedarCategoryIds = new HashMap<>();
 
-  //@formatter:off
-  private static TrustManager[] trustAllCerts = new TrustManager[1];
-  static {
-    trustAllCerts[0] = new X509TrustManager() {
-      public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
-      public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-      public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-    };
-  }
-  //@formatter:on
-
   public static void main(String[] args) {
 
     String inputSourceLocation = args[0];
-    String targetServer = args[1];
+    CedarEnvironment targetServer = ServerUtil.toCedarEnvironment(args[1]);
     String folderId = args[2];
     String apiKey = args[3];
     boolean attachCategories = false;
@@ -69,7 +52,7 @@ public class CadsrUploaderTool {
 
     // Read the categoryIds from CEDAR to be able to link CDEs to them
     if (attachCategories) {
-      String categoryTreeEndpoint = getCategoryTreeEndpoint(targetServer);
+      String categoryTreeEndpoint = ServerUtil.getCategoryTreeEndpoint(targetServer);
       try {
         categoryIdsToCedarCategoryIds = getCedarCategoryIds(categoryTreeEndpoint, apiKey);
       } catch (IOException e) {
@@ -84,7 +67,7 @@ public class CadsrUploaderTool {
     try {
       File inputSource = new File(inputSourceLocation);
       String templateFieldsEndpoint = getTemplateFieldsEndpoint(targetServer, folderId);
-      String attachCategoriesEndpoint = getAttachCategoriesEndpoint(targetServer);
+      String attachCategoriesEndpoint = ServerUtil.getAttachCategoriesEndpoint(targetServer);
       if (inputSource.isDirectory()) {
         totalCdes = uploadCdeFromDirectory(inputSource, attachCategories, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
       } else {
@@ -100,47 +83,12 @@ public class CadsrUploaderTool {
     }
   }
 
-  private static String getTemplateFieldsEndpoint(String targetServer, String folderId) {
-    String serverUrl = getServerUrl(targetServer);
-    String folderUrl = getFolderUrl(targetServer);
-    return serverUrl + "/template-fields?folder_id=" + folderUrl + "%2F" + folderId;
-  }
-
-  private static String getServerUrl(String targetServer) {
-    if ("local".equals(targetServer)) {
-      return "https://resource.metadatacenter.orgx";
-    } else if ("staging".equals(targetServer)) {
-      return "https://resource.staging.metadatacenter.org";
-    } else if ("production".equals(targetServer)) {
-      return "https://resource.metadatacenter.org";
-    }
-    throw new RuntimeException("Invalid target server, possible values are 'local', 'staging', 'production'");
-  }
-
-  private static String getFolderUrl(String targetServer) {
-    if ("local".equals(targetServer)) {
-      return "https:%2F%2Frepo.metadatacenter.orgx%2Ffolders";
-    } else if ("staging".equals(targetServer)) {
-      return "https:%2F%2Frepo.staging.metadatacenter.org%2Ffolders";
-    } else if ("production".equals(targetServer)) {
-      return "https:%2F%2Frepo.metadatacenter.org%2Ffolders";
-    }
-    throw new RuntimeException("Invalid target server, possible values are 'local', 'staging', 'production'");
-  }
-
-  private static String getCategoryTreeEndpoint(String targetServer) {
-    String serverUrl = getServerUrl(targetServer);
-    return serverUrl + "/categories/tree";
-  }
-
-  private static String getAttachCategoryEndpoint(String targetServer) {
-    String serverUrl = getServerUrl(targetServer);
-    return serverUrl + "/command/attach-category";
-  }
-
-  private static String getAttachCategoriesEndpoint(String targetServer) {
-    String serverUrl = getServerUrl(targetServer);
-    return serverUrl + "/command/attach-categories";
+  private static String getTemplateFieldsEndpoint(CedarEnvironment targetEnvironment, String folderId) {
+    String resourceServerUrl = ServerUtil.getResourceServerUrl(targetEnvironment);
+    String repoServerUrl = ServerUtil.getRepoServerUrl(targetEnvironment);
+    String url = resourceServerUrl + "/template-fields?folder_id=" +
+        URLEncoder.encode(repoServerUrl + "/folders/", StandardCharsets.UTF_8) + folderId;
+    return url;
   }
 
   private static int uploadCdeFromDirectory(File inputDir, boolean attachCategories, String templateFieldsEndpoint,
@@ -154,11 +102,6 @@ public class CadsrUploaderTool {
 
   public static int uploadCdeFromFile(File inputFile, boolean attachCategories, String templateFieldsEndpoint,
                                       String attachCategoryEndpoint, String apiKey) throws IOException {
-
-      /**********/
-//      templateFieldsEndpoint = "http://www.mocky.io/v2/5d77e1e83200005847924066";
-//      attachCategoryEndpoint = "http://www.mocky.io/v2/5d77e1e83200005847924066";
-      /**********/
 
       logger.info("Processing input file at " + inputFile.getAbsolutePath());
       Collection<Map<String, Object>> fieldMaps =
@@ -176,7 +119,7 @@ public class CadsrUploaderTool {
             fieldMap.remove(CDE_CATEGORY_IDS_FIELD);
 
             String payload = objectMapper.writeValueAsString(fieldMap);
-            conn = createAndOpenConnection("POST", templateFieldsEndpoint, apiKey);
+            conn = ConnectionUtil.createAndOpenConnection("POST", templateFieldsEndpoint, apiKey);
             OutputStream os = conn.getOutputStream();
             os.write(payload.getBytes());
             os.flush();
@@ -210,15 +153,10 @@ public class CadsrUploaderTool {
   }
 
   private static Map<String, String> getCedarCategoryIds(String endpoint, String apiKey) throws IOException {
-
-    /**********/
-    //endpoint = "http://www.mocky.io/v2/5d77fe6b3200006f7f9240ee";
-    /***********/
-
     Map<String, String> categoryIdsMap = null;
     HttpURLConnection conn = null;
     try {
-      conn = createAndOpenConnection("GET", endpoint, apiKey);
+      conn = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
       int responseCode = conn.getResponseCode();
       if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
         logErrorMessage(conn);
@@ -260,7 +198,7 @@ public class CadsrUploaderTool {
         try {
           String payload = objectMapper.writeValueAsString(node);
           logger.info("Attaching CDE to category: " + payload);
-          conn = createAndOpenConnection("POST", endpoint, apiKey);
+          conn = ConnectionUtil.createAndOpenConnection("POST", endpoint, apiKey);
           OutputStream os = conn.getOutputStream();
           os.write(payload.getBytes());
           os.flush();
@@ -318,7 +256,7 @@ public class CadsrUploaderTool {
       try {
         String payload = objectMapper.writeValueAsString(node);
         logger.info("Attaching CDE to category: " + payload);
-        conn = createAndOpenConnection("POST", endpoint, apiKey);
+        conn = ConnectionUtil.createAndOpenConnection("POST", endpoint, apiKey);
         OutputStream os = conn.getOutputStream();
         os.write(payload.getBytes());
         os.flush();
@@ -342,7 +280,6 @@ public class CadsrUploaderTool {
     }
   }
 
-
   private static void logErrorMessage(final HttpURLConnection conn) {
     String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
     logger.error(response);
@@ -360,33 +297,6 @@ public class CadsrUploaderTool {
     String fieldName = responseNode.get("schema:name").asText();
     String fieldId = responseNode.get("@id").asText();
     return String.format("%s (ID: %s)", fieldName, fieldId);
-  }
-
-  private static HttpURLConnection createAndOpenConnection(String requestMethod, String endpoint, String apiKey) throws IOException {
-    ignoreSSLCheckingByAcceptingAnyCertificates();
-    try {
-      URL url = new URL(endpoint);
-      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-      conn.setDoOutput(true);
-      conn.setRequestProperty("Content-Type", "application/json");
-      conn.setRequestProperty("Authorization", apiKey);
-      return conn;
-    } catch (MalformedURLException e) {
-      logger.error(e.getMessage());
-      throw new RuntimeException(e.getMessage());
-    }
-  }
-
-  private static void ignoreSSLCheckingByAcceptingAnyCertificates() {
-    try {
-      SSLContext sc = SSLContext.getInstance("SSL");
-      sc.init(null, trustAllCerts, new java.security.SecureRandom());
-      HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-      HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> 1 == 1);
-    } catch (KeyManagementException | NoSuchAlgorithmException e) {
-      logger.error(e.getMessage());
-      throw new RuntimeException(e.getMessage());
-    }
   }
 
   private static boolean multiplesOfAHundred(int counter) {
