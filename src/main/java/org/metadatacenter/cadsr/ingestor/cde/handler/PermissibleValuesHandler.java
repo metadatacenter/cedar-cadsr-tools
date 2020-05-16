@@ -10,7 +10,7 @@ import org.metadatacenter.cadsr.cde.schema.PermissibleValuesITEM;
 import org.metadatacenter.cadsr.ingestor.cde.CadsrConceptOrigins;
 import org.metadatacenter.cadsr.ingestor.cde.Value;
 import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
-import org.metadatacenter.cadsr.ingestor.Util.ValueSetsUtil;
+import org.metadatacenter.cadsr.ingestor.Util.ValueSetUtil;
 import org.metadatacenter.cadsr.ingestor.exception.DuplicatedAxiomException;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
@@ -69,7 +69,7 @@ public class PermissibleValuesHandler implements ModelHandler {
       String valueDomainVersion = dataElement.getVALUEDOMAIN().getVersion().getContent();
       String valueSetId = null;
       try {
-        valueSetId = ValueSetsUtil.generateValueSetId(valueDomainId, valueDomainVersion);
+        valueSetId = ValueSetUtil.generateValueSetId(valueDomainId, valueDomainVersion);
       } catch (InvalidIdentifierException e) {
         logger.error(e.getMessage());
       }
@@ -133,7 +133,7 @@ public class PermissibleValuesHandler implements ModelHandler {
   private void setListOfClasses(String valueSetId, Set<Value> values) {
     for (Value value : values) {
       Map<String, Object> cls = Maps.newHashMap();
-      cls.put(ModelNodeNames.VALUE_CONSTRAINTS_URI, ValueSetsUtil.generateValueId(valueSetId, value));
+      cls.put(ModelNodeNames.VALUE_CONSTRAINTS_URI, ValueSetUtil.generateValueId(valueSetId, value));
       cls.put(ModelNodeNames.VALUE_CONSTRAINTS_LABEL, value.getDisplayLabel());
       cls.put(ModelNodeNames.VALUE_CONSTRAINTS_PREFLABEL, value.getDbLabel());
       cls.put(ModelNodeNames.VALUE_CONSTRAINTS_TYPE, ModelNodeValues.ONTOLOGY_CLASS);
@@ -146,7 +146,7 @@ public class PermissibleValuesHandler implements ModelHandler {
     Map<String, Object> valueSet = Maps.newHashMap();
     valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_NAME, dataElement.getVALUEDOMAIN().getLongName().getContent());
     valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_VS_COLLECTION, CDE_VALUESETS_ONTOLOGY_ID);
-    valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_URI, ValueSetsUtil.generateValueSetIRI(dataElement));
+    valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_URI, ValueSetUtil.generateValueSetIRI(dataElement));
     valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_NUM_TERMS, size);
     valueSets.add(valueSet);
   }

@@ -2,8 +2,8 @@ package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.google.common.base.Stopwatch;
 import org.metadatacenter.cadsr.ingestor.Util.Constants.CedarEnvironment;
-import org.metadatacenter.cadsr.ingestor.Util.ServerUtil;
-import org.metadatacenter.cadsr.ingestor.Util.CadsrCategoriesUtil;
+import org.metadatacenter.cadsr.ingestor.Util.CedarServerUtil;
+import org.metadatacenter.cadsr.ingestor.Util.CategoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ public class CadsrCategoriesUploaderTool {
 
     String inputSourceLocation = args[0];
     String cedarRootCategoryId = args[1];
-    CedarEnvironment targetEnvironment = ServerUtil.toCedarEnvironment(args[2]);
+    CedarEnvironment targetEnvironment = CedarServerUtil.toCedarEnvironment(args[2]);
     String apiKey = args[3];
 
     final Stopwatch stopwatch = Stopwatch.createStarted();
@@ -28,13 +28,10 @@ public class CadsrCategoriesUploaderTool {
     boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
-
-      String endpoint = ServerUtil.getCategoriesRestEndpoint(targetEnvironment);
-
       if (inputSource.isDirectory()) {
-        totalCategories = CadsrCategoriesUtil.uploadCategoriesFromDirectory(inputSource, cedarRootCategoryId, endpoint, apiKey);
+        totalCategories = CategoryUtil.uploadCategoriesFromDirectory(inputSource, cedarRootCategoryId, targetEnvironment, apiKey);
       } else {
-        totalCategories = CadsrCategoriesUtil.uploadCategoriesFromFile(inputSource, cedarRootCategoryId, endpoint, apiKey);
+        totalCategories = CategoryUtil.uploadCategoriesFromFile(inputSource, cedarRootCategoryId, targetEnvironment, apiKey);
       }
       success = true;
     } catch (Exception e) {

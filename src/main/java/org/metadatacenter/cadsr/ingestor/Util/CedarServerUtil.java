@@ -3,11 +3,15 @@ package org.metadatacenter.cadsr.ingestor.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import static org.metadatacenter.cadsr.ingestor.Util.Constants.*;
 
-public class ServerUtil {
+public class CedarServerUtil {
 
-  private static final Logger logger = LoggerFactory.getLogger(ServerUtil.class);
+  private static final Logger logger = LoggerFactory.getLogger(CedarServerUtil.class);
 
   public static CedarEnvironment toCedarEnvironment(String targetEnvironment) {
     if (targetEnvironment.compareToIgnoreCase(CedarEnvironment.LOCAL.name()) == 0) {
@@ -70,6 +74,26 @@ public class ServerUtil {
   public static String getAttachCategoriesEndpoint(CedarEnvironment targetEnvironment) {
     String serverUrl = getResourceServerUrl(targetEnvironment);
     return serverUrl + "/command/attach-categories";
+  }
+
+  public static String getTemplateFieldsEndpoint(String folderShortId, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
+    String resourceServerUrl = CedarServerUtil.getResourceServerUrl(targetEnvironment);
+    String repoServerUrl = CedarServerUtil.getRepoServerUrl(targetEnvironment);
+    String folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderShortId);
+    return resourceServerUrl + "/template-fields?folder_id=" + folderId;
+  }
+
+  public static String getTemplateFieldEndPoint(String fieldId, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
+    String serverUrl = getResourceServerUrl(targetEnvironment);
+    fieldId = GeneralUtil.encodeIfNeeded(fieldId);
+    return serverUrl + "/template-fields/" + fieldId;
+  }
+
+  public static String getFolderContentsEndPoint(String folderShortId, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
+    String resourceServerUrl = CedarServerUtil.getResourceServerUrl(targetEnvironment);
+    String repoServerUrl = CedarServerUtil.getRepoServerUrl(targetEnvironment);
+    String folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderShortId);
+    return resourceServerUrl + "/folders/" + folderId + "/contents";
   }
 
 }

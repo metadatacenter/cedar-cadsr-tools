@@ -23,9 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CadsrUtils {
+public class CdeUtil {
 
-  private static final Logger logger = LoggerFactory.getLogger(CadsrUtils.class);
+  private static final Logger logger = LoggerFactory.getLogger(CdeUtil.class);
 
   public static Collection<Map<String, Object>> getFieldMapsFromDataElements(DataElementsList del) {
     final List<Map<String, Object>> fieldMaps = Lists.newArrayList();
@@ -76,7 +76,7 @@ public class CadsrUtils {
   public static DataElementsList getDataElementLists(InputStream is) throws JAXBException, IOException {
     JAXBContext jaxbContext = JAXBContext.newInstance(DataElementsList.class);
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-    InputStream cleanIs = Util.processInvalidXMLCharacters(is);
+    InputStream cleanIs = GeneralUtil.processInvalidXMLCharacters(is);
     return (DataElementsList) jaxbUnmarshaller.unmarshal(new InputStreamReader(cleanIs, Constants.CHARSET));
   }
 

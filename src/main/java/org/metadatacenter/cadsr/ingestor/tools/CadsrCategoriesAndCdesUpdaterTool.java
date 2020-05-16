@@ -1,15 +1,25 @@
 package org.metadatacenter.cadsr.ingestor.tools;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
-import org.metadatacenter.cadsr.ingestor.Util.UnzipUtility;
-import org.metadatacenter.cadsr.ingestor.Util.Util;
-import org.metadatacenter.cadsr.ingestor.Util.CadsrCategoriesUtil;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElementsList;
+import org.metadatacenter.cadsr.ingestor.Util.*;
 import org.metadatacenter.cadsr.ingestor.Util.Constants.CedarEnvironment;
+import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.JAXBException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class CadsrCategoriesAndCdesUpdaterTool {
 
@@ -31,8 +41,14 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite.zip";
     final String cdesUnzippedFolderPath = cdesFolderPath + "/unzipped";
 
-    final String cedarCadsrUserApiKey = "58c4f22b9ea1548047682f3112f2f1bcedcb5e40443ddb5e6a11bda0629c2f20"; // In my local system I'm using the cedar-admin api key
+    // Id of the CEDAR folder where the contents will be uploaded
+    final String cedarFolderShortId = "196dc02b-3aa5-4693-8c20-9b4e3b3fad20";
+
+    // caDSR user's api key
+    final String apiKey = "apiKey 58c4f22b9ea1548047682f3112f2f1bcedcb5e40443ddb5e6a11bda0629c2f20"; // In my local system I'm using the cedar-admin api key
     final CedarEnvironment targetEnvironment = CedarEnvironment.LOCAL;
+
+    boolean reuploadCategories = false;
 
     /*** OUTPUTS ***/
     final String categoryTreeFolderPath = categoriesFolderPath + "/tree";
@@ -53,11 +69,46 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 
       /*** Transform XML caDSR classifications to a CEDAR JSON category tree ***/
       File classificationsFile = (new File(categoriesUnzippedFolderPath)).listFiles()[0];
-      File categoryTreeFolder = Util.checkDirectoryExists(categoryTreeFolderPath);
-      File categoryTreeFile = CadsrCategoriesUtil.convertCdeCategoriesFromFile(classificationsFile, categoryTreeFolder);
+      File categoryTreeFolder = GeneralUtil.checkDirectoryExists(categoryTreeFolderPath);
+      File categoryTreeFile = CategoryUtil.convertCdeCategoriesFromFile(classificationsFile, categoryTreeFolder);
 
       /*** Upload JSON Category Tree to CEDAR ***/
-//      ServerUtil.getRoo
+      if (reuploadCategories) {
+        String rootCategoryId = CedarServices.getRootCategoryId(targetEnvironment, apiKey);
+        // Delete existing category tree
+        CedarServices.deleteCategoryTree(targetEnvironment, apiKey);
+        CategoryUtil.uploadCategoriesFromFile(categoryTreeFile, rootCategoryId, targetEnvironment, apiKey);
+      }
+
+      /*** Transform XML CDEs to CEDAR fields and upload them to CEDAR ***/
+
+      // Read data elements from xml files
+      List<DataElement> dataElements = new ArrayList<>();
+      for (final File inputFile : new File(cdesUnzippedFolderPath).listFiles()) {
+        logger.info("Processing CDEs file: " + inputFile.getAbsolutePath());
+        DataElementsList dataElementList = CdeUtil.getDataElementLists(new FileInputStream(inputFile));
+        dataElements.addAll(dataElementList.getDataElement());
+      }
+
+      // Delete fields in the CDE folder TODO: not working. It's not able to delete published fields
+      //CedarServices.deleteAllFieldsInFolder(cedarFolderShortId, targetEnvironment, apiKey);
+
+      // For each data element, transform it to a CEDAR field and upload it
+//      int count = 0;
+//      for (DataElement dataElement : dataElements) {
+//        Map<String, Object> fieldMap = CdeUtil.getFieldMapFromDataElement(dataElement);
+//        String templateFieldsEndpoint = CedarServerUtil.getTemplateFieldsEndpoint(cedarFolderShortId, targetEnvironment);
+//        String attachCategoriesEndpoint = CedarServerUtil.getAttachCategoriesEndpoint(targetEnvironment);
+//        logger.info("Uploading CDE");
+//        CdeUploadUtil.uploadCde(fieldMap, false, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
+//        if (count++ == 5) {
+//          break;
+//        }
+//      }
+
+      // Save ontology
+      //ValueSetsOntologyManager.saveOntology(new File(ontologyFilePath));
+
 //
 //      String categoryEndPoint = CadsrCategoriesUtils.getRestEndpoint(resourceServerUrl);
 //      CadsrCategoriesUtils.uploadCategoriesFromFile(categoryTreeFile, )
@@ -85,46 +136,27 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 //      int count = 0;
 //      for (DataElement dataElement : dataElements) {
 //        Map<String, Object> fieldMap = CadsrUtils.getFieldMapFromDataElement(dataElement);
-//
-//
-//
-//
 //        System.out.println(count++);
 //      }
-//
-//
-//
-//
-//
+
 //      // Save ontology to file
 //      ValueSetsOntologyManager.saveOntology(new File(ONTOLOGY_FILE_PATH));
 //      // TODO: Move ontology to a public url where BioPortal can read it
-
 
       /*** Download and read categories and CDEs ***/
 //    String classificationsFolderPath = "/Users/marcosmr/Desktop/tmp/2020-05_cdes_upload_production_process
 //    /classifications/";
 //    String classificationsZipFilePath = classificationsFolderPath + "/xml_cscsi_20204110528.zip";
 //    String classifications
-//
-//
-//
-//
 //      UnzipUtility.unzip(classificationsZipFilePath, classificationsFolderPath);
 //      Classifications classifications = CadsrCategoriesUtils.getClassifications(new FileInputStream
 //      (classificationsFile));
 //      List<CategoryTreeNode> categoryTree = CadsrCategoriesUtils.classificationsToCategoryTree(classifications);
 //    } catch (JAXBException e) {
 //      e.printStackTrace();
-    } catch (IOException e) {
+    } catch (IOException | JAXBException e) {
       e.printStackTrace();
     }
-
-
-//    String cdesFilePath = "/Users/marcosmr/Dropbox/01.INVESTIGACION/\\[2020\\]/2020\\ -\\ NCI\\ CDEs\\ " +
-//        "Project/2020-05\\ Issue\\ 9\\ -\\ Production\\ Process\\ for\\ Updating\\ CDEs/CDEs\\ and\\ " +
-//        "Classifications/cdes/xml_cde_20205110558";
-
 
   }
 

@@ -1,16 +1,22 @@
 package org.metadatacenter.cadsr.ingestor.Util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class Util {
+public class GeneralUtil {
 
-  private static final Logger logger = LoggerFactory.getLogger(CadsrUtils.class);
+  private static ObjectMapper objectMapper = new ObjectMapper();
+  private static final Logger logger = LoggerFactory.getLogger(CdeUtil.class);
 
   public static String getSha1(String input) {
     MessageDigest mDigest = null;
@@ -91,4 +97,37 @@ public class Util {
     e.printStackTrace(printWriter);
     return writer.toString();
   }
+
+  public static String encodeIfNeeded(String uri) throws UnsupportedEncodingException {
+    String decodedUri = URLDecoder.decode(uri, "UTF-8");
+    // It is necessary to encode it
+    if (uri.compareTo(decodedUri) == 0) {
+      return URLEncoder.encode(uri, "UTF-8");
+    }
+    // If was already encoded
+    else {
+      return uri;
+    }
+  }
+
+  public static void logErrorMessage(final HttpURLConnection conn) {
+    String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
+    logger.error(response);
+    throw new RuntimeException("Unable to upload Category. Reason:\n" + response);
+  }
+
+  public static void logResponseMessage(final HttpURLConnection conn) throws IOException {
+    String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
+    String message = createMessageBasedOnFieldNameAndId(response);
+    logger.debug("POST 200 OK: " + message);
+  }
+
+  public static String createMessageBasedOnFieldNameAndId(String response) throws IOException {
+    JsonNode responseNode = objectMapper.readTree(response);
+    String fieldName = responseNode.get("schema:name").asText();
+    String fieldId = responseNode.get("@id").asText();
+    return String.format("%s (ID: %s)", fieldName, fieldId);
+  }
+
+
 }

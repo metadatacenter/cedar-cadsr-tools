@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
 import org.metadatacenter.cadsr.ingestor.Util.Constants;
-import org.metadatacenter.cadsr.ingestor.Util.Util;
+import org.metadatacenter.cadsr.ingestor.Util.GeneralUtil;
 import org.metadatacenter.cadsr.ingestor.cde.CadsrTransformationStats;
-import org.metadatacenter.cadsr.ingestor.Util.CadsrUtils;
+import org.metadatacenter.cadsr.ingestor.Util.CdeUtil;
 import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class CadsrTransformerTool {
     boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
-      File outputDir = Util.checkDirectoryExists(outputTargetLocation);
+      File outputDir = GeneralUtil.checkDirectoryExists(outputTargetLocation);
       if (inputSource.isDirectory()) {
         convertCdeFromDirectory(inputSource, outputDir);
       } else {
@@ -65,8 +65,8 @@ public class CadsrTransformerTool {
 
   public static void convertCdeFromFile(File inputFile, File outputDir) throws IOException {
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
-    File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
-    Collection<Map<String, Object>> fieldMaps = CadsrUtils.getFieldMapsFromInputStream(new FileInputStream(inputFile));
+    File outputSubDir = GeneralUtil.createDirectoryBasedOnInputFileName(inputFile, outputDir);
+    Collection<Map<String, Object>> fieldMaps = CdeUtil.getFieldMapsFromInputStream(new FileInputStream(inputFile));
     int totalFields = fieldMaps.size();
     CadsrTransformationStats.getInstance().numberOfCdesProcessedOk += totalFields;
 
@@ -87,7 +87,7 @@ public class CadsrTransformerTool {
           }
           String fieldJson = mapper.writeValueAsString(fieldMap);
           Files.write(fieldJson.getBytes(), new File(outputSubDir, uuid + ".json"));
-          if (Util.multiplesOfAHundred(counter)) {
+          if (GeneralUtil.multiplesOfAHundred(counter)) {
             logger.info(String.format("Generating CDEs (%d/%d)", counter, totalFields));
           }
           counter++;
