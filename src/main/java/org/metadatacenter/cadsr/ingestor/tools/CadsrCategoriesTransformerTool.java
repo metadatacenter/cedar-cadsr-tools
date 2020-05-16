@@ -1,8 +1,8 @@
 package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.google.common.base.Stopwatch;
-import org.metadatacenter.cadsr.ingestor.Util.Util;
-import org.metadatacenter.cadsr.ingestor.Util.CadsrCategoriesUtil;
+import org.metadatacenter.cadsr.ingestor.Util.GeneralUtil;
+import org.metadatacenter.cadsr.ingestor.Util.CategoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,15 +30,15 @@ public class CadsrCategoriesTransformerTool {
     boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
-      File outputDir = Util.checkDirectoryExists(outputTargetLocation);
+      File outputDir = GeneralUtil.checkDirectoryExists(outputTargetLocation);
       if (inputSource.isDirectory()) {
-        CadsrCategoriesUtil.convertCdeCategoriesFromDirectory(inputSource, outputDir);
+        CategoryUtil.convertCdeCategoriesFromDirectory(inputSource, outputDir);
       } else {
-        CadsrCategoriesUtil.convertCdeCategoriesFromFile(inputSource, outputDir);
+        CategoryUtil.convertCdeCategoriesFromFile(inputSource, outputDir);
       }
       success = true;
     } catch (Exception e) {
-      logger.error(Util.getStackTrace(e));
+      logger.error(GeneralUtil.getStackTrace(e));
       success = false;
     } finally {
       printSummary(stopwatch, totalCategories, success);
