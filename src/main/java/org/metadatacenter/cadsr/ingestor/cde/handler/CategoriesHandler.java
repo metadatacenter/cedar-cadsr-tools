@@ -2,8 +2,8 @@ package org.metadatacenter.cadsr.ingestor.cde.handler;
 
 import org.metadatacenter.cadsr.cde.schema.CLASSIFICATIONSLIST;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
-import org.metadatacenter.cadsr.ingestor.Util.Constants;
-import org.metadatacenter.cadsr.ingestor.Util.CategoryUtil;
+import org.metadatacenter.cadsr.ingestor.util.Constants;
+import org.metadatacenter.cadsr.ingestor.util.CategoryUtil;
 
 import java.util.ArrayList;
 import java.util.List;

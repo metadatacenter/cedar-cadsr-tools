@@ -1,8 +1,8 @@
 package org.metadatacenter.cadsr.ingestor.cde;
 
 import org.metadatacenter.cadsr.cde.schema.DataElement;
-import org.metadatacenter.cadsr.ingestor.Util.GeneralUtil;
-import org.metadatacenter.cadsr.ingestor.Util.ValueSetUtil;
+import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
+import org.metadatacenter.cadsr.ingestor.util.ValueSetUtil;
 import org.metadatacenter.cadsr.ingestor.exception.DuplicatedAxiomException;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.Set;
 
-import static org.metadatacenter.cadsr.ingestor.Util.Constants.*;
+import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
 
 public class ValueSetsOntologyManager {
 

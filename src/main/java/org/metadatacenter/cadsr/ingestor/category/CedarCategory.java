@@ -1,11 +1,17 @@
 package org.metadatacenter.cadsr.ingestor.category;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"schema:identifier", "schema:name", "schema:description", "parentCategoryId"})
+import java.util.List;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonPropertyOrder({"@id", "schema:identifier", "schema:name", "schema:description", "parentCategoryId", "children"})
 public class CedarCategory {
 
+  @JsonProperty("@id")
+  private String ldId;
   @JsonProperty("schema:identifier")
   private String id;
   @JsonProperty("schema:name")
@@ -13,15 +19,22 @@ public class CedarCategory {
   @JsonProperty("schema:description")
   private String description;
   private String parentCategoryId;
+  private List<CedarCategory> children;
 
   public CedarCategory() {
   }
 
-  public CedarCategory(String id, String name, String description, String parentCategoryId) {
+  public CedarCategory(String ldId, String id, String name, String description, String parentCategoryId, List<CedarCategory> children) {
+    this.ldId = ldId;
     this.id = id;
     this.name = name;
     this.description = description;
     this.parentCategoryId = parentCategoryId;
+    this.children = children;
+  }
+
+  public String getLdId() {
+    return ldId;
   }
 
   public String getId() {
@@ -40,14 +53,19 @@ public class CedarCategory {
     return parentCategoryId;
   }
 
+  public List<CedarCategory> getChildren() {
+    return children;
+  }
+
   @Override
   public String toString() {
     return "CedarCategory{" +
-        "id='" + id + '\'' +
+        "ldId='" + ldId + '\'' +
+        ", id='" + id + '\'' +
         ", name='" + name + '\'' +
         ", description='" + description + '\'' +
         ", parentCategoryId='" + parentCategoryId + '\'' +
+        ", children=" + children +
         '}';
   }
-
 }

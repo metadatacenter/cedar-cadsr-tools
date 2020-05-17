@@ -1,10 +1,10 @@
-package org.metadatacenter.cadsr.ingestor.Util;
+package org.metadatacenter.cadsr.ingestor.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.DataElementsList;
+import org.metadatacenter.cadsr.cde.schema.PermissibleValuesITEM;
 import org.metadatacenter.cadsr.ingestor.cde.CadsrTransformationStats;
 import org.metadatacenter.cadsr.ingestor.cde.handler.*;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
@@ -18,8 +18,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -127,7 +127,8 @@ public class CdeUtil {
     fieldMap.put(ModelNodeNames.SCHEMA_ORG_DESCRIPTION, content);
   }
 
-  private static void setFieldQuestions(final Map<String, Object> fieldMap, DataElement dataElement, UserQuestionsHandler
+  private static void setFieldQuestions(final Map<String, Object> fieldMap, DataElement dataElement,
+                                        UserQuestionsHandler
       userQuestionsHandler) throws UnsupportedDataElementException {
     userQuestionsHandler.handle(dataElement).apply(fieldMap);
   }
@@ -142,7 +143,8 @@ public class CdeUtil {
     propertiesHandler.handle(dataElement).apply(fieldMap);
   }
 
-  private static void setPermissibleValues(Map<String, Object> fieldMap, DataElement dataElement, PermissibleValuesHandler
+  private static void setPermissibleValues(Map<String, Object> fieldMap, DataElement dataElement,
+                                           PermissibleValuesHandler
       permissibleValuesHandler) throws UnsupportedDataElementException, UnknownSeparatorException {
     permissibleValuesHandler.handle(dataElement).apply(fieldMap);
   }
@@ -161,7 +163,6 @@ public class CdeUtil {
       categoriesHandler) {
     categoriesHandler.handle(dataElement).apply(fieldMap);
   }
-
 
 
   private static void createEmptyField(final Map<String, Object> fieldMap) {
@@ -235,30 +236,21 @@ public class CdeUtil {
     return valueConstraints;
   }
 
-  public static Map<String, String> getCategoryIdsFromCategoryTree(JsonNode cedarCategoryTree) {
-    return getCategoryIds(cedarCategoryTree, new HashMap<>());
+  public static String generateCdeId(String publicId, String version) {
+    return publicId + "V" + version;
   }
 
-  // Generates a map of categoryId to cedarCategoryId
-  private static Map<String, String> getCategoryIds(JsonNode category, Map<String, String> categoryIds) {
+  public static String generateCdeModifiedHashCode(DataElement dataElement) {
 
-    if (category.hasNonNull(ModelNodeNames.JSON_LD_ID) && category.hasNonNull(ModelNodeNames.SCHEMA_ORG_IDENTIFIER)) {
-      categoryIds.put(category.get(ModelNodeNames.SCHEMA_ORG_IDENTIFIER).asText(),
-          category.get(ModelNodeNames.JSON_LD_ID).asText());
+    String dataElementDateModified = dataElement.getDateModified().getContent();
+    String valueDomainDateModified = dataElement.getVALUEDOMAIN().getDateModified().getContent();
+
+    List<String> permissibleValuesItemDatesModified = new ArrayList<>();
+    for (PermissibleValuesITEM item : dataElement.getVALUEDOMAIN().getPermissibleValues().getPermissibleValuesITEM()) {
+      permissibleValuesItemDatesModified.add(item.getDateModified().getContent());
     }
 
-    if (category.hasNonNull(Constants.CEDAR_CATEGORY_CHILDREN_FIELD_NAME)) {
-      JsonNode children = category.get(Constants.CEDAR_CATEGORY_CHILDREN_FIELD_NAME);
-      if (children.isArray()) {
-        for (JsonNode childCategory : children) {
-          getCategoryIds(childCategory, categoryIds);
-        }
-      }
-    }
-
-    return categoryIds;
+    return GeneralUtil.getSha1(dataElementDateModified + valueDomainDateModified + permissibleValuesItemDatesModified.toString());
   }
-
-
 
 }

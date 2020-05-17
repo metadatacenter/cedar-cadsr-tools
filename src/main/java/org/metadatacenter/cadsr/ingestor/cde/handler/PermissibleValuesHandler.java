@@ -10,7 +10,7 @@ import org.metadatacenter.cadsr.cde.schema.PermissibleValuesITEM;
 import org.metadatacenter.cadsr.ingestor.cde.CadsrConceptOrigins;
 import org.metadatacenter.cadsr.ingestor.cde.Value;
 import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
-import org.metadatacenter.cadsr.ingestor.Util.ValueSetUtil;
+import org.metadatacenter.cadsr.ingestor.util.ValueSetUtil;
 import org.metadatacenter.cadsr.ingestor.exception.DuplicatedAxiomException;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.metadatacenter.cadsr.ingestor.Util.Constants.*;
+import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
 
 public class PermissibleValuesHandler implements ModelHandler {
 

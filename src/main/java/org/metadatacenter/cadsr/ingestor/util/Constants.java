@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor.Util;
+package org.metadatacenter.cadsr.ingestor.util;
 
 public final class Constants {
 

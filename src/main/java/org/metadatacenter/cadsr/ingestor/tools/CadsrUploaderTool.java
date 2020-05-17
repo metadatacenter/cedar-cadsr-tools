@@ -1,10 +1,9 @@
 package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.google.common.base.Stopwatch;
-import org.metadatacenter.cadsr.ingestor.Util.CategoryUtil;
-import org.metadatacenter.cadsr.ingestor.Util.CdeUploadUtil;
-import org.metadatacenter.cadsr.ingestor.Util.CedarServerUtil;
-import org.metadatacenter.cadsr.ingestor.Util.CedarServices;
+import org.metadatacenter.cadsr.ingestor.util.CdeUploadUtil;
+import org.metadatacenter.cadsr.ingestor.util.CedarServerUtil;
+import org.metadatacenter.cadsr.ingestor.util.CedarServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,10 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.metadatacenter.cadsr.ingestor.Util.Constants.ATTACH_CATEGORIES_OPTION;
-import static org.metadatacenter.cadsr.ingestor.Util.Constants.CedarEnvironment;
+import static org.metadatacenter.cadsr.ingestor.util.Constants.ATTACH_CATEGORIES_OPTION;
+import static org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 
 public class CadsrUploaderTool {
 
@@ -35,10 +35,11 @@ public class CadsrUploaderTool {
     }
 
     // Read the categoryIds from CEDAR to be able to link CDEs to them
+    Map<String, String> categoryIdsToCedarCategoryIds = null;
     if (attachCategories) {
-      String categoryTreeEndpoint = CedarServerUtil.getCategoryTreeEndpoint(targetEnvironment);
       try {
-        CedarServices.categoryIdsToCedarCategoryIds = CedarServices.getCedarCategoryIds(categoryTreeEndpoint, apiKey);
+        categoryIdsToCedarCategoryIds =
+            CedarServices.getCedarCategoryIds(targetEnvironment, apiKey);
       } catch (IOException e) {
         logger.error(e.getMessage());
       }
@@ -53,9 +54,9 @@ public class CadsrUploaderTool {
       String templateFieldsEndpoint = CedarServerUtil.getTemplateFieldsEndpoint(folderId, targetEnvironment);
       String attachCategoriesEndpoint = CedarServerUtil.getAttachCategoriesEndpoint(targetEnvironment);
       if (inputSource.isDirectory()) {
-        totalCdes = CdeUploadUtil.uploadCdeFromDirectory(inputSource, attachCategories, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
+        totalCdes = CdeUploadUtil.uploadCdeFromDirectory(inputSource, attachCategories, categoryIdsToCedarCategoryIds, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
       } else {
-        totalCdes = CdeUploadUtil.uploadCdeFromFile(inputSource, attachCategories, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
+        totalCdes = CdeUploadUtil.uploadCdeFromFile(inputSource, attachCategories, categoryIdsToCedarCategoryIds, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
       }
       success = true;
     } catch (Exception e) {

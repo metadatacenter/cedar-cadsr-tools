@@ -1,13 +1,11 @@
-package org.metadatacenter.cadsr.ingestor.Util;
+package org.metadatacenter.cadsr.ingestor.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
-import static org.metadatacenter.cadsr.ingestor.Util.Constants.*;
+import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
 
 public class CedarServerUtil {
 

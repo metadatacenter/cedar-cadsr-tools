@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor.Util;
+package org.metadatacenter.cadsr.ingestor.util;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

@@ -1,10 +1,12 @@
-package org.metadatacenter.cadsr.ingestor.Util;
+package org.metadatacenter.cadsr.ingestor.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
+import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,18 +14,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.metadatacenter.cadsr.ingestor.Util.Constants.*;
+import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
 import static org.metadatacenter.model.ModelNodeNames.JSON_LD_ID;
 
 public class CedarServices {
 
   private static final Logger logger = LoggerFactory.getLogger(CdeUploadUtil.class);
   private static ObjectMapper objectMapper = new ObjectMapper();
-  public static Map<String, String> categoryIdsToCedarCategoryIds = new HashMap<>();
 
   public static void deleteAllFieldsInFolder(String folderShortId, Constants.CedarEnvironment environment, String apiKey) throws IOException {
     List<String> fieldIds = findFieldsInFolder(folderShortId, environment, apiKey);
@@ -94,7 +94,8 @@ public class CedarServices {
     connection.disconnect();
   }
 
-  public static Map<String, String> getCedarCategoryIds(String endpoint, String apiKey) throws IOException {
+  public static Map<String, String> getCedarCategoryIds(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
+    String endpoint = CedarServerUtil.getCategoryTreeEndpoint(targetEnvironment);
     Map<String, String> categoryIdsMap = null;
     HttpURLConnection conn = null;
     try {
@@ -106,7 +107,7 @@ public class CedarServices {
         // Read the CDE @id
         String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
         JsonNode categoryTree = objectMapper.readTree(response);
-        categoryIdsMap = CdeUtil.getCategoryIdsFromCategoryTree(categoryTree);
+        categoryIdsMap = CategoryUtil.getCategoryIdsFromCategoryTree(categoryTree);
       }
     } finally {
       if (conn != null) {
@@ -114,6 +115,27 @@ public class CedarServices {
       }
     }
     return categoryIdsMap;
+  }
+
+  public static CedarCategory getCedarCategoryTree(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
+    String endpoint = CedarServerUtil.getCategoryTreeEndpoint(targetEnvironment);
+    HttpURLConnection conn = null;
+    CedarCategory categoryTree = null;
+    try {
+      conn = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
+      int responseCode = conn.getResponseCode();
+      if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
+        GeneralUtil.logErrorMessage(conn);
+      } else {
+        String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
+        categoryTree = objectMapper.readValue(response, CedarCategory.class);
+      }
+    } finally {
+      if (conn != null) {
+        conn.disconnect();
+      }
+    }
+    return categoryTree;
   }
 
   /**
@@ -124,6 +146,7 @@ public class CedarServices {
    * @param categoryIds: list of cadsr category Ids (not CEDAR  ids)
    */
   public static void attachCdeToCategoriesMultipleCalls(String cedarCdeId, List<String> categoryIds, String endpoint,
+                                                        Map<String, String> categoryIdsToCedarCategoryIds,
                                                         String apiKey) {
 
     for (String categoryId : categoryIds) {
@@ -172,7 +195,9 @@ public class CedarServices {
    * @param cedarCdeId:  CEDAR CDE id
    * @param categoryIds: list of cadsr category Ids (not CEDAR ids)
    */
-  public static void attachCdeToCategories(String cedarCdeId, List<String> categoryIds, String endpoint,
+  public static void attachCdeToCategories(String cedarCdeId, List<String> categoryIds,
+                                           Map<String, String> categoryIdsToCedarCategoryIds,
+                                           String endpoint,
                                            String apiKey) {
 
     List<String> cedarCategoryIds = new ArrayList<>();
