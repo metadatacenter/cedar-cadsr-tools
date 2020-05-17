@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor.Util;
+package org.metadatacenter.cadsr.ingestor.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,5 +73,24 @@ public class ConnectionUtil {
       throw new RuntimeException(e.getMessage());
     }
   }
+
+  public static void logErrorMessageAndThrowException(String message, final HttpURLConnection conn) {
+    String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
+    logger.error(response);
+    throw new RuntimeException(message + "\nError message: " + response);
+  }
+
+//  private static void logResponseMessage(final HttpURLConnection conn) throws IOException {
+//    String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
+//    String message = createMessageBasedOnFieldNameAndId(response);
+//    logger.debug("POST 200 OK: " + message);
+//  }
+//
+//  private static String createMessageBasedOnFieldNameAndId(String response) throws IOException {
+//    JsonNode responseNode = objectMapper.readTree(response);
+//    String fieldName = responseNode.get("schema:name").asText();
+//    String fieldId = responseNode.get("@id").asText();
+//    return String.format("%s (ID: %s)", fieldName, fieldId);
+//  }
 
 }

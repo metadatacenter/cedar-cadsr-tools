@@ -1,8 +1,8 @@
 package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.google.common.base.Stopwatch;
-import org.metadatacenter.cadsr.ingestor.Util.GeneralUtil;
-import org.metadatacenter.cadsr.ingestor.Util.CategoryUtil;
+import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
+import org.metadatacenter.cadsr.ingestor.util.CategoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

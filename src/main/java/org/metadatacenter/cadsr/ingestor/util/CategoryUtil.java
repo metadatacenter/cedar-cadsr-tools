@@ -1,18 +1,20 @@
-package org.metadatacenter.cadsr.ingestor.Util;
+package org.metadatacenter.cadsr.ingestor.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.metadatacenter.cadsr.category.schema.CSI;
 import org.metadatacenter.cadsr.category.schema.ClassificationScheme;
 import org.metadatacenter.cadsr.category.schema.Classifications;
 import org.metadatacenter.cadsr.category.schema.Context;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
+import org.metadatacenter.cadsr.cde.schema.PermissibleValuesITEM;
 import org.metadatacenter.cadsr.ingestor.category.Category;
+import org.metadatacenter.cadsr.ingestor.category.CategorySummary;
 import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
-import org.metadatacenter.cadsr.ingestor.Util.Constants.CedarEnvironment;
+import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
+import org.metadatacenter.model.ModelNodeNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +25,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.text.DecimalFormat;
 import java.util.*;
-
-import static org.metadatacenter.cadsr.ingestor.Util.Constants.*;
 
 public class CategoryUtil {
 
@@ -43,7 +43,6 @@ public class CategoryUtil {
    */
   public static File convertCdeCategoriesFromFile(File inputFile, File outputDir) throws IOException {
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
-    //File outputSubDir = Util.createDirectoryBasedOnInputFileName(inputFile, outputDir);
     List<CategoryTreeNode> categoryTree;
     File categoryTreeFile = null;
     try {
@@ -65,31 +64,27 @@ public class CategoryUtil {
     }
   }
 
-  public static int uploadCategoriesFromDirectory(File inputDir, String cedarRootCategoryId, CedarEnvironment environment,
+  public static void uploadCategoriesFromDirectory(File inputDir, String cedarRootCategoryId, CedarEnvironment environment,
                                                    String apiKey) throws IOException {
-    int totalCategories = 0;
     for (final File inputFile : inputDir.listFiles()) {
-      totalCategories += uploadCategoriesFromFile(inputFile, cedarRootCategoryId, environment, apiKey);
+      uploadCategoriesFromFile(inputFile, cedarRootCategoryId, environment, apiKey);
     }
-    return totalCategories;
   }
 
-  public static int uploadCategoriesFromFile(File inputFile, String cedarRootCategoryId, CedarEnvironment environment,
+  public static void uploadCategoriesFromFile(File inputFile, String cedarRootCategoryId, CedarEnvironment environment,
                                              String apiKey) throws IOException {
 
     List<CategoryTreeNode> categoryTreeNodes = readCategoriesFromFile(inputFile);
-    int counter = 0;
     for (CategoryTreeNode categoryTreeNode : categoryTreeNodes) {
-      uploadCategory(categoryTreeNode, cedarRootCategoryId, environment, apiKey, counter);
+      uploadCategory(categoryTreeNode, cedarRootCategoryId, environment, apiKey);
     }
-    return counter;
   }
 
-  private static void uploadCategory(CategoryTreeNode category, String cedarParentCategoryId,
-                                     CedarEnvironment environment, String apiKey, int counter) {
+  public static void uploadCategory(CategoryTreeNode category, String cedarParentCategoryId,
+                                     CedarEnvironment environment, String apiKey) {
 
     CedarCategory cedarCategory =
-        new CedarCategory(category.getCadsrId(), category.getName(), category.getDescription(), cedarParentCategoryId);
+        new CedarCategory(null, category.getCadsrId(), category.getName(), category.getDescription(), cedarParentCategoryId, null);
 
     HttpURLConnection conn = null;
     try {
@@ -109,10 +104,9 @@ public class CategoryUtil {
         logger.info("Category created: " + payload);
         String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
         String cedarCategoryId = JsonUtil.extractJsonFieldValue(response, "@id");
-        counter++;
         //logger.info(String.format("Uploading categories (%d/%d)", counter, allCategories.size()));
         for (CategoryTreeNode categoryTreeNode : category.getChildren()) {
-          uploadCategory(categoryTreeNode, cedarCategoryId, environment, apiKey, counter);
+          uploadCategory(categoryTreeNode, cedarCategoryId, environment, apiKey);
         }
       }
     } catch (JsonProcessingException e) {
@@ -258,7 +252,7 @@ public class CategoryUtil {
     for (Category category : categories) {
       if (category.getParentId().equals(parentId)) {
         CategoryTreeNode node = new CategoryTreeNode(category.getUniqueId(), category.getCadsrId(), category.getName(), category.getDescription(),
-            getChildrenNodes(category.getUniqueId(), categories));
+            getChildrenNodes(category.getUniqueId(), categories), category.getParentId());
         childrenNodes.add(node);
       }
     }
@@ -288,7 +282,53 @@ public class CategoryUtil {
     }
   }
 
+  public static Map<String, String> getCategoryIdsFromCategoryTree(JsonNode cedarCategoryTree) {
+    return getCategoryIds(cedarCategoryTree, new HashMap<>());
+  }
 
+  // Generates a map of categoryId to cedarCategoryId
+  private static Map<String, String> getCategoryIds(JsonNode category, Map<String, String> categoryIds) {
 
+    if (category.hasNonNull(ModelNodeNames.JSON_LD_ID) && category.hasNonNull(ModelNodeNames.SCHEMA_ORG_IDENTIFIER)) {
+      categoryIds.put(category.get(ModelNodeNames.SCHEMA_ORG_IDENTIFIER).asText(),
+          category.get(ModelNodeNames.JSON_LD_ID).asText());
+    }
+
+    if (category.hasNonNull(Constants.CEDAR_CATEGORY_CHILDREN_FIELD_NAME)) {
+      JsonNode children = category.get(Constants.CEDAR_CATEGORY_CHILDREN_FIELD_NAME);
+      if (children.isArray()) {
+        for (JsonNode childCategory : children) {
+          getCategoryIds(childCategory, categoryIds);
+        }
+      }
+    }
+
+    return categoryIds;
+  }
+
+  public static String generateCedarCategoryModifiedHashCode(String id, String parentId, String name, String description) {
+    return GeneralUtil.getSha1(id + parentId + name + description);
+  }
+
+  public static Map<String, CategorySummary> generateExistingCategoriesMap(CedarEnvironment environment, String apiKey) throws IOException {
+    Map<String, CategorySummary> existingCategoriesMap = new HashMap<>();
+    CedarCategory currentCedarCategoryTree = CedarServices.getCedarCategoryTree(environment, apiKey);
+    return addCategoriesToMap(currentCedarCategoryTree.getChildren(), existingCategoriesMap, null);
+  }
+
+  private static Map<String, CategorySummary> addCategoriesToMap(List<CedarCategory> categories, Map<String, CategorySummary> categoriesMap, String parentId) {
+    for (CedarCategory category : categories) {
+      if (!categoriesMap.containsKey(category.getId())) {
+        logger.info(category.getId());
+        String categoryHash = CategoryUtil.generateCedarCategoryModifiedHashCode(category.getId(), parentId, category.getName(), category.getDescription());
+        categoriesMap.put(category.getId(), new CategorySummary(category.getLdId(), categoryHash));
+        addCategoriesToMap(category.getChildren(), categoriesMap, category.getId());
+      }
+      else {
+        throw new InternalError("Category already in map: " + category.getId());
+      }
+    }
+    return categoriesMap;
+  }
 
 }

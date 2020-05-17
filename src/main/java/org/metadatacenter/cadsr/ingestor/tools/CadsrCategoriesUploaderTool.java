@@ -1,9 +1,9 @@
 package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.google.common.base.Stopwatch;
-import org.metadatacenter.cadsr.ingestor.Util.Constants.CedarEnvironment;
-import org.metadatacenter.cadsr.ingestor.Util.CedarServerUtil;
-import org.metadatacenter.cadsr.ingestor.Util.CategoryUtil;
+import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
+import org.metadatacenter.cadsr.ingestor.util.CedarServerUtil;
+import org.metadatacenter.cadsr.ingestor.util.CategoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,25 +24,24 @@ public class CadsrCategoriesUploaderTool {
 
     final Stopwatch stopwatch = Stopwatch.createStarted();
 
-    int totalCategories = 0;
     boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
       if (inputSource.isDirectory()) {
-        totalCategories = CategoryUtil.uploadCategoriesFromDirectory(inputSource, cedarRootCategoryId, targetEnvironment, apiKey);
+        CategoryUtil.uploadCategoriesFromDirectory(inputSource, cedarRootCategoryId, targetEnvironment, apiKey);
       } else {
-        totalCategories = CategoryUtil.uploadCategoriesFromFile(inputSource, cedarRootCategoryId, targetEnvironment, apiKey);
+        CategoryUtil.uploadCategoriesFromFile(inputSource, cedarRootCategoryId, targetEnvironment, apiKey);
       }
       success = true;
     } catch (Exception e) {
       logger.error(e.toString());
       success = false;
     } finally {
-      printSummary(stopwatch, totalCategories, success);
+      printSummary(stopwatch, success);
     }
   }
 
-  private static void printSummary(Stopwatch stopwatch, int totalCdes, boolean success) {
+  private static void printSummary(Stopwatch stopwatch, boolean success) {
     logger.info("----------------------------------------------------------");
     if (success) {
       logger.info("UPLOAD-CATEGORIES SUCCESS");
@@ -50,7 +49,6 @@ public class CadsrCategoriesUploaderTool {
       logger.info("UPLOAD-CATEGORIES FAILED (see error.log for details)");
     }
     logger.info("----------------------------------------------------------");
-    //logger.info("Total number categories uploaded: " + countFormat.format(totalCdes));
     long elapsedTimeInSeconds = stopwatch.elapsed(TimeUnit.SECONDS);
     long hours = elapsedTimeInSeconds / 3600;
     long minutes = (elapsedTimeInSeconds % 3600) / 60;

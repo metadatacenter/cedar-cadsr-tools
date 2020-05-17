@@ -1,4 +1,4 @@
-package org.metadatacenter.cadsr.ingestor.Util;
+package org.metadatacenter.cadsr.ingestor.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
