@@ -35,7 +35,6 @@ public class CategoryUtil {
   private static ObjectMapper objectMapper = new ObjectMapper();
 
   /**
-   *
    * @param inputFile
    * @param outputDir
    * @return Category Tree file
@@ -49,7 +48,7 @@ public class CategoryUtil {
       Classifications classifications = CategoryUtil.getClassifications(new FileInputStream(inputFile));
       categoryTree = CategoryUtil.classificationsToCategoryTree(classifications);
       logger.info("Generating categories file...");
-      String categoriesFileName = inputFile.getName().substring(0,inputFile.getName().lastIndexOf('.')) + ".json";
+      String categoriesFileName = inputFile.getName().substring(0, inputFile.getName().lastIndexOf('.')) + ".json";
       categoryTreeFile = new File(outputDir, categoriesFileName);
       new ObjectMapper().writeValue(categoryTreeFile, categoryTree);
     } catch (JAXBException e) {
@@ -64,7 +63,8 @@ public class CategoryUtil {
     }
   }
 
-  public static void uploadCategoriesFromDirectory(File inputDir, String cedarRootCategoryId, CedarEnvironment environment,
+  public static void uploadCategoriesFromDirectory(File inputDir, String cedarRootCategoryId,
+                                                   CedarEnvironment environment,
                                                    String apiKey) throws IOException {
     for (final File inputFile : inputDir.listFiles()) {
       uploadCategoriesFromFile(inputFile, cedarRootCategoryId, environment, apiKey);
@@ -72,53 +72,11 @@ public class CategoryUtil {
   }
 
   public static void uploadCategoriesFromFile(File inputFile, String cedarRootCategoryId, CedarEnvironment environment,
-                                             String apiKey) throws IOException {
+                                              String apiKey) throws IOException {
 
     List<CategoryTreeNode> categoryTreeNodes = readCategoriesFromFile(inputFile);
     for (CategoryTreeNode categoryTreeNode : categoryTreeNodes) {
-      uploadCategory(categoryTreeNode, cedarRootCategoryId, environment, apiKey);
-    }
-  }
-
-  public static void uploadCategory(CategoryTreeNode category, String cedarParentCategoryId,
-                                     CedarEnvironment environment, String apiKey) {
-
-    CedarCategory cedarCategory =
-        new CedarCategory(null, category.getCadsrId(), category.getName(), category.getDescription(), cedarParentCategoryId, null);
-
-    HttpURLConnection conn = null;
-    try {
-      Thread.sleep(50);
-      logger.info("Trying to upload: " + category.getCadsrId());
-      String payload = objectMapper.writeValueAsString(cedarCategory);
-      String url = CedarServerUtil.getCategoriesRestEndpoint(environment);
-      conn = ConnectionUtil.createAndOpenConnection("POST", url, apiKey);
-      OutputStream os = conn.getOutputStream();
-      os.write(payload.getBytes());
-      os.flush();
-      int responseCode = conn.getResponseCode();
-      if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED) {
-        logger.error("Error creating category: " + category.getCadsrId());
-        GeneralUtil.logErrorMessage(conn);
-      } else {
-        logger.info("Category created: " + payload);
-        String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
-        String cedarCategoryId = JsonUtil.extractJsonFieldValue(response, "@id");
-        //logger.info(String.format("Uploading categories (%d/%d)", counter, allCategories.size()));
-        for (CategoryTreeNode categoryTreeNode : category.getChildren()) {
-          uploadCategory(categoryTreeNode, cedarCategoryId, environment, apiKey);
-        }
-      }
-    } catch (JsonProcessingException e) {
-      logger.error(e.toString());
-    } catch (IOException e) {
-      logger.error(e.toString());
-    } catch (InterruptedException e) {
-      logger.error(e.getMessage());
-    } finally {
-      if (conn != null) {
-        conn.disconnect();
-      }
+      CedarServices.createCategory(categoryTreeNode, cedarRootCategoryId, environment, apiKey);
     }
   }
 
@@ -147,21 +105,23 @@ public class CategoryUtil {
     return categoryTreeNodes;
   }
 
-  private static List<Category> classificationsToCategoriesList(Classifications classifications) {
+  public static List<Category> classificationsToCategoriesList(Classifications classifications) {
 
     List<Category> categories = new ArrayList<>();
 
     for (Context context : classifications.getContext()) {
 
       // Level 1 (root categories)
-      Category ctxCategory = generateCategory(context.getPreferredName(), Optional.empty(), Optional.empty(), Optional.empty(),
+      Category ctxCategory = generateCategory(context.getPreferredName(), Optional.empty(), Optional.empty(),
+          Optional.empty(),
           Optional.empty(), Optional.empty(), context.getVersion().toString(), Constants.ROOT_CATEGORY_KEY);
       //categories.add(ctxCategory);
       addCategoryToList(ctxCategory, categories);
 
       // Level 2
       for (ClassificationScheme cs : context.getClassificationScheme()) {
-        Category csCategory = generateCategory(cs.getPreferredName(), Optional.of(ctxCategory.getId()), Optional.empty(),
+        Category csCategory = generateCategory(cs.getPreferredName(), Optional.of(ctxCategory.getLocalId()),
+            Optional.empty(),
             Optional.of(cs.getPublicId().toString()), Optional.of(cs.getLongName()), Optional.empty(),
             cs.getVersion().toString(), ctxCategory.getUniqueId());
         //categories.add(csCategory);
@@ -169,18 +129,19 @@ public class CategoryUtil {
 
         // Levels 3 and beyond
         for (CSI csi : cs.getCSI()) {
-          categories.addAll(classificationSchemeItemToCategories(csi, Optional.of(ctxCategory.getId()),
-              Optional.of(csCategory.getId()), csCategory.getUniqueId(), new ArrayList<>()));
+          categories.addAll(classificationSchemeItemToCategories(csi, Optional.of(ctxCategory.getLocalId()),
+              Optional.of(csCategory.getLocalId()), csCategory.getUniqueId(), new ArrayList<>()));
         }
       }
     }
     return categories;
   }
 
-  public static List<Category> classificationSchemeItemToCategories(CSI csi, Optional<String> ctxId,
-                                                                     Optional<String> csId, String parentUniqueId, List<Category> categories) {
+  public static List<Category> classificationSchemeItemToCategories(CSI csi, Optional<String> ctxLocalId,
+                                                                    Optional<String> csLocalId, String parentUniqueId
+      , List<Category> categories) {
 
-    Category category = generateCategory(csi.getClassificationSchemeItemName(), ctxId, csId,
+    Category category = generateCategory(csi.getClassificationSchemeItemName(), ctxLocalId, csLocalId,
         Optional.of(csi.getPublicId().toString()), Optional.empty(), Optional.of(csi.getClassificationSchemeItemType()),
         csi.getVersion().toString(), parentUniqueId);
 
@@ -188,7 +149,7 @@ public class CategoryUtil {
     addCategoryToList(category, categories);
 
     for (CSI csiChildren : csi.getCSI()) {
-      classificationSchemeItemToCategories(csiChildren, ctxId, csId, category.getUniqueId(), categories);
+      classificationSchemeItemToCategories(csiChildren, ctxLocalId, csLocalId, category.getUniqueId(), categories);
     }
 
     return categories;
@@ -206,9 +167,9 @@ public class CategoryUtil {
 
     List<Integer> positionsSameCategory = new ArrayList<>();
 
-    for (int i=0; i<categories.size(); i++) {
+    for (int i = 0; i < categories.size(); i++) {
       Category category = categories.get(i);
-      if (newCategory.getParentId().equals(category.getParentId()) && newCategory.getName().equals(category.getName())) {
+      if (newCategory.getParentUniqueId().equals(category.getParentUniqueId()) && newCategory.getName().equals(category.getName())) {
         positionsSameCategory.add(i);
       }
     }
@@ -231,54 +192,74 @@ public class CategoryUtil {
   }
 
 
-  private static Category generateCategory(String name, Optional<String> ctxId, Optional<String> csId, Optional<String> publicId,
-                                           Optional<String> longName, Optional<String> type, String version, String parentUniqueId) {
+  private static Category generateCategory(String name, Optional<String> ctxLocalId, Optional<String> csLocalId,
+                                           Optional<String> publicId,
+                                           Optional<String> longName, Optional<String> type, String version,
+                                           String parentUniqueId) {
 
-    String id = generateCategoryId(name, type, publicId, version);
-    String cadsrId = generateCadsrCategoryId(id, ctxId, csId);
-    String uniqueId = UUID.randomUUID().toString();
+    String categoryPublicId = publicId.isPresent() ? publicId.get() : null;
+    String localId = generateCategoryLocalId(name, type, publicId, version);
+    String cadsrId = generateCadsrCategoryId(localId, ctxLocalId, csLocalId);
+    String uniqueId = generateCategoryUniqueId(name, type, publicId, version, parentUniqueId);
     String categoryName = longName.isPresent() ? longName.get().trim() : name.trim();
     String description = longName.isPresent() ? longName.get().trim() : name.trim();
     String categoryType = type.isPresent() ? type.get() : null;
-    return new Category(id, cadsrId, uniqueId, categoryName, description, categoryType, parentUniqueId, version);
+    return new Category(categoryPublicId, version, localId, cadsrId, uniqueId, categoryName, description,
+        categoryType, parentUniqueId);
   }
 
   public static List<CategoryTreeNode> categoriesListToTree(List<Category> categories) {
     return getChildrenNodes(Constants.ROOT_CATEGORY_KEY, categories);
   }
 
-  public static List<CategoryTreeNode> getChildrenNodes(String parentId, List<Category> categories) {
+  public static List<CategoryTreeNode> getChildrenNodes(String parentUniqueId, List<Category> categories) {
     List<CategoryTreeNode> childrenNodes = new ArrayList<>();
     for (Category category : categories) {
-      if (category.getParentId().equals(parentId)) {
-        CategoryTreeNode node = new CategoryTreeNode(category.getUniqueId(), category.getCadsrId(), category.getName(), category.getDescription(),
-            getChildrenNodes(category.getUniqueId(), categories), category.getParentId());
+      if (category.getParentUniqueId().equals(parentUniqueId)) {
+        CategoryTreeNode node = new CategoryTreeNode(category.getUniqueId(), category.getPublicId(),
+            category.getName(), category.getDescription(),
+            getChildrenNodes(category.getUniqueId(), categories), category.getParentUniqueId(), category.getVersion());
         childrenNodes.add(node);
       }
     }
     return childrenNodes;
   }
 
-  public static String generateCategoryId(String name, Optional<String> type, Optional<String> publicId, String version) {
-    final String sep = "-";
-    // Format type_name_id_version_name
-    String cleanName = name.replaceAll("\n", "");
-    cleanName = cleanName.replaceAll(" ", "");
-    return cleanName + sep + (type.isPresent() ? (type.get() + sep) : "")
-        + (publicId.isPresent() ? (publicId.get() + sep) : "") + "v" + version;
+  public static String generateCategoryLocalId(String name, Optional<String> type, Optional<String> publicId,
+                                               String version) {
+    final String separator = "_";
+    // Format: type_name_id_version
+//    String categoryId = (name + separator + (type.isPresent() ? (type.get() + separator) : "")
+//        + (publicId.isPresent() ? (publicId.get() + separator) : "") + "v" + version);
+    // If publicId is not available (it happens for the first level of categories in the tree), we use the name
+    String categoryId = (publicId.isPresent() ? publicId.get() : name) + separator + "V" + version;
+    return categoryId.replaceAll("\\s", "").replaceAll("/", ""); // Remove spaces and slashes
   }
 
-  public static String generateCadsrCategoryId(String categoryId, Optional<String> ctxId, Optional<String> csId) {
-    if (ctxId.isPresent()) {
-      if (csId.isPresent()) {
-        return ctxId.get() + "/" + csId.get() + "/" + categoryId;
+  public static String generateCadsrCategoryId(String categoryLocalId, Optional<String> ctxLocalId,
+                                               Optional<String> csLocalId) {
+
+
+    if (ctxLocalId.isPresent()) {
+      if (csLocalId.isPresent()) {
+        return ctxLocalId.get() + "/" + csLocalId.get() + "/" + categoryLocalId;
+      } else {
+        return ctxLocalId.get() + "/" + categoryLocalId;
       }
-      else {
-        return ctxId.get() + "/" + categoryId;
-      }
+    } else {
+      return categoryLocalId;
     }
-    else {
+  }
+
+  public static String generateCategoryUniqueId(String name, Optional<String> type, Optional<String> publicId,
+                                                String version, String parentCategoryUniqueId) {
+
+    String categoryId = generateCategoryLocalId(name, type, publicId, version);
+
+    if (parentCategoryUniqueId.equals(Constants.ROOT_CATEGORY_KEY)) {
       return categoryId;
+    } else {
+      return parentCategoryUniqueId + "/" + categoryId;
     }
   }
 
@@ -306,25 +287,35 @@ public class CategoryUtil {
     return categoryIds;
   }
 
-  public static String generateCedarCategoryModifiedHashCode(String id, String parentId, String name, String description) {
-    return GeneralUtil.getSha1(id + parentId + name + description);
+  /**
+   * Generates a hash code based on the attributes of a category. This hash code is used to identify changes in the
+   * category and decide if it should be updated in CEDAR. Given that the goal is to keep categories updated in
+   * CEDAR, this function needs to focus only on the attributes that CEDAR stores for categories.
+   */
+  public static String generateCategoryHashCode(Category category) {
+    return generateCategoryHashCode(category.toCedarCategory());
   }
 
-  public static Map<String, CategorySummary> generateExistingCategoriesMap(CedarEnvironment environment, String apiKey) throws IOException {
+  public static String generateCategoryHashCode(CedarCategory cedarCategory) {
+    return GeneralUtil.getSha1(cedarCategory.getId() + cedarCategory.getName() + cedarCategory.getDescription());
+  }
+
+  public static Map<String, CategorySummary> generateExistingCategoriesMap(CedarEnvironment environment,
+                                                                           String apiKey) throws IOException {
     Map<String, CategorySummary> existingCategoriesMap = new HashMap<>();
     CedarCategory currentCedarCategoryTree = CedarServices.getCedarCategoryTree(environment, apiKey);
     return addCategoriesToMap(currentCedarCategoryTree.getChildren(), existingCategoriesMap, null);
   }
 
-  private static Map<String, CategorySummary> addCategoriesToMap(List<CedarCategory> categories, Map<String, CategorySummary> categoriesMap, String parentId) {
+  private static Map<String, CategorySummary> addCategoriesToMap(List<CedarCategory> categories, Map<String,
+      CategorySummary> categoriesMap, String parentId) {
     for (CedarCategory category : categories) {
       if (!categoriesMap.containsKey(category.getId())) {
         logger.info(category.getId());
-        String categoryHash = CategoryUtil.generateCedarCategoryModifiedHashCode(category.getId(), parentId, category.getName(), category.getDescription());
-        categoriesMap.put(category.getId(), new CategorySummary(category.getLdId(), categoryHash));
+        String categoryHash = CategoryUtil.generateCategoryHashCode(category);
+        categoriesMap.put(category.getId(), new CategorySummary(category.getCedarId(), category.getParentCategoryCedarId(), categoryHash));
         addCategoriesToMap(category.getChildren(), categoriesMap, category.getId());
-      }
-      else {
+      } else {
         throw new InternalError("Category already in map: " + category.getId());
       }
     }

@@ -22,24 +22,24 @@ public class CategoriesHandler implements ModelHandler {
 
         String ctxName =  item.getClassificationScheme().getContextName().getContent();
         String ctxVersion = item.getClassificationScheme().getContextVersion().getContent();
-        String ctxId = CategoryUtil.generateCategoryId(ctxName, Optional.empty(), Optional.empty(), ctxVersion);
+        String ctxLocalId = CategoryUtil.generateCategoryLocalId(ctxName, Optional.empty(), Optional.empty(), ctxVersion);
 
         String csName = item.getClassificationScheme().getPreferredName().getContent();
         String csPublicId = item.getClassificationScheme().getPublicId().getContent();
         String csVersion = item.getClassificationScheme().getVersion().getContent();
-        String csId = CategoryUtil.generateCategoryId(csName, Optional.empty(), Optional.of(csPublicId), csVersion);
+        String csLocalId = CategoryUtil.generateCategoryLocalId(csName, Optional.empty(), Optional.of(csPublicId), csVersion);
 
         String csiName = item.getClassificationSchemeItemName().getContent();
         String csiType = item.getClassificationSchemeItemType().getContent();
         String csiPublicId = item.getCsiPublicId().getContent();
         String csiVersion= item.getCsiVersion().getContent();
-        String csiId = CategoryUtil.generateCategoryId(csiName, Optional.of(csiType),
+        String categoryId = CategoryUtil.generateCategoryLocalId(csiName, Optional.of(csiType),
             Optional.of(csiPublicId), csiVersion);
 
-        String categoryId = CategoryUtil.generateCadsrCategoryId(csiId, Optional.of(ctxId), Optional.of(csId));
+        String cadsrCategoryId = CategoryUtil.generateCadsrCategoryId(categoryId, Optional.of(ctxLocalId), Optional.of(csLocalId));
 
-        if (!categoryIds.contains(categoryId)) {
-          categoryIds.add(categoryId);
+        if (!categoryIds.contains(cadsrCategoryId)) {
+          categoryIds.add(cadsrCategoryId);
         }
 
       });

@@ -1,37 +1,42 @@
 package org.metadatacenter.cadsr.ingestor.category;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.elasticsearch.cluster.ClusterStateTaskConfig;
 
 import java.util.List;
 
-@JsonPropertyOrder({"id", "cadsrId", "name","description", "children", "parentId"})
+@JsonPropertyOrder({"uniqueId", "id", "name","description", "children"})
 public class CategoryTreeNode {
 
-  private String id;
-  private String cadsrId;
+  private String uniqueId; // Unique identifier. Path from the root of the tree to the category.
+  @JsonProperty("id")
+  private String localId; // Format: PublicId (or name if not available) + "-V" + Version
   private String name;
   private String description;
   private List<CategoryTreeNode> children;
-  private String parentId;
+  private String parentUniqueId;
+  private String version;
 
   public CategoryTreeNode() {
   }
 
-  public CategoryTreeNode(String id, String cadsrId, String name, String description, List<CategoryTreeNode> children, String parentId) {
-    this.id = id;
-    this.cadsrId = cadsrId;
+  public CategoryTreeNode(String uniqueId, String localId, String name, String description, List<CategoryTreeNode> children, String parentUniqueId, String version) {
+    this.uniqueId = uniqueId;
+    this.localId = localId;
     this.name = name;
     this.description = description;
     this.children = children;
-    this.parentId = parentId;
+    this.parentUniqueId = parentUniqueId;
+    this.version = version;
   }
 
-  public String getId() {
-    return id;
+  public String getUniqueId() {
+    return uniqueId;
   }
 
-  public String getCadsrId() {
-    return cadsrId;
+  public String getLocalId() {
+    return localId;
   }
 
   public String getName() {
@@ -46,5 +51,39 @@ public class CategoryTreeNode {
     return children;
   }
 
-  public String getParentId() { return parentId; }
+  public String getParentUniqueId() {
+    return parentUniqueId;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  // Setters
+
+
+  public void setParentUniqueId(String parentUniqueId) {
+    this.parentUniqueId = parentUniqueId;
+  }
+
+  public void setChildren(List<CategoryTreeNode> children) {
+    this.children = children;
+  }
+
+  public BasicCedarCategory toBasicCedarCategory() {
+    return new BasicCedarCategory(uniqueId, name, description);
+  }
+
+  @Override
+  public String toString() {
+    return "CategoryTreeNode{" +
+        "uniqueId='" + uniqueId + '\'' +
+        ", localId='" + localId + '\'' +
+        ", name='" + name + '\'' +
+        ", description='" + description + '\'' +
+        ", children=" + children +
+        ", parentUniqueId='" + parentUniqueId + '\'' +
+        ", version='" + version + '\'' +
+        '}';
+  }
 }
