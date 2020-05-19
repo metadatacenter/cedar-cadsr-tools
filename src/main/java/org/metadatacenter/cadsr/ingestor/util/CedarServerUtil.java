@@ -54,6 +54,12 @@ public class CedarServerUtil {
     return serverUrl + "/categories";
   }
 
+  public static String getCategoryRestEndpoint(String categoryId, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
+    categoryId = GeneralUtil.encodeIfNeeded(categoryId);
+    String serverUrl = getResourceServerUrl(targetEnvironment);
+    return serverUrl + "/categories/" + categoryId;
+  }
+
   public static String getRootCategoryRestEndpoint(CedarEnvironment targetEnvironment) {
     String serverUrl = getResourceServerUrl(targetEnvironment);
     return serverUrl + "/categories/root";

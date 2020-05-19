@@ -11,30 +11,31 @@ import java.util.List;
 public class CedarCategory {
 
   @JsonProperty("@id")
-  private String ldId;
+  private String cedarId; // CEDAR's @id
   @JsonProperty("schema:identifier")
-  private String id;
+  private String id; // Unique identifier (see details in Category.java)
   @JsonProperty("schema:name")
   private String name;
   @JsonProperty("schema:description")
   private String description;
-  private String parentCategoryId;
+  @JsonProperty("parentCategoryId")
+  private String parentCategoryCedarId;
   private List<CedarCategory> children;
 
   public CedarCategory() {
   }
 
-  public CedarCategory(String ldId, String id, String name, String description, String parentCategoryId, List<CedarCategory> children) {
-    this.ldId = ldId;
+  public CedarCategory(String cedarId, String id, String name, String description, String parentCategoryCedarId, List<CedarCategory> children) {
+    this.cedarId = cedarId;
     this.id = id;
     this.name = name;
     this.description = description;
-    this.parentCategoryId = parentCategoryId;
+    this.parentCategoryCedarId = parentCategoryCedarId;
     this.children = children;
   }
 
-  public String getLdId() {
-    return ldId;
+  public String getCedarId() {
+    return cedarId;
   }
 
   public String getId() {
@@ -49,23 +50,13 @@ public class CedarCategory {
     return description;
   }
 
-  public String getParentCategoryId() {
-    return parentCategoryId;
+  public String getParentCategoryCedarId() {
+    return parentCategoryCedarId;
   }
 
   public List<CedarCategory> getChildren() {
     return children;
   }
 
-  @Override
-  public String toString() {
-    return "CedarCategory{" +
-        "ldId='" + ldId + '\'' +
-        ", id='" + id + '\'' +
-        ", name='" + name + '\'' +
-        ", description='" + description + '\'' +
-        ", parentCategoryId='" + parentCategoryId + '\'' +
-        ", children=" + children +
-        '}';
-  }
+
 }

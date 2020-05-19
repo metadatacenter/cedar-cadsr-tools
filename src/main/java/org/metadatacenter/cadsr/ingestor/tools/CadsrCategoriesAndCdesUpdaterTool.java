@@ -6,9 +6,13 @@ import org.apache.commons.io.FileUtils;
 import org.metadatacenter.cadsr.category.schema.Classifications;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.DataElementsList;
+import org.metadatacenter.cadsr.ingestor.category.Category;
 import org.metadatacenter.cadsr.ingestor.category.CategorySummary;
-import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
+import org.metadatacenter.cadsr.ingestor.category.action.CategoryActionsProcessor;
+import org.metadatacenter.cadsr.ingestor.category.action.CreateCategoryAction;
+import org.metadatacenter.cadsr.ingestor.category.action.DeleteCategoryAction;
+import org.metadatacenter.cadsr.ingestor.category.action.UpdateCategoryAction;
 import org.metadatacenter.cadsr.ingestor.util.*;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
@@ -20,10 +24,7 @@ import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CadsrCategoriesAndCdesUpdaterTool {
 
@@ -35,17 +36,20 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     /*** INPUTS ***/
     final String EXECUTION_RESOURCES_PATH = "/Users/marcosmr/Development/DEV_EXECUTIONS/2020" +
         "-05_cdes_upload_production_process";
-    final String CURRENT_CATEGORIES_MAP_FILE_PATH = EXECUTION_RESOURCES_PATH + "/categoriesMap.json";
-    final String CURRENT_CDES_MAP_FILE_PATH = EXECUTION_RESOURCES_PATH + "/cdesMap.json";
-
+    //final String EXISTING_CATEGORIES_MAP_FILE_PATH = EXECUTION_RESOURCES_PATH + "/categoriesMap.json";
+    final String EXISTING_CDES_MAP_FILE_PATH = EXECUTION_RESOURCES_PATH + "/cdesMap.json";
 
     final String categoriesFolderPath = EXECUTION_RESOURCES_PATH + "/categories";
-    final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528.zip";
+    //final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528.zip";
+    //final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_modified.zip";
+    //final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_deleted.zip";
+    final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_deleted2.zip";
     final String categoriesUnzippedFolderPath = categoriesFolderPath + "/unzipped";
 
     final String cdesFolderPath = EXECUTION_RESOURCES_PATH + "/cdes";
-    //final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite.zip";
-    final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite_modified.zip";
+    //final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558.zip";
+    final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite.zip";
+    //final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite_modified.zip";
     final String cdesUnzippedFolderPath = cdesFolderPath + "/unzipped";
 
     // Id of the CEDAR folder where the contents will be uploaded
@@ -57,16 +61,19 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     final CedarEnvironment targetEnvironment = CedarEnvironment.LOCAL;
 
     /*** OUTPUTS ***/
-    final String categoryTreeFolderPath = categoriesFolderPath + "/tree";
+    //final String categoryTreeFolderPath = categoriesFolderPath + "/tree";
     final String ontologyFilePath = EXECUTION_RESOURCES_PATH + "/ontology/cadsr-vs.owl";
 
     /*** TEMPORAL VARIABLES TODO: REMOVE ***/
-    boolean reuploadCategories = false;
-
+    boolean deleteCategoryTree = false;
 
     /*** OTHER CONSTANTS ***/
 
     try {
+
+      if (deleteCategoryTree) {
+        CedarServices.deleteCategoryTree(targetEnvironment, apiKey);
+      }
 
       /*** Download and extract Categories ***/ // TODO: Read them using FTPClient once we have the FTP host
       FileUtils.deleteDirectory(new File(categoriesUnzippedFolderPath));
@@ -81,17 +88,15 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 
       // Read map with existing CDEs, if it exists
       Map<String, CdeSummary> existingCdesMap = new HashMap<>();
-      File existingCdesMapFile = new File(CURRENT_CDES_MAP_FILE_PATH);
+      File existingCdesMapFile = new File(EXISTING_CDES_MAP_FILE_PATH);
       if (existingCdesMapFile.exists()) {
         existingCdesMap = objectMapper.readValue(existingCdesMapFile, new TypeReference<HashMap<String, CdeSummary>>() {});
       }
 
-      /*** Transform XML caDSR classifications to a CEDAR JSON category tree ***/
+      /*** Read new XML caDSR classifications as Categories ***/
       File classificationsFile = (new File(categoriesUnzippedFolderPath)).listFiles()[0];
-      File categoryTreeFolder = GeneralUtil.checkDirectoryExists(categoryTreeFolderPath);
       Classifications classifications = CategoryUtil.getClassifications(new FileInputStream(classificationsFile));
-      List<CategoryTreeNode> categoryTree = CategoryUtil.classificationsToCategoryTree(classifications);
-      //File categoryTreeFile = CategoryUtil.convertCdeCategoriesFromFile(classificationsFile, categoryTreeFolder);
+      List<Category> currentCategories = CategoryUtil.classificationsToCategoriesList(classifications);
 
       // Read the categoryIds from CEDAR to be able to link CDEs to them
       Map<String, String> categoryIdsToCedarCategoryIds = null;
@@ -102,34 +107,55 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         logger.error(e.getMessage());
       }
 
-      /*** Check category changes and generate actions ***/
-      for (CategoryTreeNode node : categoryTree) {
-        if (existingCategoriesMap.containsKey(node.getCadsrId())) {
-          String newCategoryHash = CategoryUtil.generateCedarCategoryModifiedHashCode(node.getId(), node.getParentId(), node.getName(), node.getDescription());
-          if (existingCategoriesMap.get(node.getCadsrId()).getHashCode().equals(newCategoryHash)) {
-            logger.info("****** THE CATEGORY IS ALREADY THERE, nothing to do *******");
+      /*** Check category changes ***/
+      List<CreateCategoryAction> createCategoryActions = new ArrayList<>();
+      List<UpdateCategoryAction> updateCategoryActions = new ArrayList<>();
+      List<DeleteCategoryAction> deleteCategoryActions = new ArrayList<>();
+      List<CedarCategory> unchangedCategories = new ArrayList<>();
+      Map<String, CategorySummary> existingCategoriesMapUpdated = new HashMap<>(existingCategoriesMap);
+      for (Category currentCategory : currentCategories) {
+        if (existingCategoriesMapUpdated.containsKey(currentCategory.getUniqueId())) {
+          String existingCategoryCedarId = existingCategoriesMapUpdated.get(currentCategory.getUniqueId()).getCedarId();
+          String newCategoryHash = CategoryUtil.generateCategoryHashCode(currentCategory);
+          if (existingCategoriesMapUpdated.get(currentCategory.getUniqueId()).getHashCode().equals(newCategoryHash)) {
+            unchangedCategories.add(currentCategory.toCedarCategory(existingCategoryCedarId, null));
           }
           else {
-            logger.info("****** THE CATEGORY HAS BEEN UPDATED!, update it *******");
+            updateCategoryActions.add(new UpdateCategoryAction(existingCategoryCedarId, currentCategory.toCategoryTreeNode()));
           }
         }
         else {
-          logger.info("****** NEW CATEGORY *******, create it");
+          String parentCategoryCedarId = null;
+          // Note that here we access to the original (unmodified) map
+          if (existingCategoriesMap.containsKey(currentCategory.getParentUniqueId())) {
+            parentCategoryCedarId = existingCategoriesMap.get(currentCategory.getParentUniqueId()).getCedarId();
+          }
+          createCategoryActions.add(new CreateCategoryAction(currentCategory.toCategoryTreeNode(), parentCategoryCedarId));
         }
+        // Update the map!
+        existingCategoriesMapUpdated.remove(currentCategory.getUniqueId());
       }
+      // The remaining categories will have to be deleted
+      for (CategorySummary categorySummary : existingCategoriesMapUpdated.values()) {
+        deleteCategoryActions.add(new DeleteCategoryAction(categorySummary.getCedarId()));
+      }
+
+      // Process actions
+      CategoryActionsProcessor categoryActionsProcessor =
+          new CategoryActionsProcessor(createCategoryActions, updateCategoryActions, deleteCategoryActions, targetEnvironment, apiKey);
+      categoryActionsProcessor.logActionsSummary();
+      categoryActionsProcessor.executeCategoryActions();
 
       /*** Upload JSON Category Tree to CEDAR ***/
-      if (reuploadCategories) {
-        String rootCategoryId = CedarServices.getRootCategoryId(targetEnvironment, apiKey);
-        // Delete existing category tree
-        CedarServices.deleteCategoryTree(targetEnvironment, apiKey);
-        // Upload new tree
-        //CategoryUtil.uploadCategoriesFromFile(categoryTreeFile, rootCategoryId, targetEnvironment, apiKey);
-        for (CategoryTreeNode categoryTreeNode : categoryTree) {
-          CategoryUtil.uploadCategory(categoryTreeNode, rootCategoryId, targetEnvironment, apiKey);
-        }
-
-      }
+//      List<CategoryTreeNode> categoryTreeNodes = CategoryUtil.classificationsToCategoryTree(classifications);
+//      String rootCategoryId = CedarServices.getRootCategoryId(targetEnvironment, apiKey);
+//      // Delete existing category tree
+//      CedarServices.deleteCategoryTree(targetEnvironment, apiKey);
+//      // Upload new tree
+//      //CategoryUtil.uploadCategoriesFromFile(categoryTreeFile, rootCategoryId, targetEnvironment, apiKey);
+//      for (CategoryTreeNode categoryTreeNode : categoryTreeNodes) {
+//        CategoryUtil.uploadCategory(categoryTreeNode, rootCategoryId, targetEnvironment, apiKey);
+//      }
 
       /*** Transform XML CDEs to CEDAR fields and upload them to CEDAR ***/
 
@@ -175,7 +201,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         existingCdesMap.put(cdeId, new CdeSummary(cdeCedarId, CdeUtil.generateCdeModifiedHashCode(dataElement)));
 
         logger.info("Writing file");
-        objectMapper.writeValue(new File(CURRENT_CDES_MAP_FILE_PATH), existingCdesMap);
+        objectMapper.writeValue(new File(EXISTING_CDES_MAP_FILE_PATH), existingCdesMap);
 
         if (count++ == 5) {
           break;

@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.metadatacenter.cadsr.ingestor.category.BasicCedarCategory;
 import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
+import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
+import org.metadatacenter.rest.assertion.noun.CedarParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +28,7 @@ public class CedarServices {
   private static final Logger logger = LoggerFactory.getLogger(CdeUploadUtil.class);
   private static ObjectMapper objectMapper = new ObjectMapper();
 
-  public static void deleteAllFieldsInFolder(String folderShortId, Constants.CedarEnvironment environment, String apiKey) throws IOException {
+  public static void deleteAllFieldsInFolder(String folderShortId, CedarEnvironment environment, String apiKey) throws IOException {
     List<String> fieldIds = findFieldsInFolder(folderShortId, environment, apiKey);
     for (String fieldId : fieldIds) {
       deleteField(fieldId, environment, apiKey);
@@ -33,7 +36,7 @@ public class CedarServices {
   }
 
   // Returns the @ids of all the CEDAR fields in the given folder
-  public static List<String> findFieldsInFolder(String folderShortId, Constants.CedarEnvironment environment, String apiKey) throws IOException {
+  public static List<String> findFieldsInFolder(String folderShortId, CedarEnvironment environment, String apiKey) throws IOException {
     String endpoint = CedarServerUtil.getFolderContentsEndPoint(folderShortId, environment);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
     int responseCode = connection.getResponseCode();
@@ -54,7 +57,7 @@ public class CedarServices {
     }
   }
 
-  public static void deleteField(String fieldId, Constants.CedarEnvironment environment, String apiKey) throws IOException {
+  public static void deleteField(String fieldId, CedarEnvironment environment, String apiKey) throws IOException {
     String endpointDelete = CedarServerUtil.getTemplateFieldEndPoint(fieldId, environment);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("DELETE", endpointDelete, apiKey);
     int responseCode = connection.getResponseCode();
@@ -66,7 +69,7 @@ public class CedarServices {
     connection.disconnect();
   }
 
-  public static String getRootCategoryId(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
+  public static String getRootCategoryId(CedarEnvironment targetEnvironment, String apiKey) throws IOException {
     String endpoint = CedarServerUtil.getRootCategoryRestEndpoint(targetEnvironment);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
     int responseCode = connection.getResponseCode();
@@ -80,8 +83,22 @@ public class CedarServices {
     }
   }
 
+  public static void deleteCategory(String categoryId, CedarEnvironment targetEnvironment, String apiKey) throws IOException {
+    String endpoint = CedarServerUtil.getCategoryRestEndpoint(categoryId, targetEnvironment);
+    HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("DELETE", endpoint, apiKey);
+    int responseCode = connection.getResponseCode();
+    if (responseCode != HttpURLConnection.HTTP_NO_CONTENT) {
+      String message = "Error deleting category (" + categoryId + "): "+
+          ConnectionUtil.readResponseMessage(connection.getInputStream());
+      logger.error(message);
+      throw new InternalError(message);
+    }
+    connection.disconnect();
+  }
+
+
   // Deletes all the categories and their relationships to CDEs, except the root category
-  public static void deleteCategoryTree(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
+  public static void deleteCategoryTree(CedarEnvironment targetEnvironment, String apiKey) throws IOException {
     String endpoint = CedarServerUtil.getCategoryTreeEndpoint(targetEnvironment);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("DELETE", endpoint, apiKey);
     int responseCode = connection.getResponseCode();
@@ -92,6 +109,56 @@ public class CedarServices {
       throw new InternalError(message);
     }
     connection.disconnect();
+  }
+
+  /**
+   * Uploads a category to CEDAR, including its children
+   * @param category
+   * @param cedarParentCategoryId
+   * @param environment
+   * @param apiKey
+   */
+  public static void createCategory(CategoryTreeNode category, String cedarParentCategoryId,
+                                    CedarEnvironment environment, String apiKey) {
+
+    CedarCategory cedarCategory =
+        new CedarCategory(null, category.getUniqueId(), category.getName(), category.getDescription(),
+            cedarParentCategoryId, null);
+
+    HttpURLConnection conn = null;
+    try {
+      Thread.sleep(50);
+      logger.info("Trying to upload: " + category.getUniqueId());
+      String payload = objectMapper.writeValueAsString(cedarCategory);
+      String url = CedarServerUtil.getCategoriesRestEndpoint(environment);
+      conn = ConnectionUtil.createAndOpenConnection("POST", url, apiKey);
+      OutputStream os = conn.getOutputStream();
+      os.write(payload.getBytes());
+      os.flush();
+      int responseCode = conn.getResponseCode();
+      if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED) {
+        logger.error("Error creating category: " + category.getUniqueId());
+        GeneralUtil.logErrorMessage(conn);
+      } else {
+        logger.info("Category created: " + payload);
+        String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
+        String cedarCategoryId = JsonUtil.extractJsonFieldValue(response, "@id");
+        //logger.info(String.format("Uploading categories (%d/%d)", counter, allCategories.size()));
+        for (CategoryTreeNode categoryTreeNode : category.getChildren()) {
+          createCategory(categoryTreeNode, cedarCategoryId, environment, apiKey);
+        }
+      }
+    } catch (JsonProcessingException e) {
+      logger.error(e.toString());
+    } catch (IOException e) {
+      logger.error(e.toString());
+    } catch (InterruptedException e) {
+      logger.error(e.getMessage());
+    } finally {
+      if (conn != null) {
+        conn.disconnect();
+      }
+    }
   }
 
   public static Map<String, String> getCedarCategoryIds(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
@@ -136,6 +203,33 @@ public class CedarServices {
       }
     }
     return categoryTree;
+  }
+
+  public static void updateCategory(String categoryCedarId, BasicCedarCategory category, CedarEnvironment environment,
+                                    String apiKey) {
+    HttpURLConnection conn = null;
+    try {
+      logger.info("Trying to upload: " + category.getId());
+      String payload = objectMapper.writeValueAsString(category);
+      String url = CedarServerUtil.getCategoryRestEndpoint(categoryCedarId, environment);
+      conn = ConnectionUtil.createAndOpenConnection("PUT", url, apiKey);
+      OutputStream os = conn.getOutputStream();
+      os.write(payload.getBytes());
+      os.flush();
+      int responseCode = conn.getResponseCode();
+      if (responseCode != HttpURLConnection.HTTP_OK) {
+        logger.error("Error updating category: " + category.getId());
+        GeneralUtil.logErrorMessage(conn);
+      }
+    } catch (JsonProcessingException e) {
+      logger.error(e.toString());
+    } catch (IOException e) {
+      logger.error(e.toString());
+    } finally {
+      if (conn != null) {
+        conn.disconnect();
+      }
+    }
   }
 
   /**
