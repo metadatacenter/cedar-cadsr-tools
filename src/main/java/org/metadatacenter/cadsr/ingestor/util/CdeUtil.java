@@ -129,7 +129,7 @@ public class CdeUtil {
 
   private static void setFieldQuestions(final Map<String, Object> fieldMap, DataElement dataElement,
                                         UserQuestionsHandler
-      userQuestionsHandler) throws UnsupportedDataElementException {
+                                            userQuestionsHandler) throws UnsupportedDataElementException {
     userQuestionsHandler.handle(dataElement).apply(fieldMap);
   }
 
@@ -145,7 +145,8 @@ public class CdeUtil {
 
   private static void setPermissibleValues(Map<String, Object> fieldMap, DataElement dataElement,
                                            PermissibleValuesHandler
-      permissibleValuesHandler) throws UnsupportedDataElementException, UnknownSeparatorException {
+                                               permissibleValuesHandler) throws UnsupportedDataElementException,
+      UnknownSeparatorException {
     permissibleValuesHandler.handle(dataElement).apply(fieldMap);
   }
 
@@ -236,10 +237,27 @@ public class CdeUtil {
     return valueConstraints;
   }
 
-  public static String generateCdeId(String publicId, String version) {
+  public static String generateCdeUniqueId(DataElement cde) {
+    return generateCdeUniqueId(cde.getPUBLICID().getContent(), cde.getVERSION().getContent());
+  }
+
+  public static String generateCdeUniqueId(Map<String, Object> cdeMap) {
+    return generateCdeUniqueId((String) cdeMap.get(ModelNodeNames.SCHEMA_ORG_IDENTIFIER),
+        (String) cdeMap.get(ModelNodeNames.PAV_VERSION));
+  }
+
+  public static String generateCdeUniqueId(String publicId, String version) {
     return publicId + "V" + version;
   }
 
+  /**
+   * Returns a hash code to determine if the data element changed. It is based on three dateModified fields: for the
+   * data element, for its value domain, and for each permissible value item. We assume that changes in the
+   * categories associated to the dataElement are captured by the data element's dateModified field.
+   *
+   * @param dataElement
+   * @return Hash code
+   */
   public static String generateCdeModifiedHashCode(DataElement dataElement) {
 
     String dataElementDateModified = dataElement.getDateModified().getContent();

@@ -18,10 +18,6 @@ public class CreateCategoryAction implements CategoryAction {
     this.parentCategoryCedarId = parentCategoryCedarId;
   }
 
-  public static Logger getLogger() {
-    return logger;
-  }
-
   public CategoryTreeNode getCategory() {
     return category;
   }

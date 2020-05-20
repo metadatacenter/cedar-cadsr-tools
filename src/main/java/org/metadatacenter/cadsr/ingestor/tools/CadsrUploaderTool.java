@@ -1,6 +1,7 @@
 package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.google.common.base.Stopwatch;
+import org.metadatacenter.cadsr.ingestor.util.CategoryUtil;
 import org.metadatacenter.cadsr.ingestor.util.CdeUploadUtil;
 import org.metadatacenter.cadsr.ingestor.util.CedarServerUtil;
 import org.metadatacenter.cadsr.ingestor.util.CedarServices;
@@ -11,7 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.ATTACH_CATEGORIES_OPTION;
@@ -51,12 +54,10 @@ public class CadsrUploaderTool {
     boolean success = false;
     try {
       File inputSource = new File(inputSourceLocation);
-      String templateFieldsEndpoint = CedarServerUtil.getTemplateFieldsEndpoint(folderId, targetEnvironment);
-      String attachCategoriesEndpoint = CedarServerUtil.getAttachCategoriesEndpoint(targetEnvironment);
       if (inputSource.isDirectory()) {
-        totalCdes = CdeUploadUtil.uploadCdeFromDirectory(inputSource, attachCategories, categoryIdsToCedarCategoryIds, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
+        CdeUploadUtil.uploadCdeFromDirectory(inputSource, folderId, attachCategories, categoryIdsToCedarCategoryIds, targetEnvironment, apiKey);
       } else {
-        totalCdes = CdeUploadUtil.uploadCdeFromFile(inputSource, attachCategories, categoryIdsToCedarCategoryIds, templateFieldsEndpoint, attachCategoriesEndpoint, apiKey);
+        CdeUploadUtil.uploadCdeFromFile(inputSource, folderId, attachCategories, categoryIdsToCedarCategoryIds, targetEnvironment, apiKey);
       }
       success = true;
     } catch (Exception e) {
