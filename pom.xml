@@ -97,6 +97,16 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.2.1</version>
         <executions>
+          <!-- Update categories and cdes -->
+          <execution>
+            <id>update-all</id>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrCategoriesAndCdesUpdaterTool</mainClass>
+            </configuration>
+          </execution>
           <execution>
             <id>transform-categories</id>
             <goals>

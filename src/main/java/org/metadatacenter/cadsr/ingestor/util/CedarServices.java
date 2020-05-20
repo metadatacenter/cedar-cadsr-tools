@@ -214,7 +214,7 @@ public class CedarServices {
     }
   }
 
-  public static Map<String, String> getCedarCategoryIds(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
+  public static Map<String, String> getCategoryIdsToCedarCategoryIdsMap(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
     String endpoint = CedarServerUtil.getCategoryTreeEndpoint(targetEnvironment);
     Map<String, String> categoryIdsMap = null;
     HttpURLConnection conn = null;
