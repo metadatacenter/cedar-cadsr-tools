@@ -5,28 +5,28 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.metadatacenter.cadsr.ingestor.category.BasicCedarCategory;
 import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
-import org.metadatacenter.rest.assertion.noun.CedarParameter;
+import org.metadatacenter.server.neo4j.cypher.NodeProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
-import static org.metadatacenter.model.ModelNodeNames.JSON_LD_ID;
+import static org.metadatacenter.model.ModelNodeNames.*;
 
 public class CedarServices {
 
   private static final Logger logger = LoggerFactory.getLogger(CdeUploadUtil.class);
   private static ObjectMapper objectMapper = new ObjectMapper();
+
+  /*** Field services ***/
 
   public static void deleteAllFieldsInFolder(String folderShortId, CedarEnvironment environment, String apiKey) throws IOException {
     List<String> fieldIds = findFieldsInFolder(folderShortId, environment, apiKey);
@@ -69,6 +69,56 @@ public class CedarServices {
     connection.disconnect();
   }
 
+
+  /*** CDE Services ***/
+
+  public static String createCde(Map<String, Object> cdeFieldMap, String cedarFolderShortId,
+                                 Optional<List<String>> cedarCategoryIds, CedarEnvironment cedarEnvironment,
+                                 String apiKey) {
+
+    HttpURLConnection conn = null;
+    String cedarCdeId = null;
+    try {
+
+      String templateFieldsEndpoint = CedarServerUtil.getTemplateFieldsEndpoint(cedarFolderShortId, cedarEnvironment);
+
+      // Extract the categories from the map if they are still there. They are not part of the CEDAR model so we
+      // don't want to post them
+      if (cdeFieldMap.containsKey(CDE_CATEGORY_IDS_FIELD)) {
+        cdeFieldMap.remove(CDE_CATEGORY_IDS_FIELD);
+      }
+
+      String payload = objectMapper.writeValueAsString(cdeFieldMap);
+      conn = ConnectionUtil.createAndOpenConnection("POST", templateFieldsEndpoint, apiKey);
+      OutputStream os = conn.getOutputStream();
+      os.write(payload.getBytes());
+      os.flush();
+      int responseCode = conn.getResponseCode();
+      if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
+        ConnectionUtil.logErrorMessageAndThrowException("Error uploading CDE", conn);
+      } else {
+        // Read the CDE @id
+        String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
+        cedarCdeId = JsonUtil.extractJsonFieldValue(response, JSON_LD_ID);
+
+        // Optionally, attach CDE to categories
+        if (cedarCategoryIds.isPresent()) {
+          String attachCategoriesEndpoint = CedarServerUtil.getAttachCategoriesEndpoint(cedarEnvironment);
+          CedarServices.attachCdeToCategories(cedarCdeId, cedarCategoryIds.get(), attachCategoriesEndpoint, apiKey);
+        }
+      }
+    } catch (Exception e) {
+      logger.error(e.toString());
+    } finally {
+      if (conn != null) {
+        conn.disconnect();
+      }
+    }
+    return cedarCdeId;
+  }
+
+  /*** Category Services ***/
+
   public static String getRootCategoryId(CedarEnvironment targetEnvironment, String apiKey) throws IOException {
     String endpoint = CedarServerUtil.getRootCategoryRestEndpoint(targetEnvironment);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
@@ -88,7 +138,7 @@ public class CedarServices {
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("DELETE", endpoint, apiKey);
     int responseCode = connection.getResponseCode();
     if (responseCode != HttpURLConnection.HTTP_NO_CONTENT) {
-      String message = "Error deleting category (" + categoryId + "): "+
+      String message = "Error deleting category (" + categoryId + "): " +
           ConnectionUtil.readResponseMessage(connection.getInputStream());
       logger.error(message);
       throw new InternalError(message);
@@ -113,6 +163,7 @@ public class CedarServices {
 
   /**
    * Uploads a category to CEDAR, including its children
+   *
    * @param category
    * @param cedarParentCategoryId
    * @param environment
@@ -121,15 +172,17 @@ public class CedarServices {
   public static void createCategory(CategoryTreeNode category, String cedarParentCategoryId,
                                     CedarEnvironment environment, String apiKey) {
 
-    CedarCategory cedarCategory =
-        new CedarCategory(null, category.getUniqueId(), category.getName(), category.getDescription(),
-            cedarParentCategoryId, null);
+    Map<String, String> categoryFieldsMap = new HashMap<>();
+    categoryFieldsMap.put(SCHEMA_ORG_IDENTIFIER, category.getUniqueId());
+    categoryFieldsMap.put(SCHEMA_ORG_NAME, category.getUniqueId());
+    categoryFieldsMap.put(SCHEMA_ORG_DESCRIPTION, category.getUniqueId());
+    categoryFieldsMap.put(NodeProperty.PARENT_CATEGORY_ID.getValue(), cedarParentCategoryId);
 
     HttpURLConnection conn = null;
     try {
       Thread.sleep(50);
       logger.info("Trying to upload: " + category.getUniqueId());
-      String payload = objectMapper.writeValueAsString(cedarCategory);
+      String payload = objectMapper.writeValueAsString(categoryFieldsMap);
       String url = CedarServerUtil.getCategoriesRestEndpoint(environment);
       conn = ConnectionUtil.createAndOpenConnection("POST", url, apiKey);
       OutputStream os = conn.getOutputStream();
@@ -205,11 +258,16 @@ public class CedarServices {
     return categoryTree;
   }
 
-  public static void updateCategory(String categoryCedarId, BasicCedarCategory category, CedarEnvironment environment,
+  public static void updateCategory(String categoryCedarId, CategoryTreeNode category, CedarEnvironment environment,
                                     String apiKey) {
+
+    Map<String, String> categoryFieldsMap = new HashMap<>();
+    categoryFieldsMap.put(SCHEMA_ORG_IDENTIFIER, category.getUniqueId());
+    categoryFieldsMap.put(SCHEMA_ORG_NAME, category.getUniqueId());
+    categoryFieldsMap.put(SCHEMA_ORG_DESCRIPTION, category.getUniqueId());
+
     HttpURLConnection conn = null;
     try {
-      logger.info("Trying to upload: " + category.getId());
       String payload = objectMapper.writeValueAsString(category);
       String url = CedarServerUtil.getCategoryRestEndpoint(categoryCedarId, environment);
       conn = ConnectionUtil.createAndOpenConnection("PUT", url, apiKey);
@@ -218,7 +276,7 @@ public class CedarServices {
       os.flush();
       int responseCode = conn.getResponseCode();
       if (responseCode != HttpURLConnection.HTTP_OK) {
-        logger.error("Error updating category: " + category.getId());
+        logger.error("Error updating category: " + category.getUniqueId());
         GeneralUtil.logErrorMessage(conn);
       }
     } catch (JsonProcessingException e) {
@@ -232,77 +290,14 @@ public class CedarServices {
     }
   }
 
-  /**
-   *
-   * Attach a CDE to multiple categories (making multiple REST calls)
-   *
-   * @param cedarCdeId: CEDAR CDE id
-   * @param categoryIds: list of cadsr category Ids (not CEDAR  ids)
-   */
-  public static void attachCdeToCategoriesMultipleCalls(String cedarCdeId, List<String> categoryIds, String endpoint,
-                                                        Map<String, String> categoryIdsToCedarCategoryIds,
-                                                        String apiKey) {
-
-    for (String categoryId : categoryIds) {
-
-      if (categoryIdsToCedarCategoryIds.containsKey(categoryId)) {
-
-        String cedarCategoryId = categoryIdsToCedarCategoryIds.get(categoryId);
-
-        ObjectNode node = objectMapper.createObjectNode();
-        node.put(CEDAR_CATEGORY_ATTACH_ARTIFACT_ID, cedarCdeId);
-        node.put(CEDAR_CATEGORY_ATTACH_CATEGORY_ID, cedarCategoryId);
-
-        HttpURLConnection conn = null;
-        try {
-          String payload = objectMapper.writeValueAsString(node);
-          logger.info("Attaching CDE to category: " + payload);
-          conn = ConnectionUtil.createAndOpenConnection("POST", endpoint, apiKey);
-          OutputStream os = conn.getOutputStream();
-          os.write(payload.getBytes());
-          os.flush();
-          int responseCode = conn.getResponseCode();
-          if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
-            GeneralUtil.logErrorMessage(conn);
-          } else {
-            GeneralUtil.logResponseMessage(conn);
-          }
-        } catch (JsonProcessingException e) {
-          e.printStackTrace();
-        } catch (IOException e) {
-          logger.error(e.toString());
-        } finally {
-          if (conn != null) {
-            conn.disconnect();
-          }
-        }
-      }
-      else {
-        logger.error("Could not find CEDAR Id in map for category id: " + categoryId);
-      }
-    }
-  }
+  /*** CDE-Category Services ***/
 
   /**
    * Attach a CDE to multiple categories (making a single REST call)
-   *
-   * @param cedarCdeId:  CEDAR CDE id
-   * @param categoryIds: list of cadsr category Ids (not CEDAR ids)
    */
-  public static void attachCdeToCategories(String cedarCdeId, List<String> categoryIds,
-                                           Map<String, String> categoryIdsToCedarCategoryIds,
+  public static void attachCdeToCategories(String cedarCdeId, List<String> cedarCategoryIds,
                                            String endpoint,
                                            String apiKey) {
-
-    List<String> cedarCategoryIds = new ArrayList<>();
-    for (String categoryId : categoryIds) {
-      if (categoryIdsToCedarCategoryIds.containsKey(categoryId)) {
-        cedarCategoryIds.add(categoryIdsToCedarCategoryIds.get(categoryId));
-      }
-      else {
-        logger.error("Could not find CEDAR Id in map for category id: " + categoryId);
-      }
-    }
 
     logger.info("Attaching CDE to the following categories: " + String.join(", ", cedarCategoryIds));
 
@@ -316,7 +311,6 @@ public class CedarServices {
       HttpURLConnection conn = null;
       try {
         String payload = objectMapper.writeValueAsString(node);
-        logger.info("Attaching CDE to category: " + payload);
         conn = ConnectionUtil.createAndOpenConnection("POST", endpoint, apiKey);
         OutputStream os = conn.getOutputStream();
         os.write(payload.getBytes());
@@ -325,7 +319,7 @@ public class CedarServices {
         if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
           GeneralUtil.logErrorMessage(conn);
         } else {
-          GeneralUtil.logResponseMessage(conn);
+          logger.info("CDE attached successfully to categories");
         }
       } catch (JsonProcessingException e) {
         e.printStackTrace();
@@ -337,11 +331,10 @@ public class CedarServices {
         }
       }
     } else {
-
+      String message = "No category ids provided";
+      logger.error(message);
+      throw new IllegalArgumentException(message);
     }
   }
-
-
-
 
 }

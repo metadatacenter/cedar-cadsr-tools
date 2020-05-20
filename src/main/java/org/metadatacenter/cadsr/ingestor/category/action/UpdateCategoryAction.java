@@ -6,8 +6,6 @@ import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public class UpdateCategoryAction implements CategoryAction {
 
   private static final Logger logger = LoggerFactory.getLogger(UpdateCategoryAction.class);
@@ -29,8 +27,8 @@ public class UpdateCategoryAction implements CategoryAction {
   }
 
   @Override
-  public void execute(CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
-    CedarServices.updateCategory(categoryCedarId, category.toBasicCedarCategory(), cedarEnvironment, apiKey);
+  public void execute(CedarEnvironment cedarEnvironment, String apiKey) {
+    CedarServices.updateCategory(categoryCedarId, category, cedarEnvironment, apiKey);
     logger.info("Category updated. Id: " + category.getUniqueId() + "; CEDAR @id: " + categoryCedarId);
   }
 }

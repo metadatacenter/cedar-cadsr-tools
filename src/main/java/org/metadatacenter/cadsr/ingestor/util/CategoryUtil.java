@@ -26,6 +26,9 @@ import java.net.HttpURLConnection;
 import java.text.DecimalFormat;
 import java.util.*;
 
+import static org.metadatacenter.cadsr.ingestor.util.Constants.CDE_CATEGORY_IDS_FIELD;
+import static org.metadatacenter.model.ModelNodeNames.JSON_LD_ID;
+
 public class CategoryUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(CategoryUtil.class);
@@ -270,9 +273,9 @@ public class CategoryUtil {
   // Generates a map of categoryId to cedarCategoryId
   private static Map<String, String> getCategoryIds(JsonNode category, Map<String, String> categoryIds) {
 
-    if (category.hasNonNull(ModelNodeNames.JSON_LD_ID) && category.hasNonNull(ModelNodeNames.SCHEMA_ORG_IDENTIFIER)) {
+    if (category.hasNonNull(JSON_LD_ID) && category.hasNonNull(ModelNodeNames.SCHEMA_ORG_IDENTIFIER)) {
       categoryIds.put(category.get(ModelNodeNames.SCHEMA_ORG_IDENTIFIER).asText(),
-          category.get(ModelNodeNames.JSON_LD_ID).asText());
+          category.get(JSON_LD_ID).asText());
     }
 
     if (category.hasNonNull(Constants.CEDAR_CATEGORY_CHILDREN_FIELD_NAME)) {
@@ -304,22 +307,48 @@ public class CategoryUtil {
                                                                            String apiKey) throws IOException {
     Map<String, CategorySummary> existingCategoriesMap = new HashMap<>();
     CedarCategory currentCedarCategoryTree = CedarServices.getCedarCategoryTree(environment, apiKey);
-    return addCategoriesToMap(currentCedarCategoryTree.getChildren(), existingCategoriesMap, null);
+    return addCategoriesToMap(currentCedarCategoryTree.getChildren(), existingCategoriesMap);
   }
 
   private static Map<String, CategorySummary> addCategoriesToMap(List<CedarCategory> categories, Map<String,
-      CategorySummary> categoriesMap, String parentId) {
+      CategorySummary> categoriesMap) {
     for (CedarCategory category : categories) {
       if (!categoriesMap.containsKey(category.getId())) {
-        logger.info(category.getId());
+        //logger.info(category.getId());
         String categoryHash = CategoryUtil.generateCategoryHashCode(category);
         categoriesMap.put(category.getId(), new CategorySummary(category.getCedarId(), category.getParentCategoryCedarId(), categoryHash));
-        addCategoriesToMap(category.getChildren(), categoriesMap, category.getId());
+        addCategoriesToMap(category.getChildren(), categoriesMap);
       } else {
         throw new InternalError("Category already in map: " + category.getId());
       }
     }
     return categoriesMap;
+  }
+
+  public static List<String> extractCategoryCedarIdsFromCdeField(DataElement cde, Map<String, String> categoryIdsToCategoryCedarIds) {
+    Map<String, Object> cdeFieldMap = CdeUtil.getFieldMapFromDataElement(cde);
+    return extractCategoryCedarIdsFromCdeField(cdeFieldMap, categoryIdsToCategoryCedarIds);
+  }
+
+  public static List<String> extractCategoryCedarIdsFromCdeField(Map<String, Object> cdeFieldMap, Map<String, String> categoryIdsToCategoryCedarIds) {
+    List<String> categoryIds = new ArrayList<>();
+    if (cdeFieldMap.containsKey(CDE_CATEGORY_IDS_FIELD)) {
+      categoryIds = (List) cdeFieldMap.get(CDE_CATEGORY_IDS_FIELD);
+      cdeFieldMap.remove(CDE_CATEGORY_IDS_FIELD);
+    }
+    else {
+      logger.warn("No categories found for CDE: " + cdeFieldMap.get(JSON_LD_ID));
+    }
+    List<String> categoryCedarIds = new ArrayList<>();
+    for (String categoryId : categoryIds) {
+      if (categoryIdsToCategoryCedarIds.containsKey(categoryId)) {
+        categoryCedarIds.add(categoryIdsToCategoryCedarIds.get(categoryId));
+      }
+      else {
+        logger.error("Could not find CEDAR Category Id for Category Id: " + categoryId);
+      }
+    }
+    return categoryCedarIds;
   }
 
 }

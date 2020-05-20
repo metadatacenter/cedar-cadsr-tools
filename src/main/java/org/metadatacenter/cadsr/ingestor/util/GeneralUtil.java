@@ -113,21 +113,20 @@ public class GeneralUtil {
   public static void logErrorMessage(final HttpURLConnection conn) {
     String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
     logger.error(response);
-    throw new RuntimeException("Unable to upload Category. Reason:\n" + response);
+    throw new RuntimeException(response);
   }
 
   public static void logResponseMessage(final HttpURLConnection conn) throws IOException {
     String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
-    String message = createMessageBasedOnFieldNameAndId(response);
-    logger.debug("POST 200 OK: " + message);
+    logger.debug(response);
   }
 
-  public static String createMessageBasedOnFieldNameAndId(String response) throws IOException {
-    JsonNode responseNode = objectMapper.readTree(response);
-    String fieldName = responseNode.get("schema:name").asText();
-    String fieldId = responseNode.get("@id").asText();
-    return String.format("%s (ID: %s)", fieldName, fieldId);
-  }
+//  public static String createMessageBasedOnFieldNameAndId(String response) throws IOException {
+//    JsonNode responseNode = objectMapper.readTree(response);
+//    String fieldName = responseNode.get("schema:name").asText();
+//    String fieldId = responseNode.get("@id").asText();
+//    return String.format("%s (ID: %s)", fieldName, fieldId);
+//  }
 
 
 }

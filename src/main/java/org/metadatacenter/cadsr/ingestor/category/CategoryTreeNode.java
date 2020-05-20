@@ -70,10 +70,6 @@ public class CategoryTreeNode {
     this.children = children;
   }
 
-  public BasicCedarCategory toBasicCedarCategory() {
-    return new BasicCedarCategory(uniqueId, name, description);
-  }
-
   @Override
   public String toString() {
     return "CategoryTreeNode{" +

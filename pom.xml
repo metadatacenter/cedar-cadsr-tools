@@ -15,6 +15,16 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.metadatacenter</groupId>
+      <artifactId>cedar-server-globals</artifactId>
+      <version>2.4.10-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.metadatacenter</groupId>
+      <artifactId>cedar-server-utils-core</artifactId>
+      <version>2.4.10-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>23.0-rc1</version>
@@ -23,11 +33,6 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.9.10.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.metadatacenter</groupId>
-      <artifactId>cedar-server-globals</artifactId>
-      <version>2.4.10-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
