@@ -42,7 +42,7 @@ public class CadsrUploaderTool {
     if (attachCategories) {
       try {
         categoryIdsToCedarCategoryIds =
-            CedarServices.getCedarCategoryIds(targetEnvironment, apiKey);
+            CedarServices.getCategoryIdsToCedarCategoryIdsMap(targetEnvironment, apiKey);
       } catch (IOException e) {
         logger.error(e.getMessage());
       }
