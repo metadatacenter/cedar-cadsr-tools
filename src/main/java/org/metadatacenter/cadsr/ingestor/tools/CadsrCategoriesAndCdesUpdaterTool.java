@@ -18,14 +18,12 @@ import org.metadatacenter.cadsr.ingestor.cde.action.CdeActionsProcessor;
 import org.metadatacenter.cadsr.ingestor.cde.action.CreateCdeAction;
 import org.metadatacenter.cadsr.ingestor.cde.action.DeleteCdeAction;
 import org.metadatacenter.cadsr.ingestor.cde.action.UpdateCdeAction;
-import org.metadatacenter.cadsr.ingestor.util.CategoryUtil;
-import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
-import org.metadatacenter.cadsr.ingestor.util.CedarServices;
+import org.metadatacenter.cadsr.ingestor.util.*;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
-import org.metadatacenter.cadsr.ingestor.util.UnzipUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,6 +39,14 @@ public class CadsrCategoriesAndCdesUpdaterTool {
   public static void main(String[] args) {
 
     /*** INPUTS ***/
+
+    // Id of the CEDAR CDE folder where the contents will be uploaded
+    final String cedarCdeFolderShortId = "1b21338a-10ab-4015-94be-353f947b8a6d";
+    // caDSR Admin user's api key
+    final String apiKey = "apiKey 8d1fdf56f8147054388432716b06e4dac940aa8db326d13e7bfceb17a9ec4b9c"; // In my local
+    // Cedar environment
+    final CedarEnvironment cedarEnvironment = CedarEnvironment.LOCAL;
+
     final String EXECUTION_RESOURCES_PATH = "/Users/marcosmr/Development/DEV_EXECUTIONS/2020" +
         "-05_cdes_upload_production_process";
     final String existingCdesMapFilePath = EXECUTION_RESOURCES_PATH + "/cdesMap.json";
@@ -57,14 +63,6 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite.zip";
     //final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite_modified.zip";
     final String cdesUnzippedFolderPath = cdesFolderPath + "/unzipped";
-
-    // Id of the CEDAR folder where the contents will be uploaded
-    final String cedarFolderShortId = "1b21338a-10ab-4015-94be-353f947b8a6d";
-
-    // caDSR user's api key
-    final String apiKey = "apiKey 58c4f22b9ea1548047682f3112f2f1bcedcb5e40443ddb5e6a11bda0629c2f20"; // In my local
-    // system I'm using the cedar-admin api key
-    final CedarEnvironment cedarEnvironment = CedarEnvironment.LOCAL;
 
     /*** OUTPUTS ***/
     final String ontologyFilePath = EXECUTION_RESOURCES_PATH + "/ontology/cadsr-vs.owl";
@@ -98,7 +96,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
             new TypeReference<HashMap<String, CdeSummary>>() {}));
       }
       Map<String, CdeSummary> updatedCdesMap =
-          updateCDEs(newDataElements, existingCdesMap, cedarFolderShortId, ontologyFilePath, cedarEnvironment, apiKey);
+          updateCDEs(newDataElements, existingCdesMap, cedarCdeFolderShortId, ontologyFilePath, cedarEnvironment, apiKey);
 
       logger.info("Writing map of final CDEs to a file: " + existingCdesMapFilePath);
       objectMapper.writeValue(new File(existingCdesMapFilePath), updatedCdesMap);
@@ -108,23 +106,26 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     }
   }
 
-  private static void updateCategories(List<Category> newCategories,
-                                       CedarEnvironment cedarEnvironment, String apiKey) throws IOException, JAXBException {
+  private static void updateCategories(List<Category> newCategories, CedarEnvironment cedarEnvironment, String apiKey) throws IOException, JAXBException {
 
     // Generate map with existing Categories based on the current Category Tree in CEDAR
-    Map<String, CategorySummary> existingCategoriesMap =
+    Map<String, CategorySummary> allCategoriesMap =
         Collections.unmodifiableMap(CategoryUtil.generateExistingCategoriesMap(cedarEnvironment, apiKey));
+    // Save the identifier of the top-level CDE category
+    String cadsrCategoryCedarId = allCategoriesMap.get(Constants.CADSR_CATEGORY_SCHEMA_ORG_ID).getCedarId();
+    // Keep only the CDE categories (ignoring the top-level CDE category)
+    Map<String, CategorySummary> existingCdeCategoriesMap = CategoryUtil.extractCdeCategoriesMap(allCategoriesMap);
 
     // Check category changes
     List<CreateCategoryAction> createCategoryActions = new ArrayList<>();
     List<UpdateCategoryAction> updateCategoryActions = new ArrayList<>();
     List<DeleteCategoryAction> deleteCategoryActions = new ArrayList<>();
-    Map<String, CategorySummary> categoriesToDeleteMap = new HashMap<>(existingCategoriesMap);
+    Map<String, CategorySummary> categoriesToDeleteMap = new HashMap<>(existingCdeCategoriesMap);
     for (Category newCategory : newCategories) {
-      if (existingCategoriesMap.containsKey(newCategory.getUniqueId())) {
-        String existingCategoryCedarId = existingCategoriesMap.get(newCategory.getUniqueId()).getCedarId();
+      if (existingCdeCategoriesMap.containsKey(newCategory.getUniqueId())) {
+        String existingCategoryCedarId = existingCdeCategoriesMap.get(newCategory.getUniqueId()).getCedarId();
         String newCategoryHash = CategoryUtil.generateCategoryHashCode(newCategory);
-        if (existingCategoriesMap.get(newCategory.getUniqueId()).getHashCode().equals(newCategoryHash)) {
+        if (existingCdeCategoriesMap.get(newCategory.getUniqueId()).getHashCode().equals(newCategoryHash)) {
           // The category exists in CEDAR and it didn't change. Do nothing.
         } else {
           // The category exists in CEDAR and it changed. We'll need to update it.
@@ -136,8 +137,8 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         // that the parent category is not in CEDAR means that the parent will have to be created as well. At some
         // point, the top of the hierarchy of categories to be created will point to a parent CEDAR category
         String parentCategoryCedarId = null;
-        if (existingCategoriesMap.containsKey(newCategory.getParentUniqueId())) {
-          parentCategoryCedarId = existingCategoriesMap.get(newCategory.getParentUniqueId()).getCedarId();
+        if (existingCdeCategoriesMap.containsKey(newCategory.getParentUniqueId())) {
+          parentCategoryCedarId = existingCdeCategoriesMap.get(newCategory.getParentUniqueId()).getCedarId();
         }
         createCategoryActions.add(new CreateCategoryAction(newCategory.toCategoryTreeNode(),
             parentCategoryCedarId));
@@ -154,7 +155,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     // Process category actions
     CategoryActionsProcessor categoryActionsProcessor =
         new CategoryActionsProcessor(createCategoryActions, updateCategoryActions, deleteCategoryActions,
-            cedarEnvironment, apiKey);
+            cadsrCategoryCedarId, cedarEnvironment, apiKey);
     categoryActionsProcessor.logActionsSummary();
     categoryActionsProcessor.executeCategoryActions();
   }

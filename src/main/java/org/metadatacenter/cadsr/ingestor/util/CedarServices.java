@@ -174,8 +174,8 @@ public class CedarServices {
 
     Map<String, String> categoryFieldsMap = new HashMap<>();
     categoryFieldsMap.put(SCHEMA_ORG_IDENTIFIER, category.getUniqueId());
-    categoryFieldsMap.put(SCHEMA_ORG_NAME, category.getUniqueId());
-    categoryFieldsMap.put(SCHEMA_ORG_DESCRIPTION, category.getUniqueId());
+    categoryFieldsMap.put(SCHEMA_ORG_NAME, category.getName());
+    categoryFieldsMap.put(SCHEMA_ORG_DESCRIPTION, category.getDescription());
     categoryFieldsMap.put(NodeProperty.PARENT_CATEGORY_ID.getValue(), cedarParentCategoryId);
 
     HttpURLConnection conn = null;
@@ -263,12 +263,12 @@ public class CedarServices {
 
     Map<String, String> categoryFieldsMap = new HashMap<>();
     categoryFieldsMap.put(SCHEMA_ORG_IDENTIFIER, category.getUniqueId());
-    categoryFieldsMap.put(SCHEMA_ORG_NAME, category.getUniqueId());
-    categoryFieldsMap.put(SCHEMA_ORG_DESCRIPTION, category.getUniqueId());
+    categoryFieldsMap.put(SCHEMA_ORG_NAME, category.getName());
+    categoryFieldsMap.put(SCHEMA_ORG_DESCRIPTION, category.getDescription());
 
     HttpURLConnection conn = null;
     try {
-      String payload = objectMapper.writeValueAsString(category);
+      String payload = objectMapper.writeValueAsString(categoryFieldsMap);
       String url = CedarServerUtil.getCategoryRestEndpoint(categoryCedarId, environment);
       conn = ConnectionUtil.createAndOpenConnection("PUT", url, apiKey);
       OutputStream os = conn.getOutputStream();
