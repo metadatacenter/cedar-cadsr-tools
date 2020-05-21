@@ -3,6 +3,7 @@ package org.metadatacenter.cadsr.ingestor.category.action;
 import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.metadatacenter.cadsr.ingestor.util.CategoryUtil;
 import org.metadatacenter.cadsr.ingestor.util.CedarServices;
+import org.metadatacenter.cadsr.ingestor.util.Constants;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.metadatacenter.cadsr.ingestor.util.Constants.ROOT_CATEGORY_KEY;
+import static org.metadatacenter.cadsr.ingestor.util.Constants.CADSR_CATEGORY_SCHEMA_ORG_ID;
 
 public class CategoryActionsProcessor {
 
@@ -22,16 +23,20 @@ public class CategoryActionsProcessor {
   private List<CreateCategoryAction> createCategoryActions;
   private List<UpdateCategoryAction> updateCategoryActions;
   private List<DeleteCategoryAction> deleteCategoryActions;
+  private String rootCadsrCategoryCedarId;
   private CedarEnvironment cedarEnvironment;
   private String apiKey;
 
   public CategoryActionsProcessor(List<CreateCategoryAction> createCategoryActions,
                                   List<UpdateCategoryAction> updateCategoryActions,
-                                  List<DeleteCategoryAction> deleteCategoryActions, CedarEnvironment cedarEnvironment
+                                  List<DeleteCategoryAction> deleteCategoryActions,
+                                  String rootCadsrCategoryCedarId,
+                                  CedarEnvironment cedarEnvironment
       , String apiKey) throws IOException {
     this.createCategoryActions = createCategoryActions;
     this.updateCategoryActions = updateCategoryActions;
     this.deleteCategoryActions = deleteCategoryActions;
+    this.rootCadsrCategoryCedarId = rootCadsrCategoryCedarId;
     this.cedarEnvironment = cedarEnvironment;
     this.apiKey = apiKey;
     // Prepare actions for execution.
@@ -60,7 +65,7 @@ public class CategoryActionsProcessor {
     if (createCategoryActions.size() > 0) {
       logger.info("Categories to Create:");
       for (CreateCategoryAction action : createCategoryActions) {
-        logger.info(action.getCategory().toString());
+        logger.info(action.getCategory().getUniqueId());
       }
     }
     if (deleteCategoryActions.size() > 0) {
@@ -72,7 +77,7 @@ public class CategoryActionsProcessor {
     if (updateCategoryActions.size() > 0) {
       logger.info("Categories to Update:");
       for (UpdateCategoryAction action : updateCategoryActions) {
-        logger.info(action.getCategory().toString());
+        logger.info(action.getCategory().getUniqueId());
       }
     }
   }
@@ -105,7 +110,7 @@ public class CategoryActionsProcessor {
   private void prepareDeleteActions() {
   }
 
-  private void prepareCreateActions() throws IOException {
+  private void prepareCreateActions() {
     List<CreateCategoryAction> processedCreateCategoryActions = new ArrayList<>();
     List<CategoryTreeNode> nodesToBeCreated = new ArrayList<>();
     Map<String, String> uniqueIdToParentCedarIdMap = new HashMap<>(); // We'll needed later to retrieve the parent id
@@ -114,14 +119,20 @@ public class CategoryActionsProcessor {
       uniqueIdToParentCedarIdMap.put(createAction.getCategory().getUniqueId(), createAction.getParentCategoryCedarId());
     }
     List<CategoryTreeNode> connectedCategoryTreeNodes = connectCategoryTreeNodes(nodesToBeCreated);
-    String rootCategoryId = CedarServices.getRootCategoryId(cedarEnvironment, apiKey);
 
     for (CategoryTreeNode categoryTreeNode : connectedCategoryTreeNodes) {
-      // Set the root category id if needed
-      if (categoryTreeNode.getParentUniqueId().equals(ROOT_CATEGORY_KEY)) {
-        categoryTreeNode.setParentUniqueId(rootCategoryId);
+
+
+      String parentCedarId = null;
+      // Set the caDSR root category if needed
+      if (categoryTreeNode.getParentUniqueId().equals(CADSR_CATEGORY_SCHEMA_ORG_ID)) {
+        parentCedarId = rootCadsrCategoryCedarId;
       }
-      processedCreateCategoryActions.add(new CreateCategoryAction(categoryTreeNode, uniqueIdToParentCedarIdMap.get(categoryTreeNode.getUniqueId())));
+      else {
+        parentCedarId = uniqueIdToParentCedarIdMap.get(categoryTreeNode.getUniqueId());
+      }
+
+      processedCreateCategoryActions.add(new CreateCategoryAction(categoryTreeNode, parentCedarId));
     }
     createCategoryActions = processedCreateCategoryActions;
   }
