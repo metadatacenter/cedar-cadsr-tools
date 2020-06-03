@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -80,7 +81,7 @@ public class CdeActionsProcessor {
     for (CreateCdeAction createCdeAction : createCdeActions) {
       String createdCdeCedarId = createCdeAction.execute(cedarEnvironment, apiKey);
       String createdCdeUniqueId = CdeUtil.generateCdeUniqueId(createCdeAction.getCdeFieldMap());
-      CdeSummary cdeSummary = new CdeSummary(createdCdeCedarId, createCdeAction.getHashCode());
+      CdeSummary cdeSummary = new CdeSummary(createdCdeCedarId, null, null, createCdeAction.getHashCode(),  new ArrayList<>());
       cdesMap.put(createdCdeUniqueId, cdeSummary);
     }
   }

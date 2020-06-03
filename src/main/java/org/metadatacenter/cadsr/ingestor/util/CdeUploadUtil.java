@@ -2,18 +2,18 @@ package org.metadatacenter.cadsr.ingestor.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
+import org.metadatacenter.cadsr.cde.schema.DataElement;
+import org.metadatacenter.cadsr.cde.schema.DataElementsList;
 import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.CDE_VALUESETS_ONTOLOGY_NAME;
 
@@ -22,7 +22,9 @@ public class CdeUploadUtil {
   private static final Logger logger = LoggerFactory.getLogger(CdeUploadUtil.class);
 
   public static void uploadCdeFromDirectory(File inputDir, String cedarFolderShortId,
-                                            boolean attachCategories, Map<String, String> categoryIdsToCedarCategoryIds, CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
+                                            boolean attachCategories, Map<String, String> categoryIdsToCedarCategoryIds,
+                                            CedarEnvironment cedarEnvironment, String apiKey)
+      throws IOException, JAXBException {
 
     for (final File inputFile : inputDir.listFiles()) {
       uploadCdeFromFile(inputFile, cedarFolderShortId, attachCategories, categoryIdsToCedarCategoryIds, cedarEnvironment, apiKey);
@@ -31,21 +33,20 @@ public class CdeUploadUtil {
 
   public static void uploadCdeFromFile(File inputFile, String cedarFolderShortId,
                                        boolean attachCategories, Map<String, String> categoryIdsToCedarCategoryIds,
-                                       CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
+                                       CedarEnvironment cedarEnvironment, String apiKey) throws IOException, JAXBException {
 
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
-    Collection<Map<String, Object>> fieldMaps =
-        CdeUtil.getFieldMapsFromInputStream(new FileInputStream(inputFile));
 
-    int totalFields = fieldMaps.size();
-    if (totalFields > 0) {
-      for (Map<String, Object> fieldMap : fieldMaps) {
-        Optional<List<String>> cedarCategoryIds = Optional.empty();
-        if (attachCategories) {
-          cedarCategoryIds = Optional.of(CategoryUtil.extractCategoryCedarIdsFromCdeField(fieldMap, categoryIdsToCedarCategoryIds));
-        }
-        CedarServices.createCde(fieldMap, cedarFolderShortId, cedarCategoryIds, cedarEnvironment, apiKey);
+    DataElementsList dataElementsList = CdeUtil.getDataElementLists(new FileInputStream(inputFile));
+
+    for (DataElement dataElement : dataElementsList.getDataElement()) {
+      String hashCode = CdeUtil.generateCdeHashCode(dataElement);
+      Optional<List<String>> cedarCategoryIds = Optional.empty();
+      Map<String, Object> fieldMap = CdeUtil.getFieldMapFromDataElement(dataElement);
+      if (attachCategories) {
+        cedarCategoryIds = Optional.of(CategoryUtil.extractCategoryCedarIdsFromCdeField(fieldMap, categoryIdsToCedarCategoryIds));
       }
+      CedarServices.createCde(fieldMap, hashCode, cedarFolderShortId, cedarCategoryIds, cedarEnvironment, apiKey);
     }
   }
 

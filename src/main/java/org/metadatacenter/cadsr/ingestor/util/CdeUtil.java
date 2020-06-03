@@ -251,14 +251,18 @@ public class CdeUtil {
   }
 
   /**
-   * Returns a hash code to determine if the data element changed. It is based on three dateModified fields: for the
-   * data element, for its value domain, and for each permissible value item. We assume that changes in the
-   * categories associated to the dataElement are captured by the data element's dateModified field.
+   * Returns a hash code to determine if the data element has changed. It is based on the CDE public Id, version, plus
+   * three dateModified fields: for the data element, for its value domain, and for each permissible value item.
+   * We assume that changes in the categories associated to the dataElement are captured by the data element's
+   * dateModified field.
    *
    * @param dataElement
    * @return Hash code
    */
-  public static String generateCdeModifiedHashCode(DataElement dataElement) {
+  public static String generateCdeHashCode(DataElement dataElement) {
+
+    String publicId = dataElement.getPUBLICID().getContent();
+    String version = dataElement.getVERSION().getContent();
 
     String dataElementDateModified = dataElement.getDateModified().getContent();
     String valueDomainDateModified = dataElement.getVALUEDOMAIN().getDateModified().getContent();
@@ -268,7 +272,7 @@ public class CdeUtil {
       permissibleValuesItemDatesModified.add(item.getDateModified().getContent());
     }
 
-    return GeneralUtil.getSha1(dataElementDateModified + valueDomainDateModified + permissibleValuesItemDatesModified.toString());
+    return GeneralUtil.getSha1(publicId + version + dataElementDateModified + valueDomainDateModified + permissibleValuesItemDatesModified.toString());
   }
 
 }
