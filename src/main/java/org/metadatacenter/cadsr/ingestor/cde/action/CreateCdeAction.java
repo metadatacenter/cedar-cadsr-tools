@@ -50,7 +50,7 @@ public class CreateCdeAction implements CdeAction {
     if (cedarCategoryIds != null && cedarCategoryIds.size() > 0) {
       cedarCatIds = Optional.of(cedarCategoryIds);
     }
-    String createdCdeCedarId = CedarServices.createCde(cdeFieldMap, cedarFolderShortId, cedarCatIds, cedarEnvironment, apiKey);
+    String createdCdeCedarId = CedarServices.createCde(cdeFieldMap, hashCode, cedarFolderShortId, cedarCatIds, cedarEnvironment, apiKey);
     logger.info("CDE created: " + CdeUtil.generateCdeUniqueId(cdeFieldMap) + "; CEDAR Id: " + createdCdeCedarId);
     return createdCdeCedarId;
   }

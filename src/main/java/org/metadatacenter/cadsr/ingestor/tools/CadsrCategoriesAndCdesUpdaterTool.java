@@ -23,7 +23,6 @@ import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,7 +40,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     /*** INPUTS ***/
 
     // Id of the CEDAR CDE folder where the contents will be uploaded
-    final String cedarCdeFolderShortId = "1b21338a-10ab-4015-94be-353f947b8a6d";
+    final String cedarCdeFolderShortId = "03f2d7f0-a54c-4a36-a0a8-c53159ec4aab";
     // caDSR Admin user's api key
     final String apiKey = "apiKey 8d1fdf56f8147054388432716b06e4dac940aa8db326d13e7bfceb17a9ec4b9c"; // In my local
     // Cedar environment
@@ -88,13 +87,24 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         DataElementsList newDataElementList = CdeUtil.getDataElementLists(new FileInputStream(inputFile));
         newDataElements.addAll(newDataElementList.getDataElement());
       }
-      // Read map with existing CDEs. TODO: generate the map based on a CEDAR call
+      // Retrieve existing CDEs from CEDAR TODO: retrieve all using pagination
+      List fieldNamesToInclude = new ArrayList(Arrays.asList(new String[]{"schema:identifier", "pav:version", "sourceHash"}));
+      boolean includeCategoryIds = true;
+      List<CdeSummary> cdeSummaries = CedarServices.findSummaryOfCdesInFolder(cedarCdeFolderShortId, fieldNamesToInclude, includeCategoryIds, cedarEnvironment, apiKey);
+
       Map<String, CdeSummary> existingCdesMap = new HashMap<>(); // Map cdeId (PublicId + "V" + Version)  -> CdeSummary
-      File existingCdesMapFile = new File(existingCdesMapFilePath);
-      if (existingCdesMapFile.exists()) {
-        existingCdesMap = Collections.unmodifiableMap(objectMapper.readValue(existingCdesMapFile,
-            new TypeReference<HashMap<String, CdeSummary>>() {}));
+      for (CdeSummary cdeSummary : cdeSummaries) {
+        String cdeMapKey = CdeUtil.generateCdeUniqueId(cdeSummary.getId(), cdeSummary.getVersion());
+        existingCdesMap.put(cdeMapKey, cdeSummary);
       }
+
+      //-----------------
+
+//      File existingCdesMapFile = new File(existingCdesMapFilePath);
+//      if (existingCdesMapFile.exists()) {
+//        existingCdesMap = Collections.unmodifiableMap(objectMapper.readValue(existingCdesMapFile,
+//            new TypeReference<HashMap<String, CdeSummary>>() {}));
+//      }
       Map<String, CdeSummary> updatedCdesMap =
           updateCDEs(newDataElements, existingCdesMap, cedarCdeFolderShortId, ontologyFilePath, cedarEnvironment, apiKey);
 
@@ -175,7 +185,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     int count = 0;
     for (DataElement newDataElement : newDataElements) {
       Map<String, Object> newCdeFieldMap = CdeUtil.getFieldMapFromDataElement(newDataElement);
-      String newCdeHashCode = CdeUtil.generateCdeModifiedHashCode(newDataElement);
+      String newCdeHashCode = CdeUtil.generateCdeHashCode(newDataElement);
       String newCdeUniqueId = CdeUtil.generateCdeUniqueId(newCdeFieldMap);
       List<String> categoryCedarIds = CategoryUtil.extractCategoryCedarIdsFromCdeField(newCdeFieldMap,
           categoryIdsToCedarCategoryIds);

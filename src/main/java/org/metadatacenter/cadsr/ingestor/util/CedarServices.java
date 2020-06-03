@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
+import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.metadatacenter.server.neo4j.cypher.NodeProperty;
 import org.slf4j.Logger;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.util.*;
 
@@ -52,8 +52,27 @@ public class CedarServices {
       }
       return fieldIds;
     } else {
-      logger.error("Error retrieving root category id");
-      throw new InternalError("Error retrieving root category id");
+      logger.error("Error retrieving fields in folder");
+      throw new InternalError("Error retrieving fields in folder");
+    }
+  }
+
+  public static List<CdeSummary> findSummaryOfCdesInFolder(String folderShortId, List<String> fieldNames, boolean includeCategoryIds, CedarEnvironment environment, String apiKey) throws IOException {
+    String endpoint = CedarServerUtil.getFolderContentsExtractEndPoint(folderShortId, fieldNames, includeCategoryIds,  environment);
+    HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
+    int responseCode = connection.getResponseCode();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+      String response = ConnectionUtil.readResponseMessage(connection.getInputStream());
+      connection.disconnect();
+      List<JsonNode> resources = JsonUtil.extractJsonFieldAsList(response, "resources");
+      List<CdeSummary> cdeSummaries = new ArrayList<>();
+      for (JsonNode resource : resources) {
+        cdeSummaries.add(objectMapper.treeToValue(resource, CdeSummary.class));
+      }
+      return cdeSummaries;
+    } else {
+      logger.error("Error retrieving summaries of fields in folder");
+      throw new InternalError("Error retrieving summaries of fields in folder");
     }
   }
 
@@ -72,7 +91,7 @@ public class CedarServices {
 
   /*** CDE Services ***/
 
-  public static String createCde(Map<String, Object> cdeFieldMap, String cedarFolderShortId,
+  public static String createCde(Map<String, Object> cdeFieldMap, String cdeHashCode, String cedarFolderShortId,
                                  Optional<List<String>> cedarCategoryIds, CedarEnvironment cedarEnvironment,
                                  String apiKey) {
 
@@ -90,6 +109,10 @@ public class CedarServices {
 
       String payload = objectMapper.writeValueAsString(cdeFieldMap);
       conn = ConnectionUtil.createAndOpenConnection("POST", templateFieldsEndpoint, apiKey);
+
+      // Set hash code
+      conn.setRequestProperty("CEDAR-Source-Hash", cdeHashCode);
+
       OutputStream os = conn.getOutputStream();
       os.write(payload.getBytes());
       os.flush();
