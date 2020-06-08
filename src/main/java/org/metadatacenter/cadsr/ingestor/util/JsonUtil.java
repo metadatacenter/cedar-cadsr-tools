@@ -11,10 +11,28 @@ public class JsonUtil {
 
   private static ObjectMapper objectMapper = new ObjectMapper();
 
-  public static String extractJsonFieldValue(String json, String fieldName) throws IOException {
+  public static String extractJsonFieldValueAsText(String json, String fieldName) throws IOException {
     JsonNode node = objectMapper.readTree(json);
     if (node.has(fieldName)) {
       return node.get(fieldName).asText();
+    } else {
+      throw new RuntimeException("Json field not found in object: " + fieldName);
+    }
+  }
+
+  public static JsonNode extractJsonFieldValueAsNode(String json, String fieldName) throws IOException {
+    JsonNode node = objectMapper.readTree(json);
+    if (node.has(fieldName)) {
+      return node.get(fieldName);
+    } else {
+      throw new RuntimeException("Json field not found in object: " + fieldName);
+    }
+  }
+
+  public static int extractJsonFieldValueAsInt(String json, String fieldName) throws IOException {
+    JsonNode node = objectMapper.readTree(json);
+    if (node.has(fieldName)) {
+      return node.get(fieldName).asInt();
     } else {
       throw new RuntimeException("Json field not found in object: " + fieldName);
     }

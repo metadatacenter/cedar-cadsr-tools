@@ -57,23 +57,39 @@ public class CedarServices {
     }
   }
 
-  public static List<CdeSummary> findSummaryOfCdesInFolder(String folderShortId, List<String> fieldNames, boolean includeCategoryIds, CedarEnvironment environment, String apiKey) throws IOException {
-    String endpoint = CedarServerUtil.getFolderContentsExtractEndPoint(folderShortId, fieldNames, includeCategoryIds,  environment);
-    HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
-    int responseCode = connection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      String response = ConnectionUtil.readResponseMessage(connection.getInputStream());
-      connection.disconnect();
-      List<JsonNode> resources = JsonUtil.extractJsonFieldAsList(response, "resources");
-      List<CdeSummary> cdeSummaries = new ArrayList<>();
-      for (JsonNode resource : resources) {
-        cdeSummaries.add(objectMapper.treeToValue(resource, CdeSummary.class));
+  public static List<CdeSummary> findCdeSummariesInFolder(String folderShortId, List<String> fieldNames,
+                                                          boolean includeCategoryIds, CedarEnvironment environment, String apiKey) throws IOException {
+
+    List<CdeSummary> cdeSummaries = new ArrayList<>();
+
+    boolean finished = false;
+    int offset = 0;
+    int limit = 100;
+    while (!finished) {
+      String endpoint = CedarServerUtil.getCdesInFolderExtractEndPoint(folderShortId, fieldNames, includeCategoryIds,  environment);
+      endpoint = endpoint + "&offset=" + offset + "&limit=" + limit;
+      HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
+      int responseCode = connection.getResponseCode();
+      if (responseCode == HttpURLConnection.HTTP_OK) {
+        String response = ConnectionUtil.readResponseMessage(connection.getInputStream());
+        connection.disconnect();
+        List<JsonNode> resources = JsonUtil.extractJsonFieldAsList(response, "resources");
+        for (JsonNode resource : resources) {
+          cdeSummaries.add(objectMapper.treeToValue(resource, CdeSummary.class));
+        }
+        int totalCount =  JsonUtil.extractJsonFieldValueAsInt(response, "totalCount");
+        if (cdeSummaries.size() >= totalCount) {
+          finished = true;
+        }
+        else {
+          offset += limit;
+        }
+      } else {
+        logger.error("Error retrieving summaries of fields in folder");
+        throw new InternalError("Error retrieving summaries of fields in folder");
       }
-      return cdeSummaries;
-    } else {
-      logger.error("Error retrieving summaries of fields in folder");
-      throw new InternalError("Error retrieving summaries of fields in folder");
     }
+    return cdeSummaries;
   }
 
   public static void deleteField(String fieldId, CedarEnvironment environment, String apiKey) throws IOException {
@@ -122,7 +138,7 @@ public class CedarServices {
       } else {
         // Read the CDE @id
         String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
-        cedarCdeId = JsonUtil.extractJsonFieldValue(response, JSON_LD_ID);
+        cedarCdeId = JsonUtil.extractJsonFieldValueAsText(response, JSON_LD_ID);
 
         // Optionally, attach CDE to categories
         if (cedarCategoryIds.isPresent()) {
@@ -149,7 +165,7 @@ public class CedarServices {
     if (responseCode == HttpURLConnection.HTTP_OK) {
       String response = ConnectionUtil.readResponseMessage(connection.getInputStream());
       connection.disconnect();
-      return JsonUtil.extractJsonFieldValue(response, "@id");
+      return JsonUtil.extractJsonFieldValueAsText(response, "@id");
     } else {
       logger.error("Error retrieving root category id");
       throw new InternalError("Error retrieving root category id");
@@ -216,10 +232,9 @@ public class CedarServices {
         logger.error("Error creating category: " + category.getUniqueId());
         GeneralUtil.logErrorMessage(conn);
       } else {
-        logger.info("Category created: " + payload);
         String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
-        String cedarCategoryId = JsonUtil.extractJsonFieldValue(response, "@id");
-        //logger.info(String.format("Uploading categories (%d/%d)", counter, allCategories.size()));
+        String cedarCategoryId = JsonUtil.extractJsonFieldValueAsText(response, "@id");
+        logger.info("Category created: " + payload + "CEDAR Id: " + cedarCategoryId + ".");
         for (CategoryTreeNode categoryTreeNode : category.getChildren()) {
           createCategory(categoryTreeNode, cedarCategoryId, environment, apiKey);
         }

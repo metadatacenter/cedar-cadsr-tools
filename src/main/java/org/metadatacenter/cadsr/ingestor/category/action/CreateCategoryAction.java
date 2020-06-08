@@ -28,6 +28,7 @@ public class CreateCategoryAction implements CategoryAction {
 
   @Override
   public void execute(CedarEnvironment cedarEnvironment, String apiKey) {
+    logger.info("Creating category: " + category.getUniqueId());
     CedarServices.createCategory(category, parentCategoryCedarId, cedarEnvironment, apiKey);
     logger.info("Category created: " + category.getUniqueId());
   }

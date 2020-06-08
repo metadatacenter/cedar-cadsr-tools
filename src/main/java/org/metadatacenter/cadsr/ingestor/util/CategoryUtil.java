@@ -167,31 +167,36 @@ public class CategoryUtil {
    */
   public static List<Category> addCategoryToList(Category newCategory, List<Category> categories) {
 
-    List<Integer> positionsSameCategory = new ArrayList<>();
+    List<Integer> positionOfCategoriesWithSameName = new ArrayList<>();
 
     for (int i = 0; i < categories.size(); i++) {
       Category category = categories.get(i);
       if (newCategory.getParentUniqueId().equals(category.getParentUniqueId()) && newCategory.getName().equals(category.getName())) {
-        logger.warn("Found two categories with the same name at the same level!: " + category.getUniqueId() + "; " + newCategory.getUniqueId());
-        positionsSameCategory.add(i);
+        logger.warn("Found two categories with the same name at the same level! Name: " + category.getName() + ". Category Ids: " + category.getUniqueId() + "; " + newCategory.getUniqueId());
+        positionOfCategoriesWithSameName.add(i);
       }
     }
 
-    for (int position : positionsSameCategory) {
+    // Update names of categories with the same name than newCategory
+    for (int position : positionOfCategoriesWithSameName) {
       Category existingCategory = categories.get(position);
       categories.remove(position);
-      existingCategory.setName(existingCategory.getName() + " " + existingCategory.getVersion());
+      String existingCategoryNewName = existingCategory.getName() + " " + existingCategory.getVersion();
+      logger.info("Updating category name to avoid confusion: " + existingCategory.getName() + " (" + existingCategory.getUniqueId() + ")" + " -> " + existingCategoryNewName);
+      existingCategory.setName(existingCategoryNewName);
       categories.add(existingCategory);
     }
 
-    if (!positionsSameCategory.isEmpty()) {
-      newCategory.setName(newCategory.getName() + " " + newCategory.getVersion());
+    // Update name of newCategory
+    if (!positionOfCategoriesWithSameName.isEmpty()) {
+      String newName = newCategory.getName() + " " + newCategory.getVersion();
+      logger.info("Updating category name to avoid confusion: " + newCategory.getName() + " (" + newCategory.getUniqueId() + ")" + " -> " + newName);
+      newCategory.setName(newName);
     }
 
     categories.add(newCategory);
 
     return categories;
-
   }
 
 
@@ -201,9 +206,9 @@ public class CategoryUtil {
                                            String parentUniqueId) {
 
     String categoryPublicId = publicId.isPresent() ? publicId.get() : null;
-    String localId = generateCategoryLocalId(name, type, publicId, version);
+    String localId = generateCategoryLocalId(name, publicId, version);
     String cadsrId = generateCadsrCategoryId(localId, ctxLocalId, csLocalId);
-    String uniqueId = generateCdeCategoryUniqueId(name, type, publicId, version, parentUniqueId);
+    String uniqueId = generateCdeCategoryUniqueId(name, publicId, version, parentUniqueId);
     String categoryName = longName.isPresent() ? longName.get().trim() : name.trim();
     String description = longName.isPresent() ? longName.get().trim() : name.trim();
     String categoryType = type.isPresent() ? type.get() : null;
@@ -211,10 +216,6 @@ public class CategoryUtil {
     return new Category(categoryPublicId, version, localId, cadsrId, uniqueId, categoryName, description,
         categoryType, parentUniqueId);
   }
-
-//  public static List<CategoryTreeNode> categoriesListToTree(List<Category> categories) {
-//    return getChildrenNodes(Constants.ROOT_CATEGORY_KEY, categories);
-//  }
 
   public static List<CategoryTreeNode> cdeCategoriesListToTree(List<Category> categories) {
     return getChildrenNodes(CADSR_CATEGORY_SCHEMA_ORG_ID, categories);
@@ -233,29 +234,23 @@ public class CategoryUtil {
     return childrenNodes;
   }
 
-  public static String generateCategoryLocalId(String name, Optional<String> type, Optional<String> publicId,
-                                               String version) {
+  public static String generateCategoryLocalId(String name, Optional<String> publicId, String version) {
     final String separator = "_";
-    // Format: type_name_id_version
-//    String categoryId = (name + separator + (type.isPresent() ? (type.get() + separator) : "")
-//        + (publicId.isPresent() ? (publicId.get() + separator) : "") + "v" + version);
-    // If publicId is not available (it happens for the first level of categories in the tree), we use the name
     String categoryId = (publicId.isPresent() ? publicId.get() : name) + separator + "V" + version;
     return categoryId.replaceAll("\\s", "").replaceAll("/", ""); // Remove spaces and slashes
   }
 
   public static String generateCadsrCategoryId(String categoryLocalId, Optional<String> ctxLocalId,
                                                Optional<String> csLocalId) {
-
-
+    String categoryId = CADSR_CATEGORY_SCHEMA_ORG_ID;
     if (ctxLocalId.isPresent()) {
       if (csLocalId.isPresent()) {
-        return ctxLocalId.get() + "/" + csLocalId.get() + "/" + categoryLocalId;
+        return categoryId + "/" + ctxLocalId.get() + "/" + csLocalId.get() + "/" + categoryLocalId;
       } else {
-        return ctxLocalId.get() + "/" + categoryLocalId;
+        return categoryId + "/" + ctxLocalId.get() + "/" + categoryLocalId;
       }
     } else {
-      return categoryLocalId;
+      return categoryId + "/" + categoryLocalId;
     }
   }
 
@@ -271,10 +266,10 @@ public class CategoryUtil {
 //    }
 //  }
 
-  public static String generateCdeCategoryUniqueId(String name, Optional<String> type, Optional<String> publicId,
-                                                String version, String parentCategoryUniqueId) {
+  public static String generateCdeCategoryUniqueId(String name, Optional<String> publicId,
+                                                   String version, String parentCategoryUniqueId) {
 
-    String categoryId = generateCategoryLocalId(name, type, publicId, version);
+    String categoryId = generateCategoryLocalId(name, publicId, version);
     return parentCategoryUniqueId + "/" + categoryId;
 
 //    if (parentCategoryUniqueId.equals(CADSR_CATEGORY_SCHEMA_ORG_ID)) {
@@ -322,13 +317,13 @@ public class CategoryUtil {
   }
 
   public static Map<String, CategorySummary> generateExistingCategoriesMap(CedarEnvironment environment,
-                                                                              String apiKey) throws IOException {
+                                                                           String apiKey) throws IOException {
     Map<String, CategorySummary> existingCategoriesMap = new HashMap<>();
     CedarCategory currentCedarCategoryTree = CedarServices.getCedarCategoryTree(environment, apiKey);
     return addCdeCategoriesToMap(currentCedarCategoryTree.getChildren(), existingCategoriesMap);
   }
 
-  public static Map<String, CategorySummary> extractCdeCategoriesMap(Map<String, CategorySummary> allCategories) throws IOException {
+  public static Map<String, CategorySummary> extractCdeCategoriesMap(Map<String, CategorySummary> allCategories) {
     Map<String, CategorySummary> cdeCategories = new HashMap<>();
     for (String categoryUniqueId : allCategories.keySet()) {
       // Ignore the root NCI caDSR category
@@ -340,11 +335,16 @@ public class CategoryUtil {
     return cdeCategories;
   }
 
+  /**
+   * Reads a list of CedarCategory objects and stores them into a map (key: category unique id; value: CategorySummary)
+   * @param categories
+   * @param categoriesMap
+   * @return Categories map
+   */
   private static Map<String, CategorySummary> addCdeCategoriesToMap(List<CedarCategory> categories, Map<String,
       CategorySummary> categoriesMap) {
     for (CedarCategory category : categories) {
       if (!categoriesMap.containsKey(category.getId())) {
-        //logger.info(category.getId());
         String categoryHash = CategoryUtil.generateCategoryHashCode(category);
         categoriesMap.put(category.getId(), new CategorySummary(category.getCedarId(),
             category.getParentCategoryCedarId(), categoryHash));
@@ -354,6 +354,20 @@ public class CategoryUtil {
       }
     }
     return categoriesMap;
+  }
+
+  public static List<String> extractCategoryIdsFromCdeField(DataElement cde) {
+    Map<String, Object> cdeFieldMap = CdeUtil.getFieldMapFromDataElement(cde);
+    return extractCategoryIdsFromCdeField(cdeFieldMap);
+  }
+
+  public static List<String> extractCategoryIdsFromCdeField(Map<String, Object> cdeFieldMap) {
+    if (cdeFieldMap.containsKey(CDE_CATEGORY_IDS_FIELD)) {
+      return (List) cdeFieldMap.get(CDE_CATEGORY_IDS_FIELD);
+    } else {
+      logger.warn("No categories found for CDE: " + cdeFieldMap.get(JSON_LD_ID));
+      return new ArrayList<>();
+    }
   }
 
   public static List<String> extractCategoryCedarIdsFromCdeField(DataElement cde,
@@ -381,5 +395,4 @@ public class CategoryUtil {
     }
     return categoryCedarIds;
   }
-
 }
