@@ -38,6 +38,7 @@ public class CdeActionsProcessor {
   }
 
   public void executeCdeActions() throws IOException {
+    logger.info("Applying CDE actions: ");
     if (updateCdeActions.size() > 0) {
       executeUpdateActions();
     }
@@ -47,10 +48,11 @@ public class CdeActionsProcessor {
     if (createCdeActions.size() > 0) {
       executeCreateActions();
     }
+    logger.info("Finished applying CDE actions.");
   }
 
   public void logActionsSummary() {
-    logger.info("Processing CDE actions: ");
+    logger.info("CDE actions: ");
     logger.info(" - " + createCdeActions.size() + " Create actions");
     logger.info(" - " + deleteCdeActions.size() + " Delete actions");
     logger.info(" - " + updateCdeActions.size() + " Update actions");
@@ -76,12 +78,13 @@ public class CdeActionsProcessor {
 
   /*** Private methods to execute actions ***/
 
-  private void executeCreateActions() throws IOException {
+  private void executeCreateActions() {
     logger.info("Executing CDE Create actions");
     for (CreateCdeAction createCdeAction : createCdeActions) {
       String createdCdeCedarId = createCdeAction.execute(cedarEnvironment, apiKey);
       String createdCdeUniqueId = CdeUtil.generateCdeUniqueId(createCdeAction.getCdeFieldMap());
-      CdeSummary cdeSummary = new CdeSummary(createdCdeCedarId, null, null, createCdeAction.getHashCode(),  new ArrayList<>());
+      CdeSummary cdeSummary = new CdeSummary(createdCdeCedarId, null, null, createCdeAction.getHashCode(),
+          new ArrayList<>());
       cdesMap.put(createdCdeUniqueId, cdeSummary);
     }
   }
@@ -93,7 +96,7 @@ public class CdeActionsProcessor {
     }
   }
 
-  private void executeUpdateActions() throws IOException {
+  private void executeUpdateActions() {
     logger.info("Executing CDE Update actions");
     for (UpdateCdeAction updateCdeAction : updateCdeActions) {
       updateCdeAction.execute(cedarEnvironment, apiKey);

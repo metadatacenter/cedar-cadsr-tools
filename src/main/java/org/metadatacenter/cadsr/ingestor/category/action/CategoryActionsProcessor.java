@@ -1,9 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.category.action;
 
 import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
-import org.metadatacenter.cadsr.ingestor.util.CategoryUtil;
-import org.metadatacenter.cadsr.ingestor.util.CedarServices;
-import org.metadatacenter.cadsr.ingestor.util.Constants;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,21 +28,19 @@ public class CategoryActionsProcessor {
                                   List<UpdateCategoryAction> updateCategoryActions,
                                   List<DeleteCategoryAction> deleteCategoryActions,
                                   String rootCadsrCategoryCedarId,
-                                  CedarEnvironment cedarEnvironment
-      , String apiKey) throws IOException {
+                                  CedarEnvironment cedarEnvironment, String apiKey) {
     this.createCategoryActions = createCategoryActions;
     this.updateCategoryActions = updateCategoryActions;
     this.deleteCategoryActions = deleteCategoryActions;
     this.rootCadsrCategoryCedarId = rootCadsrCategoryCedarId;
     this.cedarEnvironment = cedarEnvironment;
     this.apiKey = apiKey;
-    // Prepare actions for execution.
-    //prepareUpdateActions();
-    //prepareDeleteActions();
+    // Prepare create actions for execution.
     prepareCreateActions();
   }
 
   public void executeCategoryActions() throws IOException {
+    logger.info("Applying category actions.");
     if (updateCategoryActions.size() > 0) {
       executeUpdateActions();
     }
@@ -55,29 +50,30 @@ public class CategoryActionsProcessor {
     if (createCategoryActions.size() > 0) {
       executeCreateActions();
     }
+    logger.info("Finished applying category actions.");
   }
 
   public void logActionsSummary() {
-    logger.info("Processing category actions: ");
+    logger.info("Category actions: ");
     logger.info(" - " + createCategoryActions.size() + " Create actions");
     logger.info(" - " + deleteCategoryActions.size() + " Delete actions");
     logger.info(" - " + updateCategoryActions.size() + " Update actions");
     if (createCategoryActions.size() > 0) {
       logger.info("Categories to Create:");
       for (CreateCategoryAction action : createCategoryActions) {
-        logger.info(action.getCategory().getUniqueId());
+        logger.info(" - " + action.getCategory().getUniqueId() + " (" + action.getCategory().getName() + ").");
       }
     }
     if (deleteCategoryActions.size() > 0) {
       logger.info("Categories to Delete:");
       for (DeleteCategoryAction action : deleteCategoryActions) {
-        logger.info(action.getCategoryCedarId());
+        logger.info(" - " + action.getCategoryCedarId());
       }
     }
     if (updateCategoryActions.size() > 0) {
       logger.info("Categories to Update:");
       for (UpdateCategoryAction action : updateCategoryActions) {
-        logger.info(action.getCategory().getUniqueId());
+        logger.info(" - " + action.getCategory().getUniqueId() + " (" + action.getCategory().getName() + ").");
       }
     }
   }
@@ -107,9 +103,6 @@ public class CategoryActionsProcessor {
 
   /*** Private methods to prepare actions for execution ***/
 
-  private void prepareDeleteActions() {
-  }
-
   private void prepareCreateActions() {
     List<CreateCategoryAction> processedCreateCategoryActions = new ArrayList<>();
     List<CategoryTreeNode> nodesToBeCreated = new ArrayList<>();
@@ -121,9 +114,7 @@ public class CategoryActionsProcessor {
     List<CategoryTreeNode> connectedCategoryTreeNodes = connectCategoryTreeNodes(nodesToBeCreated);
 
     for (CategoryTreeNode categoryTreeNode : connectedCategoryTreeNodes) {
-
-
-      String parentCedarId = null;
+      String parentCedarId;
       // Set the caDSR root category if needed
       if (categoryTreeNode.getParentUniqueId().equals(CADSR_CATEGORY_SCHEMA_ORG_ID)) {
         parentCedarId = rootCadsrCategoryCedarId;
@@ -131,14 +122,10 @@ public class CategoryActionsProcessor {
       else {
         parentCedarId = uniqueIdToParentCedarIdMap.get(categoryTreeNode.getUniqueId());
       }
-
       processedCreateCategoryActions.add(new CreateCategoryAction(categoryTreeNode, parentCedarId));
     }
     createCategoryActions = processedCreateCategoryActions;
   }
-
-
-  //private void prepareUpdateActions() { }
 
   /**
    * Organize the CategoryTreeNodes as a tree in order to be able to create them in the right order. When we
@@ -165,7 +152,7 @@ public class CategoryActionsProcessor {
     }
 
     for (CategoryTreeNode node : nodes) {
-      // It's a top level node, does not have parents in the lists of given nodes
+      // It's a top level node, it does not have parents in the lists of given nodes.
       if (!nodeUniqueIds.contains(node.getParentUniqueId())) {
         topLevelNodes.add(node);
       }

@@ -31,9 +31,10 @@ import java.util.*;
 
 public class CadsrCategoriesAndCdesUpdaterTool {
 
-  private static ObjectMapper objectMapper = new ObjectMapper();
   private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesAndCdesUpdaterTool.class);
-  final static int MAX_CDES_TO_PROCESS = 5; // delete
+
+  // TODO: DELETE
+  final static int MAX_CDES_TO_PROCESS = 6;
 
   public static void main(String[] args) {
 
@@ -48,12 +49,12 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 
     final String EXECUTION_RESOURCES_PATH = "/Users/marcosmr/Development/DEV_EXECUTIONS/2020" +
         "-05_cdes_upload_production_process";
-    final String existingCdesMapFilePath = EXECUTION_RESOURCES_PATH + "/cdesMap.json";
+//    final String existingCdesMapFilePath = EXECUTION_RESOURCES_PATH + "/cdesMap.json";
 
     final String categoriesFolderPath = EXECUTION_RESOURCES_PATH + "/categories";
-    final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528.zip";
-//    final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_modified.zip";
-//    final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_deleted.zip";
+    //final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528.zip";
+    //final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_modified.zip";
+    final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_deleted.zip";
 //    final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_deleted2.zip";
     final String categoriesUnzippedFolderPath = categoriesFolderPath + "/unzipped";
 
@@ -68,16 +69,26 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 
     try {
 
-      /*** UPDATE CATEGORIES ***/
-      // Download and parse new Categories TODO: Read them using FTPClient once we have the FTP host
+      /*** STEP 1. UPDATE CATEGORIES ***/
+      logger.info("*****************************************");
+      logger.info("*  STEP 1. UPDATE NCI caDSR CATEGORIES  *");
+      logger.info("*****************************************");
+
+      // Download and parse new Categories TODO: Download them using FTPClient once we have the FTP host
+      logger.info("Downloading most recent categories.");
       FileUtils.deleteDirectory(new File(categoriesUnzippedFolderPath));
       UnzipUtility.unzip(categoriesZipFilePath, categoriesUnzippedFolderPath);
       File classificationsFile = (new File(categoriesUnzippedFolderPath)).listFiles()[0];
       Classifications newClassifications = CategoryUtil.getClassifications(new FileInputStream(classificationsFile));
       List<Category> newCategories = CategoryUtil.classificationsToCategoriesList(newClassifications);
+      logger.info("Finished downloading categories. " + newCategories.size() + " categories found.");
       updateCategories(newCategories, cedarEnvironment, apiKey);
 
-      /*** UPDATE CDEs ***/
+      /*** STEP 2. UPDATE CDEs and CDE-Category relations ***/
+      logger.info("*****************************************");
+      logger.info("*         STEP 2. UPDATE CDEs           *");
+      logger.info("*****************************************");
+
       // Download and parse new CDEs // TODO: Read them using FTPClient once we have the FTP host
       FileUtils.deleteDirectory(new File(cdesUnzippedFolderPath));
       UnzipUtility.unzip(cdesZipFilePath, cdesUnzippedFolderPath);
@@ -87,46 +98,29 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         DataElementsList newDataElementList = CdeUtil.getDataElementLists(new FileInputStream(inputFile));
         newDataElements.addAll(newDataElementList.getDataElement());
       }
-      // Retrieve existing CDEs from CEDAR TODO: retrieve all using pagination
-      List fieldNamesToInclude = new ArrayList(Arrays.asList(new String[]{"schema:identifier", "pav:version", "sourceHash"}));
-      boolean includeCategoryIds = true;
-      List<CdeSummary> cdeSummaries = CedarServices.findSummaryOfCdesInFolder(cedarCdeFolderShortId, fieldNamesToInclude, includeCategoryIds, cedarEnvironment, apiKey);
 
-      Map<String, CdeSummary> existingCdesMap = new HashMap<>(); // Map cdeId (PublicId + "V" + Version)  -> CdeSummary
-      for (CdeSummary cdeSummary : cdeSummaries) {
-        String cdeMapKey = CdeUtil.generateCdeUniqueId(cdeSummary.getId(), cdeSummary.getVersion());
-        existingCdesMap.put(cdeMapKey, cdeSummary);
-      }
-
-      //-----------------
-
-//      File existingCdesMapFile = new File(existingCdesMapFilePath);
-//      if (existingCdesMapFile.exists()) {
-//        existingCdesMap = Collections.unmodifiableMap(objectMapper.readValue(existingCdesMapFile,
-//            new TypeReference<HashMap<String, CdeSummary>>() {}));
-//      }
-      Map<String, CdeSummary> updatedCdesMap =
-          updateCDEs(newDataElements, existingCdesMap, cedarCdeFolderShortId, ontologyFilePath, cedarEnvironment, apiKey);
-
-      logger.info("Writing map of final CDEs to a file: " + existingCdesMapFilePath);
-      objectMapper.writeValue(new File(existingCdesMapFilePath), updatedCdesMap);
+      updateCDEs(newDataElements, cedarCdeFolderShortId, ontologyFilePath, cedarEnvironment, apiKey);
 
     } catch (IOException | JAXBException e) {
       e.printStackTrace();
     }
   }
 
-  private static void updateCategories(List<Category> newCategories, CedarEnvironment cedarEnvironment, String apiKey) throws IOException, JAXBException {
+  private static void updateCategories(List<Category> newCategories, CedarEnvironment cedarEnvironment,
+                                       String apiKey) throws IOException {
 
     // Generate map with existing Categories based on the current Category Tree in CEDAR
+    logger.info("Retrieving current NCI caDSR categories from CEDAR.");
     Map<String, CategorySummary> allCategoriesMap =
         Collections.unmodifiableMap(CategoryUtil.generateExistingCategoriesMap(cedarEnvironment, apiKey));
     // Save the identifier of the top-level CDE category
     String cadsrCategoryCedarId = allCategoriesMap.get(Constants.CADSR_CATEGORY_SCHEMA_ORG_ID).getCedarId();
     // Keep only the CDE categories (ignoring the top-level CDE category)
     Map<String, CategorySummary> existingCdeCategoriesMap = CategoryUtil.extractCdeCategoriesMap(allCategoriesMap);
+    logger.info("Number of NCI caDSR categories retrieved from CEDAR: " + existingCdeCategoriesMap.size() + ".");
 
-    // Check category changes
+    // Check category modifications and store them as actions that will be applied later
+    logger.info("Checking category changes and generating category actions.");
     List<CreateCategoryAction> createCategoryActions = new ArrayList<>();
     List<UpdateCategoryAction> updateCategoryActions = new ArrayList<>();
     List<DeleteCategoryAction> deleteCategoryActions = new ArrayList<>();
@@ -145,7 +139,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
       } else {
         // The category is not in CEDAR yet. We'll need to create it. We'll see if its parent is in CEDAR. The fact
         // that the parent category is not in CEDAR means that the parent will have to be created as well. At some
-        // point, the top of the hierarchy of categories to be created will point to a parent CEDAR category
+        // point, the top of the hierarchy of categories to be created will point to a parent CEDAR category.
         String parentCategoryCedarId = null;
         if (existingCdeCategoriesMap.containsKey(newCategory.getParentUniqueId())) {
           parentCategoryCedarId = existingCdeCategoriesMap.get(newCategory.getParentUniqueId()).getCedarId();
@@ -170,14 +164,31 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     categoryActionsProcessor.executeCategoryActions();
   }
 
-  private static Map<String, CdeSummary> updateCDEs(List<DataElement> newDataElements, Map<String, CdeSummary> existingCdesMap,
-                                 String cedarFolderShortId, String ontologyFilePath,
-                                 CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
+  private static Map<String, CdeSummary> updateCDEs(List<DataElement> newDataElements,
+                                                    String cedarFolderShortId, String ontologyFilePath,
+                                                    CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
+
+    // Retrieve existing CDEs from CEDAR
+    logger.info("Retrieving current CDEs from CEDAR (folder short id: " + cedarFolderShortId + ").");
+    List fieldNamesToInclude = new ArrayList(Arrays.asList(new String[]{"schema:identifier", "pav:version",
+        "sourceHash"}));
+    List<CdeSummary> cdeSummaries = CedarServices.findCdeSummariesInFolder(cedarFolderShortId,
+        fieldNamesToInclude, true, cedarEnvironment, apiKey);
+    logger.info("Number of CDEs retrieved from CEDAR: " + cdeSummaries.size() + ").");
+
+    // Create CDE Map (key: cdeId (PublicId + "V" + Version); Value: CdeSummary)
+    Map<String, CdeSummary> existingCdesMap = new HashMap<>();
+    for (CdeSummary cdeSummary : cdeSummaries) {
+      String cdeMapKey = CdeUtil.generateCdeUniqueId(cdeSummary.getId(), cdeSummary.getVersion());
+      existingCdesMap.put(cdeMapKey, cdeSummary);
+    }
 
     // Read the categoryIds from CEDAR to be able to link CDEs to them
-    Map<String, String> categoryIdsToCedarCategoryIds = CedarServices.getCategoryIdsToCedarCategoryIdsMap(cedarEnvironment, apiKey);
+    Map<String, String> categoryIdsToCedarCategoryIds =
+        CedarServices.getCategoryIdsToCedarCategoryIdsMap(cedarEnvironment, apiKey);
 
     // Check CDE changes
+    logger.info("Checking CDEs changes and generating actions.");
     List<CreateCdeAction> createCdeActions = new ArrayList<>();
     List<UpdateCdeAction> updateCdeActions = new ArrayList<>();
     List<DeleteCdeAction> deleteCdeActions = new ArrayList<>();
@@ -189,13 +200,14 @@ public class CadsrCategoriesAndCdesUpdaterTool {
       String newCdeUniqueId = CdeUtil.generateCdeUniqueId(newCdeFieldMap);
       List<String> categoryCedarIds = CategoryUtil.extractCategoryCedarIdsFromCdeField(newCdeFieldMap,
           categoryIdsToCedarCategoryIds);
-      // Check if the CDE is new or not
+      // Check whether the CDE is new
       if (existingCdesMap.containsKey(newCdeUniqueId)) {
         if (existingCdesMap.get(newCdeUniqueId).getHashCode().equals(newCdeHashCode)) {
           // The CDE exists in CEDAR and it didn't change. Do nothing.
         } else {
-          // TODO: The CDE exists in CEDAR and it changed. We'll have to update it.
-          updateCdeActions.add(new UpdateCdeAction());
+          // The CDE exists in CEDAR and it changed. This is wrong. In this case, a new version should have been
+          // generated in the caDSR XML. Different XMLs shouldn't contain different CDEs with the same public id and version
+          logger.error("Error: The CDE has changed, but its public Id and Version were not updated in the caDSR XML: " + newCdeUniqueId);
         }
       } else {
         // The CDE doesn't exist in CEDAR. We'll have to create it.
@@ -208,9 +220,11 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         break;
       }
     }
-    // TODO: The remaining CDEs in the map are not part of the new caDSR file. We'll delete them from CEDAR.
+    // The remaining CDEs in the map are not part of the new caDSR file. That's wrong. All CDEs should be kept in the
+    // XML. The CDEs that are not used anymore will have RETIRED status.
     for (CdeSummary cdeSummary : cdesToDeleteMap.values()) {
-      deleteCdeActions.add(new DeleteCdeAction());
+      logger.error("Error: The CDE is not part of the caDSR XML any more: " +
+          CdeUtil.generateCdeUniqueId(cdeSummary.getId(), cdeSummary.getVersion()));
     }
 
     // Process CDE actions
