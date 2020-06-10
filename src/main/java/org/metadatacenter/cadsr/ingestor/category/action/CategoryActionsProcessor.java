@@ -1,5 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.category.action;
 
+import org.metadatacenter.cadsr.ingestor.category.CategoryStats;
 import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.slf4j.Logger;
@@ -35,6 +36,10 @@ public class CategoryActionsProcessor {
     this.rootCadsrCategoryCedarId = rootCadsrCategoryCedarId;
     this.cedarEnvironment = cedarEnvironment;
     this.apiKey = apiKey;
+    // Save stats
+    CategoryStats.getInstance().numberOfCategoriesToBeCreated = createCategoryActions.size();
+    CategoryStats.getInstance().numberOfCategoriesToBeUpdated = updateCategoryActions.size();
+    CategoryStats.getInstance().numberOfCategoriesToBeDeleted = deleteCategoryActions.size();
     // Prepare create actions for execution.
     prepareCreateActions();
   }

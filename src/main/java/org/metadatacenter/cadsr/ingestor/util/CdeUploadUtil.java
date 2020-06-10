@@ -42,11 +42,13 @@ public class CdeUploadUtil {
     for (DataElement dataElement : dataElementsList.getDataElement()) {
       String hashCode = CdeUtil.generateCdeHashCode(dataElement);
       Optional<List<String>> cedarCategoryIds = Optional.empty();
+      Optional<List<String>> categoryIds = Optional.empty();
       Map<String, Object> fieldMap = CdeUtil.getFieldMapFromDataElement(dataElement);
       if (attachCategories) {
         cedarCategoryIds = Optional.of(CategoryUtil.extractCategoryCedarIdsFromCdeField(fieldMap, categoryIdsToCedarCategoryIds));
+        categoryIds = Optional.of(CategoryUtil.extractCategoryIdsFromCdeField(fieldMap));
       }
-      CedarServices.createCde(fieldMap, hashCode, cedarFolderShortId, cedarCategoryIds, cedarEnvironment, apiKey);
+      CedarServices.createCde(fieldMap, hashCode, cedarFolderShortId, cedarCategoryIds, categoryIds, cedarEnvironment, apiKey);
     }
   }
 

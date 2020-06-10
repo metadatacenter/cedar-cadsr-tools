@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.Optional;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
 

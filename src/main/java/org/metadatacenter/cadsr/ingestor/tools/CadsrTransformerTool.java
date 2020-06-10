@@ -6,7 +6,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.io.Files;
 import org.metadatacenter.cadsr.ingestor.util.Constants;
 import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
-import org.metadatacenter.cadsr.ingestor.cde.CadsrTransformationStats;
+import org.metadatacenter.cadsr.ingestor.cde.CdeStats;
 import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
 import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class CadsrTransformerTool {
     File outputSubDir = GeneralUtil.createDirectoryBasedOnInputFileName(inputFile, outputDir);
     Collection<Map<String, Object>> fieldMaps = CdeUtil.getFieldMapsFromInputStream(new FileInputStream(inputFile));
     int totalFields = fieldMaps.size();
-    CadsrTransformationStats.getInstance().numberOfCdesProcessedOk += totalFields;
+    //CdeStats.getInstance().numberOfCdesProcessedOk += totalFields;
 
     if (totalFields > 0) {
       int counter = 0;
@@ -116,26 +116,26 @@ public class CadsrTransformerTool {
     }
     logger.info("----------------------------------------------------------");
     logger.info("Summary of results:");
-    logger.info("- Number of input caDSR CDEs: " + countFormat.format(CadsrTransformationStats.getInstance().numberOfInputCdes));
+    logger.info("- Number of input caDSR CDEs: " + countFormat.format(CdeStats.getInstance().numberOfInputCdes));
     logger.info("- Number of CEDAR CDEs generated: "
-        + countFormat.format(CadsrTransformationStats.getInstance().numberOfCdesProcessedOk)
-        + " (" + calculatePercentage(CadsrTransformationStats.getInstance().numberOfCdesProcessedOk,
-        CadsrTransformationStats.getInstance().numberOfInputCdes) + ")");
+        + countFormat.format(CdeStats.getInstance().numberOfCdesProcessedOk)
+        + " (" + GeneralUtil.calculatePercentage(CdeStats.getInstance().numberOfCdesProcessedOk,
+        CdeStats.getInstance().numberOfInputCdes) + ")");
     logger.info("- Number of CEDAR CDEs skipped: "
-        + countFormat.format(CadsrTransformationStats.getInstance().numberOfCdesSkipped)
-        + " (" + calculatePercentage(CadsrTransformationStats.getInstance().numberOfCdesSkipped,
-        CadsrTransformationStats.getInstance().numberOfInputCdes) + ")");
+        + countFormat.format(CdeStats.getInstance().numberOfCdesSkipped)
+        + " (" + GeneralUtil.calculatePercentage(CdeStats.getInstance().numberOfCdesSkipped,
+        CdeStats.getInstance().numberOfInputCdes) + ")");
     logger.info("- Number of CEDAR CDEs that failed to process: "
-        + countFormat.format(CadsrTransformationStats.getInstance().numberOfCdesFailed)
-        + " (" + calculatePercentage(CadsrTransformationStats.getInstance().numberOfCdesFailed,
-        CadsrTransformationStats.getInstance().numberOfInputCdes) + ")");
+        + countFormat.format(CdeStats.getInstance().numberOfCdesFailed)
+        + " (" + GeneralUtil.calculatePercentage(CdeStats.getInstance().numberOfCdesFailed,
+        CdeStats.getInstance().numberOfInputCdes) + ")");
     logger.info("- Breakdown of skipped CDEs: ");
-    for (Map.Entry<String,Integer> entry : CadsrTransformationStats.getInstance().getSkippedReasons().entrySet()) {
+    for (Map.Entry<String,Integer> entry : CdeStats.getInstance().getSkippedReasons().entrySet()) {
       logger.info("  - " + entry.getKey() + ": " + entry.getValue());
     }
-    if (CadsrTransformationStats.getInstance().numberOfCdesFailed > 0) {
+    if (CdeStats.getInstance().numberOfCdesFailed > 0) {
       logger.info("- Breakdown of failed CDEs: ");
-      for (Map.Entry<String, Integer> entry : CadsrTransformationStats.getInstance().getFailedReasons().entrySet()) {
+      for (Map.Entry<String, Integer> entry : CdeStats.getInstance().getFailedReasons().entrySet()) {
         logger.info("  - " + entry.getKey() + ": " + entry.getValue());
       }
     }
@@ -147,11 +147,5 @@ public class CadsrTransformerTool {
     logger.info("Finished at: " + LocalDateTime.now());
     logger.info("----------------------------------------------------------");
   }
-
-  private static String calculatePercentage(int amount, int total) {
-    final DecimalFormat percentFormat = new DecimalFormat("###.##%");
-    return percentFormat.format(((float) amount / (float) total));
-  }
-
 }
 

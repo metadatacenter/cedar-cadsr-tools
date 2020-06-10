@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.DataElementsList;
 import org.metadatacenter.cadsr.cde.schema.PermissibleValuesITEM;
-import org.metadatacenter.cadsr.ingestor.cde.CadsrTransformationStats;
+import org.metadatacenter.cadsr.ingestor.cde.CdeStats;
 import org.metadatacenter.cadsr.ingestor.cde.handler.*;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
@@ -30,16 +30,9 @@ public class CdeUtil {
   public static Collection<Map<String, Object>> getFieldMapsFromDataElements(DataElementsList del) {
     final List<Map<String, Object>> fieldMaps = Lists.newArrayList();
     for (DataElement dataElement : del.getDataElement()) {
-      try {
-        final Map<String, Object> field = Maps.newHashMap();
-        parseDataElement(dataElement, field);
-        fieldMaps.add(field);
-      } catch (UnsupportedDataElementException e) {
-        CadsrTransformationStats.getInstance().addSkipped(e.getReason());
-        logger.warn(e.getMessage());
-      } catch (UnknownSeparatorException e) {
-        CadsrTransformationStats.getInstance().addFailed(e.getMessage());
-        logger.error(e.getMessage());
+      Map<String, Object> fieldMap = getFieldMapFromDataElement(dataElement);
+      if (fieldMap != null) {
+        fieldMaps.add(fieldMap);
       }
     }
     return fieldMaps;
@@ -49,19 +42,21 @@ public class CdeUtil {
     final Map<String, Object> fieldMap = Maps.newHashMap();
     try {
       parseDataElement(de, fieldMap);
+      return fieldMap;
     } catch (UnsupportedDataElementException e) {
+      CdeStats.getInstance().addSkipped(e.getReason());
       logger.warn(e.getMessage());
     } catch (UnknownSeparatorException e) {
+      CdeStats.getInstance().addFailed(e.getMessage());
       logger.error(e.getMessage());
     }
-    return fieldMap;
+    return null;
   }
 
   public static Collection<Map<String, Object>> getFieldMapsFromInputStream(InputStream is) {
     final List<Map<String, Object>> fieldMaps = Lists.newArrayList();
     try {
       DataElementsList del = getDataElementLists(is);
-      CadsrTransformationStats.getInstance().numberOfInputCdes += del.getDataElement().size();
       fieldMaps.addAll(getFieldMapsFromDataElements(del));
     } catch (ClassCastException e) {
       logger.error("Source document is not a list of data elements: " + e);

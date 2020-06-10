@@ -1,6 +1,5 @@
 package org.metadatacenter.cadsr.ingestor.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.metadatacenter.cadsr.category.schema.CSI;
@@ -8,12 +7,8 @@ import org.metadatacenter.cadsr.category.schema.ClassificationScheme;
 import org.metadatacenter.cadsr.category.schema.Classifications;
 import org.metadatacenter.cadsr.category.schema.Context;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
-import org.metadatacenter.cadsr.cde.schema.PermissibleValuesITEM;
-import org.metadatacenter.cadsr.ingestor.category.Category;
-import org.metadatacenter.cadsr.ingestor.category.CategorySummary;
-import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
+import org.metadatacenter.cadsr.ingestor.category.*;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
-import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
 import org.metadatacenter.model.ModelNodeNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +17,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -33,8 +27,6 @@ import static org.metadatacenter.model.ModelNodeNames.JSON_LD_ID;
 public class CategoryUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(CategoryUtil.class);
-
-  private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
 
   private static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -136,6 +128,7 @@ public class CategoryUtil {
         }
       }
     }
+    CategoryStats.getInstance().numberOfInputCategories = categories.size();
     return categories;
   }
 
@@ -254,29 +247,12 @@ public class CategoryUtil {
     }
   }
 
-//  public static String generateCategoryUniqueId(String name, Optional<String> type, Optional<String> publicId,
-//                                                String version, String parentCategoryUniqueId) {
-//
-//    String categoryId = generateCategoryLocalId(name, type, publicId, version);
-//
-//    if (parentCategoryUniqueId.equals(Constants.ROOT_CATEGORY_KEY)) {
-//      return categoryId;
-//    } else {
-//      return parentCategoryUniqueId + "/" + categoryId;
-//    }
-//  }
-
   public static String generateCdeCategoryUniqueId(String name, Optional<String> publicId,
                                                    String version, String parentCategoryUniqueId) {
 
     String categoryId = generateCategoryLocalId(name, publicId, version);
     return parentCategoryUniqueId + "/" + categoryId;
 
-//    if (parentCategoryUniqueId.equals(CADSR_CATEGORY_SCHEMA_ORG_ID)) {
-//      return categoryId;
-//    } else {
-//      return parentCategoryUniqueId + "/" + categoryId;
-//    }
   }
 
   public static Map<String, String> getCategoryIdsFromCategoryTree(JsonNode cedarCategoryTree) {
@@ -381,7 +357,6 @@ public class CategoryUtil {
     List<String> categoryIds = new ArrayList<>();
     if (cdeFieldMap.containsKey(CDE_CATEGORY_IDS_FIELD)) {
       categoryIds = (List) cdeFieldMap.get(CDE_CATEGORY_IDS_FIELD);
-      cdeFieldMap.remove(CDE_CATEGORY_IDS_FIELD);
     } else {
       logger.warn("No categories found for CDE: " + cdeFieldMap.get(JSON_LD_ID));
     }
