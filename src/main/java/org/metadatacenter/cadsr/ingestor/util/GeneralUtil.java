@@ -1,6 +1,5 @@
 package org.metadatacenter.cadsr.ingestor.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
@@ -12,10 +11,10 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 
 public class GeneralUtil {
 
-  private static ObjectMapper objectMapper = new ObjectMapper();
   private static final Logger logger = LoggerFactory.getLogger(CdeUtil.class);
 
   public static String getSha1(String input) {
@@ -120,6 +119,12 @@ public class GeneralUtil {
     String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
     logger.debug(response);
   }
+
+  public static String calculatePercentage(int amount, int total) {
+    final DecimalFormat percentFormat = new DecimalFormat("###.##%");
+    return percentFormat.format(((float) amount / (float) total));
+  }
+
 
 //  public static String createMessageBasedOnFieldNameAndId(String response) throws IOException {
 //    JsonNode responseNode = objectMapper.readTree(response);

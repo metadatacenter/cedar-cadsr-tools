@@ -24,6 +24,5 @@ public class DeleteCategoryAction implements CategoryAction {
   @Override
   public void execute(CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
     CedarServices.deleteCategory(categoryCedarId, cedarEnvironment, apiKey);
-    logger.info("Category deleted. CEDAR @id: " + categoryCedarId);
   }
 }

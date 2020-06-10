@@ -1,5 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.category.action;
 
+import org.metadatacenter.cadsr.ingestor.category.CategoryStats;
 import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.metadatacenter.cadsr.ingestor.util.CedarServices;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
@@ -30,6 +31,5 @@ public class CreateCategoryAction implements CategoryAction {
   public void execute(CedarEnvironment cedarEnvironment, String apiKey) {
     logger.info("Creating category: " + category.getUniqueId());
     CedarServices.createCategory(category, parentCategoryCedarId, cedarEnvironment, apiKey);
-    logger.info("Category created: " + category.getUniqueId());
   }
 }

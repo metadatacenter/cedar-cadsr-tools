@@ -29,6 +29,5 @@ public class UpdateCategoryAction implements CategoryAction {
   @Override
   public void execute(CedarEnvironment cedarEnvironment, String apiKey) {
     CedarServices.updateCategory(categoryCedarId, category, cedarEnvironment, apiKey);
-    logger.info("Category updated. Id: " + category.getUniqueId() + "; CEDAR @id: " + categoryCedarId);
   }
 }

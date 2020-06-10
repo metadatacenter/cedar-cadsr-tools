@@ -1,7 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.tools;
 
 import com.google.common.base.Stopwatch;
-import org.metadatacenter.cadsr.ingestor.util.CategoryUtil;
 import org.metadatacenter.cadsr.ingestor.util.CdeUploadUtil;
 import org.metadatacenter.cadsr.ingestor.util.CedarServerUtil;
 import org.metadatacenter.cadsr.ingestor.util.CedarServices;
@@ -12,9 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.ATTACH_CATEGORIES_OPTION;
