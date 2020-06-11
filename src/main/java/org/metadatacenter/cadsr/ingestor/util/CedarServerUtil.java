@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
@@ -102,17 +103,17 @@ public class CedarServerUtil {
   }
 
   public static String getCdesInFolderExtractEndPoint(String folderShortId, List<String> fieldNames,
-                                                      boolean includeCategoryIds, CedarEnvironment targetEnvironment)
-      throws UnsupportedEncodingException {
+                                                      boolean includeCategoryIds, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
     String resourceServerUrl = CedarServerUtil.getResourceServerUrl(targetEnvironment);
     String repoServerUrl = CedarServerUtil.getRepoServerUrl(targetEnvironment);
     String folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderShortId);
     String url = resourceServerUrl + "/folders/" + folderId + "/contents-extract?resource_types=field";
+    List<String> updatedFieldNames = new ArrayList<>(fieldNames); // Create a copy because we may update it to include 'categories'
     if (includeCategoryIds) {
-      fieldNames.add("categories");
+      updatedFieldNames.add("categories");
     }
-    if (fieldNames.size() > 0) {
-      url = url + "&field_names=" + String.join(",", fieldNames);
+    if (updatedFieldNames.size() > 0) {
+      url = url + "&field_names=" + String.join(",", updatedFieldNames);
     }
     return url;
   }
