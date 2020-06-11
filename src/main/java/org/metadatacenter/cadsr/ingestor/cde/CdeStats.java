@@ -13,6 +13,8 @@ public class CdeStats {
   public int numberOfCdesProcessedOk;
   public int numberOfCdesToBeCreated;
   public int numberOfCdesCreated;
+  public int numberOfCdesToBeRetired;
+  public int numberOfCdesRetired;
   public int numberOfCdesSkipped;
   public int numberOfCdesFailed;
   private Map<String, Integer> skippedReasons; // stores the reason and the count of CDEs skipped for that reason
@@ -26,6 +28,8 @@ public class CdeStats {
     numberOfCdesProcessedOk = 0;
     numberOfCdesToBeCreated = 0;
     numberOfCdesCreated = 0;
+    numberOfCdesToBeRetired = 0;
+    numberOfCdesRetired = 0;
     numberOfCdesSkipped = 0;
     numberOfCdesFailed = 0;
     skippedReasons = new HashMap<>();
