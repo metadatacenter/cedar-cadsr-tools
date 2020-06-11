@@ -86,9 +86,11 @@ public class CedarServices {
         else {
           offset += limit;
         }
+        logger.info(cdeSummaries.size() + "/" + totalCount + " CDEs retrieved.");
       } else {
-        logger.error("Error retrieving summaries of fields in folder");
-        throw new InternalError("Error retrieving summaries of fields in folder");
+        String message = "Error retrieving CDE summaries";
+        logger.error(message);
+        throw new InternalError(message);
       }
     }
     return cdeSummaries;
@@ -186,21 +188,6 @@ public class CedarServices {
     else {
       logger.info("Category deleted successfully. CEDAR @id: " + categoryCedarId);
       CategoryStats.getInstance().numberOfCategoriesDeleted++;
-    }
-    connection.disconnect();
-  }
-
-
-  // Deletes all the categories and their relationships to CDEs, except the root category
-  public static void deleteCategoryTree(CedarEnvironment targetEnvironment, String apiKey) throws IOException {
-    String endpoint = CedarServerUtil.getCategoryTreeEndpoint(targetEnvironment);
-    HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("DELETE", endpoint, apiKey);
-    int responseCode = connection.getResponseCode();
-    if (responseCode != HttpURLConnection.HTTP_NO_CONTENT) {
-      String message = "Error deleting category tree: " +
-          ConnectionUtil.readResponseMessage(connection.getInputStream());
-      logger.error(message);
-      throw new InternalError(message);
     }
     connection.disconnect();
   }

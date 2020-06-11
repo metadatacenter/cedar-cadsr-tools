@@ -17,7 +17,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.CADSR_CATEGORY_SCHEMA_ORG_ID;
@@ -365,9 +364,23 @@ public class CategoryUtil {
       if (categoryIdsToCategoryCedarIds.containsKey(categoryId)) {
         categoryCedarIds.add(categoryIdsToCategoryCedarIds.get(categoryId));
       } else {
-        logger.error("Could not find CEDAR Category Id for Category Id: " + categoryId);
+        logger.error("Error: Category referenced from the CDE is not in the categories XML: " + categoryId);
+        CategoryStats.getInstance().idsOfCategoriesNotFoundInSource.add(categoryId);
       }
     }
     return categoryCedarIds;
+  }
+
+  /**
+   * Deletes all NCI caDSR categories. It does not remove neither the root category nor the NCI Cadsr root category.
+   */
+  public static void deleteAllNciCadsrCategories(CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
+    Map<String, CategorySummary> allCategoriesMap =
+        Collections.unmodifiableMap(CategoryUtil.generateExistingCategoriesMap(cedarEnvironment, apiKey));
+    // Keep only the CDE categories (ignoring the top-level CDE category)
+    Map<String, CategorySummary> existingCdeCategoriesMap = CategoryUtil.extractCdeCategoriesMap(allCategoriesMap);
+    for (CategorySummary categorySummary : existingCdeCategoriesMap.values()) {
+      CedarServices.deleteCategory(categorySummary.getCedarId(), cedarEnvironment, apiKey);
+    }
   }
 }

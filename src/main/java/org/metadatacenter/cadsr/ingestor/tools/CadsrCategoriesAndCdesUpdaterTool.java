@@ -17,6 +17,7 @@ import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
 import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
 import org.metadatacenter.cadsr.ingestor.cde.action.CdeActionsProcessor;
 import org.metadatacenter.cadsr.ingestor.cde.action.CreateCdeAction;
+import org.metadatacenter.cadsr.ingestor.cde.action.RetireCdeAction;
 import org.metadatacenter.cadsr.ingestor.util.*;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 
   private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesAndCdesUpdaterTool.class);
 
-  final static int MAX_CDES_TO_PROCESS = 120;
+  final static int MAX_CDES_TO_PROCESS = Integer.MAX_VALUE;
 
   public static void main(String[] args) {
 
@@ -60,28 +61,43 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 //    final String existingCdesMapFilePath = EXECUTION_RESOURCES_PATH + "/cdesMap.json";
 
     final String categoriesFolderPath = EXECUTION_RESOURCES_PATH + "/categories";
-    //final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528.zip";
+    final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20205110511.zip";
     //final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_modified.zip";
     //final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_deleted.zip";
-    final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_deleted2.zip";
+    //final String categoriesZipFilePath = categoriesFolderPath + "/xml_cscsi_20204110528_deleted2.zip";
     final String categoriesUnzippedFolderPath = categoriesFolderPath + "/unzipped";
 
     final String cdesFolderPath = EXECUTION_RESOURCES_PATH + "/cdes";
-    //final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558.zip";
+    final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558.zip";
     //final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_2_lite_only_one.zip";
-    final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite.zip";
+    //final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite.zip";
     //final String cdesZipFilePath = cdesFolderPath + "/xml_cde_20205110558_lite_modified.zip";
     final String cdesUnzippedFolderPath = cdesFolderPath + "/unzipped";
+
+    final boolean deleteAllNciCadsrCategories = false;
 
     /*** OUTPUTS ***/
     final String ontologyFilePath = EXECUTION_RESOURCES_PATH + "/ontology/cadsr-vs.owl";
 
     try {
 
+      logger.info("#####################################################################");
+      logger.info("# Execution started at " + startTime);
+      logger.info("# Execution settings:");
+      logger.info("#   - CEDAR folder shord Id: " + cedarCdeFolderShortId);
+      logger.info("#   - CEDAR environment: " + targetEnvironment.name());
+      logger.info("#####################################################################\n");
+
       /*** STEP 1. UPDATE CATEGORIES ***/
       logger.info("#########################################");
       logger.info("#      Updating caDSR Categories...     #");
       logger.info("#########################################");
+
+      if (deleteAllNciCadsrCategories) {
+        logger.info("Deleting all caDSR categories.");
+        CategoryUtil.deleteAllNciCadsrCategories(targetEnvironment, cadsrAdminApikey);
+        CategoryStats.resetStats();
+      }
 
       // Download and parse new Categories TODO: Download them using FTPClient once we have the FTP host
       logger.info("Downloading most recent categories.");
@@ -111,7 +127,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 
       updateCDEs(newDataElements, cedarCdeFolderShortId, ontologyFilePath, targetEnvironment, cadsrAdminApikey);
 
-      printSummary(stopwatch, startTime);
+      printSummary(stopwatch, startTime, ontologyFilePath);
 
     } catch (IOException | JAXBException e) {
       e.printStackTrace();
@@ -204,9 +220,11 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     // Check CDE changes
     logger.info("Checking CDEs changes and generating actions.");
     List<CreateCdeAction> createCdeActions = new ArrayList<>();
+    List<RetireCdeAction> retireCdeActions = new ArrayList<>();
     Map<String, CdeSummary> cdesToDeleteMap = new HashMap<>(existingCdesMap);
-    int count = 0;
+    int count = 1;
     for (DataElement newDataElement : newDataElements) {
+      logger.info("Processing CDE " + count + "/" + newDataElements.size());
       Map<String, Object> newCdeFieldMap = CdeUtil.getFieldMapFromDataElement(newDataElement);
       CdeStats.getInstance().numberOfInputCdes++;
       if (newCdeFieldMap != null) { // If the cde is not supported, newCdeFieldMap will be null
@@ -224,8 +242,10 @@ public class CadsrCategoriesAndCdesUpdaterTool {
             // The CDE exists in CEDAR and it changed. This is wrong. In this case, a new version should have been
             // generated in the caDSR XML. Different XMLs shouldn't contain different CDEs with the same public id
             // and version
-            logger.error("Error: The CDE has changed, but its public Id and Version were not updated in the caDSR " +
-                "XML: " + newCdeUniqueId);
+            String reason = "Error: The CDE has changed, but its public Id and Version were not updated in the XML";
+            logger.error(reason + newCdeUniqueId);
+            CdeStats.getInstance().numberOfCdesFailed++;
+            CdeStats.getInstance().addFailed(reason);
           }
         } else {
           // The CDE doesn't exist in CEDAR. We'll have to create it.
@@ -236,21 +256,22 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         cdesToDeleteMap.remove(newCdeUniqueId);
       }
       // Stop when reaching limit
-      if (count++ == MAX_CDES_TO_PROCESS - 1) {
+      if (count++ == MAX_CDES_TO_PROCESS) {
         break;
       }
 
     }
-    // The remaining CDEs in the map are not part of the new caDSR file. That's wrong. All CDEs should be kept in the
-    // XML. The CDEs that are not used anymore will have RETIRED status.
+    // The remaining CDEs in the map are not part of the new caDSR file with RELEASED status so they will have RETIRED
+    // status. We will have to set them as RETIRED in CEDAR
     for (CdeSummary cdeSummary : cdesToDeleteMap.values()) {
-      logger.error("Error: The CDE is not part of the caDSR XML any more: " +
+      logger.warn("The CDE is not part of the caDSR XML any more with RELEASED status: " +
           CdeUtil.generateCdeUniqueId(cdeSummary.getId(), cdeSummary.getVersion()));
+     retireCdeActions.add(new RetireCdeAction(cdeSummary.getCedarId(), cdeSummary.getId(), cdeSummary.getVersion(), cdeSummary.getHashCode()));
     }
 
     // Process CDE actions
     CdeActionsProcessor cdeActionsProcessor =
-        new CdeActionsProcessor(createCdeActions,
+        new CdeActionsProcessor(createCdeActions, retireCdeActions,
             new HashMap<>(existingCdesMap), cedarEnvironment, apiKey);
     cdeActionsProcessor.logActionsSummary();
     cdeActionsProcessor.executeCdeActions();
@@ -261,7 +282,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     return cdeActionsProcessor.getCdesMap();
   }
 
-  private static void printSummary(Stopwatch stopwatch, LocalDateTime startTime) {
+  private static void printSummary(Stopwatch stopwatch, LocalDateTime startTime, String ontologyFilePath) {
     final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
     long elapsedTimeInSeconds = stopwatch.elapsed(TimeUnit.SECONDS);
     long hours = elapsedTimeInSeconds / 3600;
@@ -276,43 +297,50 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     logger.info("#  caDSR CATEGORIES SUMMARY:");
     logger.info("#    - Number of categories read from the XML file: " + countFormat.format(CategoryStats.getInstance().numberOfInputCategories));
     logger.info("#    - Number of categories in CEDAR: " + countFormat.format(CategoryStats.getInstance().numberOfExistingCategories));
-    logger.info("#    - Number of categories to be created: " + countFormat.format(CategoryStats.getInstance().numberOfCategoriesToBeCreated));
+    logger.info("#    - Number of categories to be CREATED: " + countFormat.format(CategoryStats.getInstance().numberOfCategoriesToBeCreated));
     logger.info("#    - Number of categories created successfully: " + countFormat.format(CategoryStats.getInstance().numberOfCategoriesCreated));
-    logger.info("#    - Number of categories to be updated: " + countFormat.format(CategoryStats.getInstance().numberOfCategoriesToBeUpdated));
+    logger.info("#    - Number of categories to be UPDATED: " + countFormat.format(CategoryStats.getInstance().numberOfCategoriesToBeUpdated));
     logger.info("#    - Number of categories updated successfully: " + countFormat.format(CategoryStats.getInstance().numberOfCategoriesUpdated));
-    logger.info("#    - Number of categories to be deleted: " + countFormat.format(CategoryStats.getInstance().numberOfCategoriesToBeDeleted));
+    logger.info("#    - Number of categories to be DELETED: " + countFormat.format(CategoryStats.getInstance().numberOfCategoriesToBeDeleted));
     logger.info("#    - Number of categories deleted successfully: " + countFormat.format(CategoryStats.getInstance().numberOfCategoriesDeleted));
+    logger.info("#    - Number of categories referenced in CDEs but not found in source XML: " + countFormat.format(CategoryStats.getInstance().idsOfCategoriesNotFoundInSource.size()));
+    logger.info("#    - List of categories referenced in CDEs but not found in source XML: ");
+    for (String categoryId : CategoryStats.getInstance().idsOfCategoriesNotFoundInSource) {
+      logger.info("#      - " + categoryId);
+    }
     logger.info("#  CDEs SUMMARY:");
     logger.info("#    - Number of CDEs read from the XML files: " + countFormat.format(CdeStats.getInstance().numberOfInputCdes));
     logger.info("#    - Number of CDEs successfully transformed to CEDAR fields: "
         + countFormat.format(CdeStats.getInstance().numberOfCdesProcessedOk)
         + " (" + GeneralUtil.calculatePercentage(CdeStats.getInstance().numberOfCdesProcessedOk,
         CdeStats.getInstance().numberOfInputCdes) + ")");
-    logger.info("#    - Number of CEDAR CDEs that were skipped: "
+    logger.info("#      - Number of CEDAR CDEs that were skipped: "
         + countFormat.format(CdeStats.getInstance().numberOfCdesSkipped)
         + " (" + GeneralUtil.calculatePercentage(CdeStats.getInstance().numberOfCdesSkipped,
         CdeStats.getInstance().numberOfInputCdes) + ")");
-    logger.info("#    - Number of CEDAR CDEs that failed to process: "
+    logger.info("#      - Number of CEDAR CDEs that failed to process: "
         + countFormat.format(CdeStats.getInstance().numberOfCdesFailed)
         + " (" + GeneralUtil.calculatePercentage(CdeStats.getInstance().numberOfCdesFailed,
         CdeStats.getInstance().numberOfInputCdes) + ")");
-    logger.info("#    - Breakdown of skipped CDEs: ");
+    logger.info("#      - Breakdown of skipped CDEs: ");
     for (Map.Entry<String, Integer> entry : CdeStats.getInstance().getSkippedReasons().entrySet()) {
-      logger.info("#      - " + entry.getKey() + ": " + entry.getValue());
+      logger.info("#        - " + entry.getKey() + ": " + entry.getValue());
     }
     if (CdeStats.getInstance().numberOfCdesFailed > 0) {
-      logger.info("#    - Breakdown of failed CDEs: ");
+      logger.info("#      - Breakdown of failed CDEs: ");
       for (Map.Entry<String, Integer> entry : CdeStats.getInstance().getFailedReasons().entrySet()) {
-        logger.info("#      - " + entry.getKey() + ": " + entry.getValue());
+        logger.info("#        - " + entry.getKey() + ": " + entry.getValue());
       }
     }
     logger.info("#    - Number of CDEs in CEDAR: " + countFormat.format(CdeStats.getInstance().numberOfExistingCdes));
-    logger.info("#    - Number of CEDAR CDE fields to be created: "
+    logger.info("#    - Number of CEDAR CDE fields to be CREATED: "
         + countFormat.format(CdeStats.getInstance().numberOfCdesToBeCreated));
-    logger.info("#    - Number of CEDAR CDE fields created successfully: "
-        + countFormat.format(CdeStats.getInstance().numberOfCdesCreated)
-        + " (" + GeneralUtil.calculatePercentage(CdeStats.getInstance().numberOfCdesCreated,
-        CdeStats.getInstance().numberOfInputCdes) + ")");
+    logger.info("#    - Number of CEDAR CDE fields created successfully: " + countFormat.format(CdeStats.getInstance().numberOfCdesCreated));
+    logger.info("#    - Number of CEDAR CDE fields to be RETIRED: "
+        + countFormat.format(CdeStats.getInstance().numberOfCdesToBeRetired));
+    logger.info("#    - Number of CEDAR CDE fields retired successfully: " + countFormat.format(CdeStats.getInstance().numberOfCdesRetired));
+    logger.info("#  CEDARVS ONTOLOGY SUMMARY:");
+    logger.info("#    - File path: " + ontologyFilePath);
     logger.info("#####################################################################");
   }
 
