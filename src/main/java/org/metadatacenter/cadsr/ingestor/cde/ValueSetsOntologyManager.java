@@ -22,6 +22,10 @@ public class ValueSetsOntologyManager {
   private static OWLOntologyManager manager;
   private static OWLOntology ontology;
   private static OWLDataFactory owlDataFactory;
+
+  private static int valueSetsCount = 0;
+  private static int valuesCount = 0;
+
   private static final Logger logger = LoggerFactory.getLogger(ValueSetsOntologyManager.class);
 
   static {
@@ -40,13 +44,10 @@ public class ValueSetsOntologyManager {
 
     String valueDomainId = GeneralUtil.getValueOrNull(dataElement.getVALUEDOMAIN().getPublicId().getContent());
     String valueDomainVersion = GeneralUtil.getValueOrNull(dataElement.getVALUEDOMAIN().getVersion().getContent());
-    String valueDomainPrefName = GeneralUtil.getValueOrNull(dataElement.getVALUEDOMAIN().getPreferredName().getContent());
+    String valueDomainPrefName =
+        GeneralUtil.getValueOrNull(dataElement.getVALUEDOMAIN().getPreferredName().getContent());
     String valueDomainPrefDefinition = GeneralUtil.getValueOrNull(dataElement.getVALUEDOMAIN().getPreferredDefinition()
         .getContent());
-    //String valueDomainLongName = Util.getValueOrNull(dataElement.getVALUEDOMAIN().getPreferredName().getContent());
-    //String valueSetWorkflowStatus = Util.getValueOrNull(dataElement.getVALUEDOMAIN().getWorkflowStatus().getContent
-    // ());
-
 
     // Create the class that will represent the value set
     OWLClass valueSetClass = dataElementToOWLClass(valueDomainId, valueDomainVersion);
@@ -75,16 +76,15 @@ public class ValueSetsOntologyManager {
         ontology = addAnnotationAxiomToClass(OWLRDFVocabulary.RDFS_COMMENT.getIRI(), valueDomainPrefDefinition,
             valueSetClass);
       }
-//      if (valueDomainLongName != null && !valueDomainLongName.equals(valueDomainPrefName)) {
-//        ontology = addAnnotationAxiomToClass(SKOSVocabulary.ALTLABEL.getIRI(), valueDomainLongName, valueSetClass);
-//      }
+
       // Values of the value set
       for (Value value : values) {
         ontology = addPermissibleValuesToOntology(valueSetId, value, valueSetClass);
+        valuesCount++;
       }
+      valueSetsCount++;
     } else {
-//      logger.debug("The value set has not been added to the ontology because it's already there. Class IRI: " +
-//          valueSetClass.getIRI());
+      logger.warn("The value set has not been added to the ontology because it's already there. Class IRI: " + valueSetClass.getIRI());
     }
   }
 
@@ -151,4 +151,11 @@ public class ValueSetsOntologyManager {
     }
   }
 
+  public static int getValueSetsCount() {
+    return valueSetsCount;
+  }
+
+  public static int getValuesCount() {
+    return valuesCount;
+  }
 }

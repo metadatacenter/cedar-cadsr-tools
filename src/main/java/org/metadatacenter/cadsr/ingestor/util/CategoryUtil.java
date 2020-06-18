@@ -6,8 +6,10 @@ import org.metadatacenter.cadsr.category.schema.CSI;
 import org.metadatacenter.cadsr.category.schema.ClassificationScheme;
 import org.metadatacenter.cadsr.category.schema.Classifications;
 import org.metadatacenter.cadsr.category.schema.Context;
+import org.metadatacenter.cadsr.cde.schema.CLASSIFICATIONSLIST;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.category.*;
+import org.metadatacenter.cadsr.ingestor.cde.handler.CategoriesHandler;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.metadatacenter.model.ModelNodeNames;
 import org.slf4j.Logger;
@@ -331,9 +333,42 @@ public class CategoryUtil {
     return categoriesMap;
   }
 
-  public static List<String> extractCategoryIdsFromCdeField(DataElement cde) {
-    Map<String, Object> cdeFieldMap = CdeUtil.getFieldMapFromDataElement(cde);
-    return extractCategoryIdsFromCdeField(cdeFieldMap);
+  /**
+   * Extracts the category ids from a dataElement without performing a full parsing of the data element
+   * @param dataElement
+   * @return
+   */
+  public static List<String> extractCategoryIdsFromCdeField(DataElement dataElement) {
+    List<String> categoryIds = new ArrayList<>();
+    final CLASSIFICATIONSLIST classificationsList = dataElement.getCLASSIFICATIONSLIST();
+
+    if (classificationsList != null) {
+      classificationsList.getCLASSIFICATIONSLISTITEM().stream().forEach(item -> {
+
+        String ctxName = item.getClassificationScheme().getContextName().getContent();
+        String ctxVersion = item.getClassificationScheme().getContextVersion().getContent();
+        String ctxLocalId = CategoryUtil.generateCategoryLocalId(ctxName, Optional.empty(), ctxVersion);
+
+        String csName = item.getClassificationScheme().getPreferredName().getContent();
+        String csPublicId = item.getClassificationScheme().getPublicId().getContent();
+        String csVersion = item.getClassificationScheme().getVersion().getContent();
+        String csLocalId = CategoryUtil.generateCategoryLocalId(csName, Optional.of(csPublicId), csVersion);
+
+        String csiName = item.getClassificationSchemeItemName().getContent();
+        String csiPublicId = item.getCsiPublicId().getContent();
+        String csiVersion = item.getCsiVersion().getContent();
+        String categoryId = CategoryUtil.generateCategoryLocalId(csiName,
+            Optional.of(csiPublicId), csiVersion);
+
+        String cadsrCategoryId = CategoryUtil.generateCadsrCategoryId(categoryId, Optional.of(ctxLocalId),
+            Optional.of(csLocalId));
+
+        if (!categoryIds.contains(cadsrCategoryId)) {
+          categoryIds.add(cadsrCategoryId);
+        }
+      });
+    }
+    return categoryIds;
   }
 
   public static List<String> extractCategoryIdsFromCdeField(Map<String, Object> cdeFieldMap) {
