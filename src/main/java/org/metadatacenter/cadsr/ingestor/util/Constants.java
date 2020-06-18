@@ -2,6 +2,12 @@ package org.metadatacenter.cadsr.ingestor.util;
 
 public final class Constants {
 
+  // Folder and file paths
+  public static final String CLASSIFICATIONS_TMP_FOLDER_PATH = "./tmp/classifications_download";
+  public static final String CLASSIFICATIONS_UNZIP_FOLDER_NAME = "unzipped";
+  public static final String CDES_TMP_FOLDER_PATH = "./tmp/cdes_download";
+  public static final String CDES_UNZIP_FOLDER_NAME = "unzipped";
+
   public enum CedarEnvironment {LOCAL, STAGING, PRODUCTION}
 
   public static final String LOCAL_RESOURCE_SERVER_URL = "https://resource.metadatacenter.orgx";
@@ -42,14 +48,10 @@ public final class Constants {
   //public static final String ROOT_CATEGORY_KEY = "CDE_ROOT";
   public static final String CADSR_CATEGORY_SCHEMA_ORG_ID = "CADSR-CATEGORY-ID";
   public static final String CDE_CATEGORY_IDS_FIELD = "categoryIds"; // This field is not part of the CEDAR model
-  public static final String CATEGORIES_FOLDER_NAME = "categories";
   public static final String CATEGORIES_FILE_NAME_SUFFIX = "_categories";
   public static final String CEDAR_CATEGORY_CHILDREN_FIELD_NAME = "children";
   public static final String CEDAR_CATEGORY_ATTACH_ARTIFACT_ID = "artifactId";
   public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_ID = "categoryId";
   public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_IDS = "categoryIds";
-
-  public static final String CATEGORIES_FTP_URL = "https://cadsr.nci.nih.gov/ftp/caDSR_Downloads/Classifications/XML/";
-  public static final String CDES_FTP_URL = "https://cadsr.nci.nih.gov/ftp/caDSR_Downloads/CDE/XML/";
 
 }
