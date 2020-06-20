@@ -60,8 +60,8 @@ public class CadsrCategoriesAndCdesUpdaterTool {
       logger.info("#   - CEDAR environment: " + settings.getCedarEnvironment().name());
       logger.info("#   - CEDAR caDSR Admin api key: " + "******");
       logger.info("#   - Local execution folder: " + settings.getExecutionFolder());
-      logger.info("#   - Local categories file: " + (settings.getCategoriesFile() != null ? settings.getCategoriesFile() : "Not provided"));
-      logger.info("#   - Local CDEs file: " + (settings.getCdesFile() != null ? settings.getCdesFile() : "Not provided"));
+      logger.info("#   - Local categories file: " + (settings.getCategoriesFilePath() != null ? settings.getCategoriesFilePath() : "Not provided"));
+      logger.info("#   - Local CDEs file: " + (settings.getCdesFilePath() != null ? settings.getCdesFilePath() : "Not provided"));
       logger.info("#   - caDSR FTP Host: " + (settings.getFtpHost() != null ? settings.getFtpHost() : "Not provided"));
       logger.info("#   - caDSR FTP User: " + (settings.getFtpUser() != null ? settings.getFtpUser() : "Not provided"));
       logger.info("#   - caDSR FTP Password: " + (settings.getFtpPassword() != null ? "********" : "Not provided"));
@@ -83,8 +83,8 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         String categoriesOutputFolder = settings.getExecutionFolder() + "/" + Constants.CATEGORIES_FOLDER;
         String unzippedCategoriesFolder = categoriesOutputFolder + "/" + Constants.UNZIPPED_FOLDER;
 
-        if (settings.getCategoriesFile() != null) { // Read categories from file
-          UnzipUtility.unzip(settings.getExecutionFolder() + "/" + settings.getCategoriesFile(), unzippedCategoriesFolder);
+        if (settings.getCategoriesFilePath() != null) { // Read categories from file
+          UnzipUtility.unzip(settings.getCategoriesFilePath(), unzippedCategoriesFolder);
         } else { // Download most recent categories from the NCI FTP servers
           logger.info("Downloading most recent categories");
           File categoriesZipFile = FtpUtil.downloadMostRecentFile(settings.getFtpHost(), settings.getFtpUser(), settings.getFtpPassword(), settings.getFtpCategoriesFolder(), categoriesOutputFolder);
@@ -118,8 +118,8 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         String cdesOutputFolder = settings.getExecutionFolder() + "/" + Constants.CDES_FOLDER;
         String unzippedCdesFolder = cdesOutputFolder + "/" + Constants.UNZIPPED_FOLDER;
 
-        if (settings.getCdesFile() != null) {
-          UnzipUtility.unzip(settings.getExecutionFolder() + "/" + settings.getCdesFile(), unzippedCdesFolder);
+        if (settings.getCdesFilePath() != null) {
+          UnzipUtility.unzip(settings.getCdesFilePath(), unzippedCdesFolder);
         } else { // read CDEs from file
           logger.info("Downloading most recent CDEs");
           File cdesZipFile = FtpUtil.downloadMostRecentFile(settings.getFtpHost(), settings.getFtpUser(), settings.getFtpPassword(), settings.getFtpCdesFolder(), cdesOutputFolder);
@@ -146,6 +146,13 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     } catch (IOException | JAXBException e) {
       logger.error("Error: " + e.getMessage());
       e.printStackTrace();
+    }
+    finally {
+      try {
+        FileUtils.deleteDirectory(new File(settings.getExecutionFolder()));
+      } catch (IOException e) {
+        logger.error("Error deleting execution folder: " + e.getMessage());
+      }
     }
   }
 

@@ -20,8 +20,8 @@ public class ConfigSettings {
   private String ftpPassword;
   private String ftpCategoriesFolder;
   private String ftpCdesFolder;
-  private String categoriesFile;
-  private String cdesFile;
+  private String categoriesFilePath;
+  private String cdesFilePath;
   private String ontologyOutputFile;
 
   public ConfigSettings() {
@@ -127,20 +127,20 @@ public class ConfigSettings {
     this.ftpCdesFolder = ftpCdesFolder;
   }
 
-  public String getCategoriesFile() {
-    return categoriesFile;
+  public String getCategoriesFilePath() {
+    return categoriesFilePath;
   }
 
-  public void setCategoriesFile(String categoriesFile) {
-    this.categoriesFile = categoriesFile;
+  public void setCategoriesFilePath(String categoriesFilePath) {
+    this.categoriesFilePath = categoriesFilePath;
   }
 
-  public String getCdesFile() {
-    return cdesFile;
+  public String getCdesFilePath() {
+    return cdesFilePath;
   }
 
-  public void setCdesFile(String cdesFile) {
-    this.cdesFile = cdesFile;
+  public void setCdesFilePath(String cdesFilePath) {
+    this.cdesFilePath = cdesFilePath;
   }
 
   public String getOntologyOutputFile() {
