@@ -79,6 +79,11 @@
       <artifactId>commons-net</artifactId>
       <version>3.6</version>
     </dependency>
+    <dependency>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>1.4</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -97,9 +102,8 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.2.1</version>
         <executions>
-          <!-- Update categories and cdes -->
           <execution>
-            <id>update-all</id>
+            <id>cedar-cadsr-updater</id>
             <goals>
               <goal>java</goal>
             </goals>
@@ -107,42 +111,42 @@
               <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrCategoriesAndCdesUpdaterTool</mainClass>
             </configuration>
           </execution>
-          <execution>
-            <id>transform-categories</id>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrCategoriesTransformerTool</mainClass>
-            </configuration>
-          </execution>
-          <execution>
-            <id>upload-categories</id>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrCategoriesUploaderTool</mainClass>
-            </configuration>
-          </execution>
-          <execution>
-            <id>transform-cdes</id>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrTransformerTool</mainClass>
-            </configuration>
-          </execution>
-          <execution>
-            <id>upload-cdes</id>
-            <goals>
-              <goal>java</goal>
-            </goals>
-            <configuration>
-              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrUploaderTool</mainClass>
-            </configuration>
-          </execution>
+<!--          <execution>-->
+<!--            <id>transform-categories</id>-->
+<!--            <goals>-->
+<!--              <goal>java</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrCategoriesTransformerTool_Deprecated</mainClass>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--          <execution>-->
+<!--            <id>upload-categories</id>-->
+<!--            <goals>-->
+<!--              <goal>java</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrCategoriesUploaderTool_Deprecated</mainClass>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--          <execution>-->
+<!--            <id>transform-cdes</id>-->
+<!--            <goals>-->
+<!--              <goal>java</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrTransformerTool_Deprecated</mainClass>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--          <execution>-->
+<!--            <id>upload-cdes</id>-->
+<!--            <goals>-->
+<!--              <goal>java</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <mainClass>org.metadatacenter.cadsr.ingestor.tools.CadsrUploaderTool_Deprecated</mainClass>-->
+<!--            </configuration>-->
+<!--          </execution>-->
         </executions>
       </plugin>
       <plugin>

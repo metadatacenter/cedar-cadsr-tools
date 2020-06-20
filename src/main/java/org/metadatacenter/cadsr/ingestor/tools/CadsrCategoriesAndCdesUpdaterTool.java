@@ -18,11 +18,10 @@ import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
 import org.metadatacenter.cadsr.ingestor.cde.action.CdeActionsProcessor;
 import org.metadatacenter.cadsr.ingestor.cde.action.CreateCdeAction;
 import org.metadatacenter.cadsr.ingestor.cde.action.RetireCdeAction;
+import org.metadatacenter.cadsr.ingestor.tools.config.ConfigSettings;
+import org.metadatacenter.cadsr.ingestor.tools.config.ConfigSettingsParser;
 import org.metadatacenter.cadsr.ingestor.util.*;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
-import org.metadatacenter.config.CedarConfig;
-import org.metadatacenter.config.environment.CedarEnvironmentVariableProvider;
-import org.metadatacenter.model.SystemComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,61 +37,111 @@ import java.util.concurrent.TimeUnit;
 public class CadsrCategoriesAndCdesUpdaterTool {
 
   private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesAndCdesUpdaterTool.class);
-
-  private final static CedarConfig cedarConfig;
   private final static int MAX_CDES_TO_PROCESS = Integer.MAX_VALUE;
-
-  static {
-    SystemComponent systemComponent = SystemComponent.NCI_CADSR_TOOLS;
-    Map<String, String> environment = CedarEnvironmentVariableProvider.getFor(systemComponent);
-    cedarConfig = CedarConfig.getInstance(environment);
-  }
 
   public static void main(String[] args) {
 
     final Stopwatch stopwatch = Stopwatch.createStarted();
     final LocalDateTime startTime = LocalDateTime.now();
-
-    String cedarCdeFolderShortId = args[0];
-    CedarEnvironment targetEnvironment = CedarServerUtil.toCedarEnvironment(args[1]);
-    String cadsrAdminApikey = "apiKey " + args[2];
-
-    /*** INPUTS ***/
-
-    final Optional<String> classificationsZipFileName = Optional.empty(); //Optional.of("xml_cscsi_20205110511.zip");
-    final Optional<String> cdesZipFilePath = Optional.empty(); //Optional.of("xml_cde_20205110558.zip");
-    final boolean cleanupCedarCategories = false;
-
-    /*** OUTPUTS ***/
-    final String ontologyFilePath = "/Users/marcosmr/Development/DEV_EXECUTIONS/2020" +
-        "-05_cdes_upload_production_process/ontology/cadsr-vs.owl";
+    ConfigSettings settings = ConfigSettingsParser.parse(args);
 
     try {
-
       logger.info("#####################################################################");
       logger.info("# Execution started at " + startTime);
       logger.info("# Execution settings:");
-      logger.info("#   - CEDAR folder shord Id: " + cedarCdeFolderShortId);
-      logger.info("#   - CEDAR environment: " + targetEnvironment.name());
+      logger.info("#   - Command-line arguments: ");
+      for (String argGroup : GeneralUtil.commandLineArgumentsGrouped(args, "-p", "--ftp-password", "-k", "apikey")) {
+        logger.info("#     " + argGroup);
+      }
+      logger.info("#   - Update categories? " + (settings.getUpdateCategories()? "Yes" : "No"));
+      logger.info("#   - Delete existing categories before updating them? " + (settings.getDeleteCategories()? "Yes" : "No"));
+      logger.info("#   - Update CDEs? " + (settings.getUpdateCdes()? "Yes" : "No"));
+      logger.info("#   - CEDAR folder short Id: " + settings.getCedarCdeFolderShortId());
+      logger.info("#   - CEDAR environment: " + settings.getCedarEnvironment().name());
+      logger.info("#   - CEDAR caDSR Admin api key: " + "******");
+      logger.info("#   - Local execution folder: " + settings.getExecutionFolder());
+      logger.info("#   - Local categories file: " + (settings.getCategoriesFile() != null ? settings.getCategoriesFile() : "Not provided"));
+      logger.info("#   - Local CDEs file: " + (settings.getCdesFile() != null ? settings.getCdesFile() : "Not provided"));
+      logger.info("#   - caDSR FTP Host: " + (settings.getFtpHost() != null ? settings.getFtpHost() : "Not provided"));
+      logger.info("#   - caDSR FTP User: " + (settings.getFtpUser() != null ? settings.getFtpUser() : "Not provided"));
+      logger.info("#   - caDSR FTP Password: " + (settings.getFtpPassword() != null ? "********" : "Not provided"));
+      logger.info("#   - caDSR FTP Categories folder: " + (settings.getFtpCategoriesFolder() != null ? settings.getFtpCategoriesFolder() : "Not provided"));
+      logger.info("#   - caDSR FTP CDEs folder: " + (settings.getFtpCdesFolder() != null ? settings.getFtpCdesFolder() : "Not provided"));
+      logger.info("#   - Ontology output file: " + settings.getOntologyOutputFile());
       logger.info("#####################################################################\n");
 
-      /*** STEP 1. UPDATE CATEGORIES ***/
-      logger.info("#########################################");
-      logger.info("#      Updating caDSR Categories...     #");
-      logger.info("#########################################");
+      if (settings.getUpdateCategories()) {
 
-      updateCategories(Constants.CLASSIFICATIONS_TMP_FOLDER_PATH, classificationsZipFileName, cleanupCedarCategories,
-          targetEnvironment, cadsrAdminApikey);
+        /*** UPDATE CATEGORIES ***/
+        logger.info("#########################################");
+        logger.info("#      Updating caDSR Categories...     #");
+        logger.info("#########################################");
 
-      /*** STEP 2. UPDATE CDEs and CDE-Category relations ***/
-      logger.info("#########################################");
-      logger.info("#            Updating CDEs...           #");
-      logger.info("#########################################");
+        // Delete categories temporal folder if it exists
+        FileUtils.deleteDirectory(new File(settings.getExecutionFolder()));
 
-      updateCDEs(Constants.CDES_TMP_FOLDER_PATH, cdesZipFilePath, cedarCdeFolderShortId, ontologyFilePath,
-          targetEnvironment, cadsrAdminApikey);
+        String categoriesOutputFolder = settings.getExecutionFolder() + "/" + Constants.CATEGORIES_FOLDER;
+        String unzippedCategoriesFolder = categoriesOutputFolder + "/" + Constants.UNZIPPED_FOLDER;
 
-      printSummary(stopwatch, startTime, ontologyFilePath);
+        if (settings.getCategoriesFile() != null) { // Read categories from file
+          UnzipUtility.unzip(settings.getExecutionFolder() + "/" + settings.getCategoriesFile(), unzippedCategoriesFolder);
+        } else { // Download most recent categories from the NCI FTP servers
+          logger.info("Downloading most recent categories");
+          File categoriesZipFile = FtpUtil.downloadMostRecentFile(settings.getFtpHost(), settings.getFtpUser(), settings.getFtpPassword(), settings.getFtpCategoriesFolder(), categoriesOutputFolder);
+          UnzipUtility.unzip(categoriesZipFile.getAbsolutePath(), unzippedCategoriesFolder);
+        }
+
+        if (settings.getDeleteCategories()) {
+          logger.info("Deleting all existing caDSR categories in CEDAR.");
+          CategoryUtil.deleteAllNciCadsrCategories(settings.getCedarEnvironment(), settings.getCadsrAdminApikey());
+          CategoryStats.resetStats();
+        }
+
+        File classificationsFile = (new File(unzippedCategoriesFolder)).listFiles()[0];
+        Classifications newClassifications = CategoryUtil.getClassifications(new FileInputStream(classificationsFile));
+        List<Category> newCategories = CategoryUtil.classificationsToCategoriesList(newClassifications);
+        logger.info("Finished downloading categories. " + newCategories.size() + " categories found.");
+
+        updateCategories(newCategories, settings.getCedarEnvironment(), settings.getCadsrAdminApikey());
+      }
+
+      if (settings.getUpdateCdes()) {
+
+        /*** UPDATE CDEs and CDE-Category relations ***/
+        logger.info("#########################################");
+        logger.info("#            Updating CDEs...           #");
+        logger.info("#########################################");
+
+        // Delete CDEs temporal folder if it exists
+        FileUtils.deleteDirectory(new File(settings.getExecutionFolder()));
+
+        String cdesOutputFolder = settings.getExecutionFolder() + "/" + Constants.CDES_FOLDER;
+        String unzippedCdesFolder = cdesOutputFolder + "/" + Constants.UNZIPPED_FOLDER;
+
+        if (settings.getCdesFile() != null) {
+          UnzipUtility.unzip(settings.getExecutionFolder() + "/" + settings.getCdesFile(), unzippedCdesFolder);
+        } else { // read CDEs from file
+          logger.info("Downloading most recent CDEs");
+          File cdesZipFile = FtpUtil.downloadMostRecentFile(settings.getFtpHost(), settings.getFtpUser(), settings.getFtpPassword(), settings.getFtpCdesFolder(), cdesOutputFolder);
+          UnzipUtility.unzip(cdesZipFile.getAbsolutePath(), unzippedCdesFolder);
+        }
+
+        List<DataElement> newDataElements = new ArrayList<>();
+        for (final File inputFile : new File(unzippedCdesFolder).listFiles()) {
+          logger.info("Processing CDEs file: " + inputFile.getAbsolutePath());
+          DataElementsList newDataElementList = CdeUtil.getDataElementLists(new FileInputStream(inputFile));
+          newDataElements.addAll(newDataElementList.getDataElement());
+        }
+
+        updateCDEs(newDataElements, settings.getCedarCdeFolderShortId(), settings.getOntologyOutputFile(), settings.getCedarEnvironment(), settings.getCadsrAdminApikey());
+
+        // Remove temporal files
+        logger.info("Deleting temporal execution folder: " + new File(settings.getExecutionFolder()).getAbsolutePath());
+        FileUtils.deleteDirectory(new File(settings.getExecutionFolder()));
+
+      }
+
+      printSummary(stopwatch, startTime, settings.getOntologyOutputFile());
 
     } catch (IOException | JAXBException e) {
       logger.error("Error: " + e.getMessage());
@@ -100,36 +149,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     }
   }
 
-  private static void updateCategories(String tmpExecutionFolderPath, Optional<String> classificationsZipFileName,
-                                       boolean cleanupCategories, CedarEnvironment cedarEnvironment,
-                                       String apiKey) throws IOException, JAXBException {
-
-    // Delete categories temporal folder if it exists
-    FileUtils.deleteDirectory(new File(tmpExecutionFolderPath));
-
-    String unzippedCategoriesFolderPath = tmpExecutionFolderPath + "/" + Constants.CLASSIFICATIONS_UNZIP_FOLDER_NAME;
-    if (classificationsZipFileName.isPresent()) { // Read categories from file
-      UnzipUtility.unzip(tmpExecutionFolderPath + "/" + classificationsZipFileName.get(), unzippedCategoriesFolderPath);
-    } else { // Download most recent categories from the NCI FTP servers
-      logger.info("Downloading most recent categories");
-      File categoriesZipFile = FtpUtil.downloadMostRecentFile(cedarConfig.getNciCadsrToolsConfig().getFtp().getHost(),
-          cedarConfig.getNciCadsrToolsConfig().getFtp().getUser(),
-          cedarConfig.getNciCadsrToolsConfig().getFtp().getPassword(),
-          cedarConfig.getNciCadsrToolsConfig().getFtp().getClassificationsDirectory(),
-          tmpExecutionFolderPath);
-      UnzipUtility.unzip(categoriesZipFile.getAbsolutePath(), unzippedCategoriesFolderPath);
-    }
-
-    if (cleanupCategories) {
-      logger.info("Deleting all existing caDSR categories in CEDAR.");
-      CategoryUtil.deleteAllNciCadsrCategories(cedarEnvironment, apiKey);
-      CategoryStats.resetStats();
-    }
-
-    File classificationsFile = (new File(unzippedCategoriesFolderPath)).listFiles()[0];
-    Classifications newClassifications = CategoryUtil.getClassifications(new FileInputStream(classificationsFile));
-    List<Category> newCategories = CategoryUtil.classificationsToCategoriesList(newClassifications);
-    logger.info("Finished downloading categories. " + newCategories.size() + " categories found.");
+  private static void updateCategories(List<Category> newCategories, CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
 
     // Generate map with existing Categories based on the current Category Tree in CEDAR
     logger.info("Retrieving current NCI caDSR categories from CEDAR.");
@@ -186,37 +206,11 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     categoryActionsProcessor.logActionsSummary();
     categoryActionsProcessor.executeCategoryActions();
 
-    // Remove temporal files
-    logger.info("Deleting folder generated during categories update: " + new File(Constants.CLASSIFICATIONS_TMP_FOLDER_PATH).getAbsolutePath());
-    FileUtils.deleteDirectory(new File(Constants.CLASSIFICATIONS_TMP_FOLDER_PATH));
   }
 
-  private static Map<String, CdeSummary> updateCDEs(String tmpExecutionFolderPath, Optional<String> cdesZipFileName,
+  private static Map<String, CdeSummary> updateCDEs(List<DataElement> newDataElements,
                                                     String cedarFolderShortId, String ontologyFilePath,
-                                                    CedarEnvironment cedarEnvironment, String apiKey) throws IOException, JAXBException {
-
-    // Delete CDEs temporal folder if it exists
-    FileUtils.deleteDirectory(new File(tmpExecutionFolderPath));
-
-    String unzippedCdesFolderPath = tmpExecutionFolderPath + "/" + Constants.CDES_UNZIP_FOLDER_NAME;
-    if (cdesZipFileName.isPresent()) {
-      UnzipUtility.unzip(tmpExecutionFolderPath + "/" + cdesZipFileName.get(), unzippedCdesFolderPath);
-    } else { // read CDEs from file
-      logger.info("Downloading most recent CDEs");
-      File cdesZipFile = FtpUtil.downloadMostRecentFile(cedarConfig.getNciCadsrToolsConfig().getFtp().getHost(),
-          cedarConfig.getNciCadsrToolsConfig().getFtp().getUser(),
-          cedarConfig.getNciCadsrToolsConfig().getFtp().getPassword(),
-          cedarConfig.getNciCadsrToolsConfig().getFtp().getCdesDirectory(),
-          tmpExecutionFolderPath);
-      UnzipUtility.unzip(cdesZipFile.getAbsolutePath(), unzippedCdesFolderPath);
-    }
-
-    List<DataElement> newDataElements = new ArrayList<>();
-    for (final File inputFile : new File(unzippedCdesFolderPath).listFiles()) {
-      logger.info("Processing CDEs file: " + inputFile.getAbsolutePath());
-      DataElementsList newDataElementList = CdeUtil.getDataElementLists(new FileInputStream(inputFile));
-      newDataElements.addAll(newDataElementList.getDataElement());
-    }
+                                                    CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
 
     // Retrieve existing CDEs from CEDAR
     logger.info("Retrieving current CDEs from CEDAR (folder short id: " + cedarFolderShortId + ").");

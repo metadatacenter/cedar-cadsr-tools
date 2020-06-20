@@ -25,9 +25,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.CDE_VALUESETS_ONTOLOGY_NAME;
 
-public class CadsrTransformerTool {
+public class CadsrTransformerTool_Deprecated {
 
-  private static final Logger logger = LoggerFactory.getLogger(CadsrTransformerTool.class);
+  private static final Logger logger = LoggerFactory.getLogger(CadsrTransformerTool_Deprecated.class);
   private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
   private static final ObjectMapper mapper = new ObjectMapper();
 

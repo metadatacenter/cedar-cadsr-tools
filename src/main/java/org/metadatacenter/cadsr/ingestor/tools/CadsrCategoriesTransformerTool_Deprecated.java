@@ -15,9 +15,9 @@ import java.util.concurrent.TimeUnit;
  * This class reads a caDSR XML file with a <Classifications> root element and generates a JSON file with a tree of
  * categories.
  */
-public class CadsrCategoriesTransformerTool {
+public class CadsrCategoriesTransformerTool_Deprecated {
 
-  private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesTransformerTool.class);
+  private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesTransformerTool_Deprecated.class);
 
   public static void main(String[] args) {
 

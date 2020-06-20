@@ -3,10 +3,12 @@ package org.metadatacenter.cadsr.ingestor.util;
 public final class Constants {
 
   // Folder and file paths
-  public static final String CLASSIFICATIONS_TMP_FOLDER_PATH = "./tmp/classifications_download";
-  public static final String CLASSIFICATIONS_UNZIP_FOLDER_NAME = "unzipped";
-  public static final String CDES_TMP_FOLDER_PATH = "./tmp/cdes_download";
-  public static final String CDES_UNZIP_FOLDER_NAME = "unzipped";
+  public static final String EXECUTION_FOLDER = "./cadsr-exec-tmp"; // Temporal folder with files used during execution
+  public static final String CATEGORIES_FOLDER = "categories";
+  public static final String CDES_FOLDER = "cdes";
+  public static final String UNZIPPED_FOLDER = "unzipped";
+  public static final String ONTOLOGY_FOLDER = "ontology";
+  public static final String ONTOLOGY_FILE = "cadsr-vs.owl";
 
   public enum CedarEnvironment {LOCAL, STAGING, PRODUCTION}
 

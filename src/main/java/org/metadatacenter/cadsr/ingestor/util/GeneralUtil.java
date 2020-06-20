@@ -12,6 +12,9 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class GeneralUtil {
 
@@ -125,13 +128,32 @@ public class GeneralUtil {
     return percentFormat.format(((float) amount / (float) total));
   }
 
-
-//  public static String createMessageBasedOnFieldNameAndId(String response) throws IOException {
-//    JsonNode responseNode = objectMapper.readTree(response);
-//    String fieldName = responseNode.get("schema:name").asText();
-//    String fieldId = responseNode.get("@id").asText();
-//    return String.format("%s (ID: %s)", fieldName, fieldId);
-//  }
+  public static List<String> commandLineArgumentsGrouped(String[] args, String passwordShortOption, String passwordLongOption, String apikeyShortOption, String apikeyLongOption) {
+    List<String> argGroups = new ArrayList<>();
+    String group = "";
+    for (int i=0; i<args.length; i++) {
+      String arg = args[i];
+      if (arg.equals(passwordShortOption) || arg.equals(passwordLongOption) || arg.equals(apikeyShortOption) || arg.equals(apikeyLongOption)) {
+        group = group.concat(arg + " ********"); // hide password or apikey
+        i++;
+      }
+      else {
+        if (arg.startsWith("-")) {
+          if (group.length() > 0) {
+            argGroups.add(group);
+            group = "";
+          }
+          group = group.concat(arg);
+        }
+        else {
+          group = group.concat(" " + arg);
+          argGroups.add(group);
+          group = "";
+        }
+      }
+    }
+    return argGroups;
+  }
 
 
 }
