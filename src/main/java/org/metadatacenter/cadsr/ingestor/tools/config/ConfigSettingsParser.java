@@ -26,7 +26,7 @@ public class ConfigSettingsParser {
     options.addOption( "t", "update-categories", false, "Update CEDAR categories");
     options.addOption( "c", "update-cdes", false, "Update CEDAR CDEs and attach them to CEDAR categories");
     options.addOption( "d", "delete-categories", false, "Delete existing CEDAR categories");
-    options.addOption( "o", "ontology", true, "Name of the ontology file that will contain the value sets generated");
+    options.addOption( "o", "ontology-folder", true, "Path to the folder the CADSR-VS ontology will be saved in");
 
     options.addOption( "h", "ftp-host", true, "caDSR FTP host");
     options.addOption( "u", "ftp-user", true, "caDSR FTP user name");
@@ -123,10 +123,10 @@ public class ConfigSettingsParser {
       }
 
       if (cmd.hasOption("o")) {
-        settings.setOntologyOutputFile(cmd.getOptionValue("o"));
+        settings.setOntologyOutputFolderPath(cmd.getOptionValue("o"));
       }
       else {
-        settings.setOntologyOutputFile(Constants.ONTOLOGY_FILE);
+        settings.setOntologyOutputFolderPath(Constants.ONTOLOGY_FOLDER);
       }
 
 

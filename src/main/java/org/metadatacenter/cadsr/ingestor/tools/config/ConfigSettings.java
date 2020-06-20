@@ -22,7 +22,7 @@ public class ConfigSettings {
   private String ftpCdesFolder;
   private String categoriesFilePath;
   private String cdesFilePath;
-  private String ontologyOutputFile;
+  private String ontologyOutputFolderPath;
 
   public ConfigSettings() {
   }
@@ -143,11 +143,11 @@ public class ConfigSettings {
     this.cdesFilePath = cdesFilePath;
   }
 
-  public String getOntologyOutputFile() {
-    return ontologyOutputFile;
+  public String getOntologyOutputFolderPath() {
+    return ontologyOutputFolderPath;
   }
 
-  public void setOntologyOutputFile(String ontologyOutputFile) {
-    this.ontologyOutputFile = ontologyOutputFile;
+  public void setOntologyOutputFolderPath(String ontologyOutputFolderPath) {
+    this.ontologyOutputFolderPath = ontologyOutputFolderPath;
   }
 }

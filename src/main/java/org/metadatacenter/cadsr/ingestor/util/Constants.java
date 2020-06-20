@@ -2,6 +2,8 @@ package org.metadatacenter.cadsr.ingestor.util;
 
 public final class Constants {
 
+  public static final int MAX_CDES_TO_PROCESS = Integer.MAX_VALUE; // It can be used to limit the number of CDEs to be processed when debugging or testing
+
   // Folder and file paths
   public static final String EXECUTION_FOLDER = "cadsr-exec-tmp"; // Temporal folder with files used during execution
   public static final String CATEGORIES_FOLDER = "categories";
@@ -47,13 +49,11 @@ public final class Constants {
 
   // Categories
   public static final String ATTACH_CATEGORIES_OPTION = "-a";
-  //public static final String ROOT_CATEGORY_KEY = "CDE_ROOT";
   public static final String CADSR_CATEGORY_SCHEMA_ORG_ID = "CADSR-CATEGORY-ID";
   public static final String CDE_CATEGORY_IDS_FIELD = "categoryIds"; // This field is not part of the CEDAR model
   public static final String CATEGORIES_FILE_NAME_SUFFIX = "_categories";
   public static final String CEDAR_CATEGORY_CHILDREN_FIELD_NAME = "children";
   public static final String CEDAR_CATEGORY_ATTACH_ARTIFACT_ID = "artifactId";
-  public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_ID = "categoryId";
   public static final String CEDAR_CATEGORY_ATTACH_CATEGORY_IDS = "categoryIds";
 
 }
