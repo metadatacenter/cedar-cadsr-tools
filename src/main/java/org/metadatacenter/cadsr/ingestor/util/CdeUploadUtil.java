@@ -21,17 +21,17 @@ public class CdeUploadUtil {
   private static final Logger logger = LoggerFactory.getLogger(CdeUploadUtil.class);
 
   public static void uploadCdeFromDirectory(File inputDir, String cedarFolderShortId,
-                                            boolean attachCategories, Map<String, String> categoryIdsToCedarCategoryIds,
+                                            boolean attachCategories, Map<String, Set<String>> categoryCadsrIdsToCedarCategoryIds,
                                             CedarEnvironment cedarEnvironment, String apiKey)
       throws IOException, JAXBException {
 
     for (final File inputFile : inputDir.listFiles()) {
-      uploadCdeFromFile(inputFile, cedarFolderShortId, attachCategories, categoryIdsToCedarCategoryIds, cedarEnvironment, apiKey);
+      uploadCdeFromFile(inputFile, cedarFolderShortId, attachCategories, categoryCadsrIdsToCedarCategoryIds, cedarEnvironment, apiKey);
     }
   }
 
   public static void uploadCdeFromFile(File inputFile, String cedarFolderShortId,
-                                       boolean attachCategories, Map<String, String> categoryIdsToCedarCategoryIds,
+                                       boolean attachCategories, Map<String, Set<String>> categoryCadsrIdsToCedarCategoryIds,
                                        CedarEnvironment cedarEnvironment, String apiKey) throws IOException, JAXBException {
 
     logger.info("Processing input file at " + inputFile.getAbsolutePath());
@@ -41,13 +41,11 @@ public class CdeUploadUtil {
     for (DataElement dataElement : dataElementsList.getDataElement()) {
       String hashCode = CdeUtil.generateCdeHashCode(dataElement);
       Optional<List<String>> cedarCategoryIds = Optional.empty();
-      Optional<List<String>> categoryIds = Optional.empty();
       Map<String, Object> fieldMap = CdeUtil.getFieldMapFromDataElement(dataElement);
       if (attachCategories) {
-        cedarCategoryIds = Optional.of(CategoryUtil.extractCategoryCedarIdsFromCdeField(fieldMap, categoryIdsToCedarCategoryIds));
-        categoryIds = Optional.of(CategoryUtil.extractCategoryIdsFromCdeField(fieldMap));
+        cedarCategoryIds = Optional.of(CategoryUtil.extractCategoryCedarIdsFromCdeField(fieldMap, categoryCadsrIdsToCedarCategoryIds));
       }
-      CedarServices.createCde(fieldMap, hashCode, cedarFolderShortId, cedarCategoryIds, categoryIds, cedarEnvironment, apiKey);
+      CedarServices.createCde(fieldMap, hashCode, cedarFolderShortId, cedarCategoryIds, cedarEnvironment, apiKey);
     }
   }
 

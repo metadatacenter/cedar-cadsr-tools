@@ -59,7 +59,9 @@ public class CdeActionsProcessor {
 
   private void executeCreateActions() {
     logger.info("Executing CDE Create actions");
+    int count = 0;
     for (CreateCdeAction createCdeAction : createCdeActions) {
+      logger.info("Progress: " + count++ + "/" + createCdeActions.size());
       String createdCdeCedarId = createCdeAction.execute(cedarEnvironment, apiKey);
       String createdCdeUniqueId = CdeUtil.generateCdeUniqueId(createCdeAction.getCdeFieldMap());
       CdeSummary cdeSummary = new CdeSummary(createdCdeCedarId, null, null, createCdeAction.getHashCode(),

@@ -109,7 +109,7 @@ public class CedarServices {
   }
 
   public static String createCde(Map<String, Object> cdeFieldMap, String cdeHashCode, String cedarFolderShortId,
-                                 Optional<List<String>> cedarCategoryIds, Optional<List<String>> categoryIds, CedarEnvironment cedarEnvironment,
+                                 Optional<List<String>> cedarCategoryIds, CedarEnvironment cedarEnvironment,
                                  String apiKey) {
 
     HttpURLConnection conn = null;
@@ -146,7 +146,7 @@ public class CedarServices {
         // Optionally, attach CDE to categories
         if (cedarCategoryIds.isPresent()) {
           String attachCategoriesEndpoint = CedarServerUtil.getAttachCategoriesEndpoint(cedarEnvironment);
-          CedarServices.attachCdeToCategories(cedarCdeId, cedarCategoryIds.get(), categoryIds.get(), attachCategoriesEndpoint, apiKey);
+          CedarServices.attachCdeToCategories(cedarCdeId, cedarCategoryIds.get(), attachCategoriesEndpoint, apiKey);
         }
       }
     } catch (Exception e) {
@@ -242,9 +242,9 @@ public class CedarServices {
     return cedarCategoryId;
   }
 
-  public static Map<String, String> getCategoryIdsToCedarCategoryIdsMap(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
+  public static Map<String, String> getCategoryUniqueIdsToCedarCategoryIdsMap(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
     String endpoint = CedarServerUtil.getCategoryTreeEndpoint(targetEnvironment);
-    Map<String, String> categoryIdsMap = null;
+    Map<String, String> categoryUniqueIdsMap = null;
     HttpURLConnection conn = null;
     try {
       conn = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
@@ -255,14 +255,14 @@ public class CedarServices {
         // Read the CDE @id
         String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
         JsonNode categoryTree = objectMapper.readTree(response);
-        categoryIdsMap = CategoryUtil.getCategoryIdsFromCategoryTree(categoryTree);
+        categoryUniqueIdsMap = CategoryUtil.getCategoryUniqueIdsFromCategoryTree(categoryTree);
       }
     } finally {
       if (conn != null) {
         conn.disconnect();
       }
     }
-    return categoryIdsMap;
+    return categoryUniqueIdsMap;
   }
 
   public static CedarCategory getCedarCategoryTree(Constants.CedarEnvironment targetEnvironment, String apiKey) throws IOException {
@@ -327,14 +327,14 @@ public class CedarServices {
   /**
    * Attach a CDE to multiple categories (making a single REST call)
    */
-  public static void attachCdeToCategories(String cedarCdeId, List<String> cedarCategoryIds, List<String> categoryIds,
+  public static void attachCdeToCategories(String cedarCdeId, List<String> cedarCategoryIds,
                                            String endpoint,
                                            String apiKey) {
 
     if (cedarCategoryIds.size() > 0) {
       logger.info("Attaching CDE to the following categories: ");
       for (int i=0; i<cedarCategoryIds.size(); i++) {
-        logger.info(" - " + cedarCategoryIds.get(i) + " (" + categoryIds.get(i) + ")");
+        logger.info(" - " + cedarCategoryIds.get(i));
       }
     }
 
