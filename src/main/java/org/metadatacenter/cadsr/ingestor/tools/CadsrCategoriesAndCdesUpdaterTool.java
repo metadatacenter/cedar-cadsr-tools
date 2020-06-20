@@ -237,8 +237,10 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     }
 
     // Read the categoryIds from CEDAR to be able to link CDEs to them
-    Map<String, String> categoryIdsToCedarCategoryIds =
-        CedarServices.getCategoryIdsToCedarCategoryIdsMap(cedarEnvironment, apiKey);
+    Map<String, String> categoryUniqueIdsToCedarCategoryIds =
+        CedarServices.getCategoryUniqueIdsToCedarCategoryIdsMap(cedarEnvironment, apiKey);
+    Map<String, Set<String>> categoryCadsrIdsToCedarCategoryIds =
+        CategoryUtil.generateCategoryCadsrIdsToCedarCategoryIdsMap(categoryUniqueIdsToCedarCategoryIds);
 
     // Check CDE changes
     logger.info("Checking CDEs changes and generating actions.");
@@ -256,8 +258,8 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         String newCdeHashCode = CdeUtil.generateCdeHashCode(newDataElement);
         String newCdeUniqueId = CdeUtil.generateCdeUniqueId(newDataElement);
         List<String> categoryCedarIds = CategoryUtil.extractCategoryCedarIdsFromCdeField(newCdeFieldMap,
-            categoryIdsToCedarCategoryIds);
-        List<String> categoryIds = CategoryUtil.extractCategoryIdsFromCdeField(newCdeFieldMap);
+            categoryCadsrIdsToCedarCategoryIds);
+        List<String> categoryCadsrIds = CategoryUtil.extractCategoryCadsrIdsFromCdeField(newCdeFieldMap);
         // Check whether the CDE is new
         if (existingCdesMap.containsKey(newCdeUniqueId)) {
           if (existingCdesMap.get(newCdeUniqueId).getHashCode().equals(newCdeHashCode)) {
@@ -274,7 +276,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         } else {
           // The CDE doesn't exist in CEDAR. We'll have to create it.
           createCdeActions.add(new CreateCdeAction(newCdeFieldMap, newCdeHashCode, cedarFolderShortId,
-              categoryCedarIds, categoryIds));
+              categoryCedarIds, categoryCadsrIds));
         }
         // Update the map to remove the cdes that have been visited.
         cdesToDeleteMap.remove(newCdeUniqueId);

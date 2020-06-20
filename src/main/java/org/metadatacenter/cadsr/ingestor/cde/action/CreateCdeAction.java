@@ -19,15 +19,15 @@ public class CreateCdeAction implements CdeAction {
   private String hashCode;
   private String cedarFolderShortId;
   private List<String> cedarCategoryIds;
-  private List<String> categoryIds;
+  private List<String> categoryCadsrIds;
 
   public CreateCdeAction(Map<String, Object> cdeFieldMap, String hashCode, String cedarFolderShortId,
-                         List<String> cedarCategoryIds, List<String> categoryIds) {
+                         List<String> cedarCategoryIds, List<String> categoryCadsrIds) {
     this.cdeFieldMap = cdeFieldMap;
     this.hashCode = hashCode;
     this.cedarFolderShortId = cedarFolderShortId;
     this.cedarCategoryIds = cedarCategoryIds;
-    this.categoryIds = categoryIds;
+    this.categoryCadsrIds = categoryCadsrIds;
   }
 
   public static Logger getLogger() {
@@ -50,8 +50,8 @@ public class CreateCdeAction implements CdeAction {
     return cedarCategoryIds;
   }
 
-  public List<String> getCategoryIds() {
-    return categoryIds;
+  public List<String> getCategoryCadsrIds() {
+    return categoryCadsrIds;
   }
 
   @Override
@@ -59,13 +59,9 @@ public class CreateCdeAction implements CdeAction {
     logger.info("-----------------------------------------");
     logger.info("Creating CDE: " + CdeUtil.generateCdeUniqueId(cdeFieldMap) + " (" + cdeFieldMap.get(ModelNodeNames.SCHEMA_ORG_NAME).toString() + ")");
     Optional<List<String>> cedarCatIds = Optional.empty();
-    Optional<List<String>> catIds = Optional.empty();
     if (cedarCategoryIds != null && cedarCategoryIds.size() > 0) {
       cedarCatIds = Optional.of(cedarCategoryIds);
     }
-    if (categoryIds != null && categoryIds.size() > 0) {
-      catIds = Optional.of(categoryIds);
-    }
-    return CedarServices.createCde(cdeFieldMap, hashCode, cedarFolderShortId, cedarCatIds, catIds, cedarEnvironment, apiKey);
+    return CedarServices.createCde(cdeFieldMap, hashCode, cedarFolderShortId, cedarCatIds, cedarEnvironment, apiKey);
   }
 }

@@ -255,15 +255,15 @@ public class CategoryUtil {
 
   }
 
-  public static Map<String, String> getCategoryIdsFromCategoryTree(JsonNode cedarCategoryTree) {
-    return getCategoryIds(cedarCategoryTree, new HashMap<>());
+  public static Map<String, String> getCategoryUniqueIdsFromCategoryTree(JsonNode cedarCategoryTree) {
+    return getCategoryUniqueIds(cedarCategoryTree, new HashMap<>());
   }
 
   // Generates a map of categoryId to cedarCategoryId
-  private static Map<String, String> getCategoryIds(JsonNode category, Map<String, String> categoryIds) {
+  private static Map<String, String> getCategoryUniqueIds(JsonNode category, Map<String, String> categoryUniqueIds) {
 
     if (category.hasNonNull(JSON_LD_ID) && category.hasNonNull(ModelNodeNames.SCHEMA_ORG_IDENTIFIER)) {
-      categoryIds.put(category.get(ModelNodeNames.SCHEMA_ORG_IDENTIFIER).asText(),
+      categoryUniqueIds.put(category.get(ModelNodeNames.SCHEMA_ORG_IDENTIFIER).asText(),
           category.get(JSON_LD_ID).asText());
     }
 
@@ -271,12 +271,12 @@ public class CategoryUtil {
       JsonNode children = category.get(Constants.CEDAR_CATEGORY_CHILDREN_FIELD_NAME);
       if (children.isArray()) {
         for (JsonNode childCategory : children) {
-          getCategoryIds(childCategory, categoryIds);
+          getCategoryUniqueIds(childCategory, categoryUniqueIds);
         }
       }
     }
 
-    return categoryIds;
+    return categoryUniqueIds;
   }
 
   /**
@@ -333,7 +333,11 @@ public class CategoryUtil {
   }
 
   /**
-   * Extracts the category ids from a dataElement without performing a full parsing of the data element
+   * Extracts the category ids from a dataElement without performing a full parsing of the data element. As explained
+   * in Category.java, the CDEs XML file does not provide more than three levels, so this field will make it possible
+   * to link CDES to categories. Some categories have the same cadsrId but different uniqueId because the
+   * classification scheme items are at different levels (e.g., 3 vs 4).
+   *
    * @param dataElement
    * @return
    */
@@ -370,7 +374,12 @@ public class CategoryUtil {
     return categoryIds;
   }
 
-  public static List<String> extractCategoryIdsFromCdeField(Map<String, Object> cdeFieldMap) {
+  /**
+   * Extracts the category's caDSR identifiers from a CDE field. Note that
+   * @param cdeFieldMap
+   * @return
+   */
+  public static List<String> extractCategoryCadsrIdsFromCdeField(Map<String, Object> cdeFieldMap) {
     if (cdeFieldMap.containsKey(CDE_CATEGORY_IDS_FIELD)) {
       return (List) cdeFieldMap.get(CDE_CATEGORY_IDS_FIELD);
     } else {
@@ -380,29 +389,62 @@ public class CategoryUtil {
   }
 
   public static List<String> extractCategoryCedarIdsFromCdeField(DataElement cde,
-                                                                 Map<String, String> categoryIdsToCategoryCedarIds) {
+                                                                 Map<String, Set<String>> categoryCadsrIdsToCategoryCedarIds) {
     Map<String, Object> cdeFieldMap = CdeUtil.getFieldMapFromDataElement(cde);
-    return extractCategoryCedarIdsFromCdeField(cdeFieldMap, categoryIdsToCategoryCedarIds);
+    return extractCategoryCedarIdsFromCdeField(cdeFieldMap, categoryCadsrIdsToCategoryCedarIds);
   }
 
   public static List<String> extractCategoryCedarIdsFromCdeField(Map<String, Object> cdeFieldMap,
-                                                                 Map<String, String> categoryIdsToCategoryCedarIds) {
-    List<String> categoryIds = new ArrayList<>();
+                                                                 Map<String, Set<String>> categoryCadsrIdsToCategoryCedarIds) {
+    List<String> categoryCadsrIds = new ArrayList<>();
     if (cdeFieldMap.containsKey(CDE_CATEGORY_IDS_FIELD)) {
-      categoryIds = (List) cdeFieldMap.get(CDE_CATEGORY_IDS_FIELD);
+      categoryCadsrIds = (List) cdeFieldMap.get(CDE_CATEGORY_IDS_FIELD);
     } else {
       logger.warn("No categories found for CDE: " + cdeFieldMap.get(JSON_LD_ID));
     }
     List<String> categoryCedarIds = new ArrayList<>();
-    for (String categoryId : categoryIds) {
-      if (categoryIdsToCategoryCedarIds.containsKey(categoryId)) {
-        categoryCedarIds.add(categoryIdsToCategoryCedarIds.get(categoryId));
+    for (String categoryCadsrId : categoryCadsrIds) {
+      if (categoryCadsrIdsToCategoryCedarIds.containsKey(categoryCadsrId)) {
+        categoryCedarIds.addAll(categoryCadsrIdsToCategoryCedarIds.get(categoryCadsrId));
       } else {
-        logger.error("Error: Category referenced from the CDE is not in the categories XML: " + categoryId);
-        CategoryStats.getInstance().idsOfCategoriesNotFoundInSource.add(categoryId);
+        logger.error("Error: Category referenced from the CDE is not in the categories XML: " + categoryCadsrId);
+        CategoryStats.getInstance().idsOfCategoriesNotFoundInSource.add(categoryCadsrId);
       }
     }
     return categoryCedarIds;
+  }
+
+  /**
+   * Translates a map based on category unique Ids to a map that uses category caDSR ids as keys (see Category.java
+   * to understand the difference between category caDSR ids and category unique ids)
+   *
+   * @param categoryUniqueIdsToCedarCategoryIdsMap
+   * @return
+   */
+  public static Map<String, Set<String>> generateCategoryCadsrIdsToCedarCategoryIdsMap(Map<String, String> categoryUniqueIdsToCedarCategoryIdsMap) {
+    Map<String, Set<String>> categoryCadsrIdsToCedarCategoryIdsMap = new HashMap<>();
+    for (String categoryUniqueId : categoryUniqueIdsToCedarCategoryIdsMap.keySet()) {
+      String categoryCadsrId = categoryUniqueIdToCadsrId(categoryUniqueId);
+      if (categoryCadsrIdsToCedarCategoryIdsMap.containsKey(categoryCadsrId)) {
+        Set<String> cedarCategoryIds = categoryCadsrIdsToCedarCategoryIdsMap.get(categoryCadsrId);
+        cedarCategoryIds.add(categoryUniqueIdsToCedarCategoryIdsMap.get(categoryUniqueId));
+      }
+      else {
+        Set<String> cedarCategoryIds = new HashSet<>();
+        cedarCategoryIds.add(categoryUniqueIdsToCedarCategoryIdsMap.get(categoryUniqueId));
+        categoryCadsrIdsToCedarCategoryIdsMap.put(categoryCadsrId, cedarCategoryIds);
+      }
+    }
+    return categoryCadsrIdsToCedarCategoryIdsMap;
+  }
+
+  public static String categoryUniqueIdToCadsrId(String categoryUniqueId) {
+    String[] categoryIdsFromRoot = categoryUniqueId.split("/");
+    if (categoryIdsFromRoot.length <= 4) { // 4 because NCI CaDSR root + Context + CS + CSI
+      return categoryUniqueId;
+    } else {
+      return categoryIdsFromRoot[0] + "/" + categoryIdsFromRoot[1] + "/" + categoryIdsFromRoot[2] + "/" + categoryIdsFromRoot[categoryIdsFromRoot.length - 1];
+    }
   }
 
   /**
