@@ -1,6 +1,5 @@
 package org.metadatacenter.cadsr.ingestor.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

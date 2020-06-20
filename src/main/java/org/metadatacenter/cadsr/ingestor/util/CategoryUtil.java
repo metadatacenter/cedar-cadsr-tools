@@ -9,7 +9,6 @@ import org.metadatacenter.cadsr.category.schema.Context;
 import org.metadatacenter.cadsr.cde.schema.CLASSIFICATIONSLIST;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.category.*;
-import org.metadatacenter.cadsr.ingestor.cde.handler.CategoriesHandler;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 import org.metadatacenter.model.ModelNodeNames;
 import org.slf4j.Logger;

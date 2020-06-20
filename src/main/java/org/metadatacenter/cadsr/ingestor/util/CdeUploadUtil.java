@@ -1,6 +1,5 @@
 package org.metadatacenter.cadsr.ingestor.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Files;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.DataElementsList;
