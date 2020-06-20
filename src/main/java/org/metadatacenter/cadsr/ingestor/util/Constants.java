@@ -3,7 +3,7 @@ package org.metadatacenter.cadsr.ingestor.util;
 public final class Constants {
 
   // Folder and file paths
-  public static final String EXECUTION_FOLDER = "./cadsr-exec-tmp"; // Temporal folder with files used during execution
+  public static final String EXECUTION_FOLDER = "cadsr-exec-tmp"; // Temporal folder with files used during execution
   public static final String CATEGORIES_FOLDER = "categories";
   public static final String CDES_FOLDER = "cdes";
   public static final String UNZIPPED_FOLDER = "unzipped";

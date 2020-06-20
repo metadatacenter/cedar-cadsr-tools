@@ -3,7 +3,6 @@ package org.metadatacenter.cadsr.ingestor.tools.config;
 import org.apache.commons.cli.*;
 import org.metadatacenter.cadsr.ingestor.util.CedarServerUtil;
 import org.metadatacenter.cadsr.ingestor.util.Constants;
-import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,11 +115,11 @@ public class ConfigSettingsParser {
       }
 
       if (cmd.hasOption("G")) {
-        settings.setCategoriesFile(cmd.getOptionValue("G"));
+        settings.setCategoriesFilePath(cmd.getOptionValue("G"));
       }
 
       if (cmd.hasOption("E")) {
-        settings.setCdesFile(cmd.getOptionValue("E"));
+        settings.setCdesFilePath(cmd.getOptionValue("E"));
       }
 
       if (cmd.hasOption("o")) {
