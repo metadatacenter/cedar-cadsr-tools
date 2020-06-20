@@ -17,9 +17,9 @@ import java.util.concurrent.TimeUnit;
 import static org.metadatacenter.cadsr.ingestor.util.Constants.ATTACH_CATEGORIES_OPTION;
 import static org.metadatacenter.cadsr.ingestor.util.Constants.CedarEnvironment;
 
-public class CadsrUploaderTool {
+public class CadsrUploaderTool_Deprecated {
 
-  private static final Logger logger = LoggerFactory.getLogger(CadsrUploaderTool.class);
+  private static final Logger logger = LoggerFactory.getLogger(CadsrUploaderTool_Deprecated.class);
 
   private static final DecimalFormat countFormat = new DecimalFormat("#,###,###,###");
 

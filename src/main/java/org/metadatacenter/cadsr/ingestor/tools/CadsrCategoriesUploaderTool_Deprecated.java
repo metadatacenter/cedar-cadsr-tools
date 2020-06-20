@@ -11,9 +11,9 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
-public class CadsrCategoriesUploaderTool {
+public class CadsrCategoriesUploaderTool_Deprecated {
 
-  private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesUploaderTool.class);
+  private static final Logger logger = LoggerFactory.getLogger(CadsrCategoriesUploaderTool_Deprecated.class);
 
   public static void main(String[] args) {
 
