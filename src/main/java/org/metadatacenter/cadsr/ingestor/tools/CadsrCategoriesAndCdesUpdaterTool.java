@@ -69,6 +69,12 @@ public class CadsrCategoriesAndCdesUpdaterTool {
       logger.info("#   - Ontology destination folder: " + settings.getOntologyOutputFolderPath());
       logger.info("#####################################################################\n");
 
+      if (settings.getDeleteCategories()) {
+        logger.info("Deleting all existing CEDAR categories.");
+        CategoryUtil.deleteAllNciCadsrCategories(settings.getCedarEnvironment(), settings.getCadsrAdminApikey());
+        CategoryStats.resetStats();
+      }
+
       if (settings.getUpdateCategories()) {
 
         /*** UPDATE CATEGORIES ***/
@@ -88,12 +94,6 @@ public class CadsrCategoriesAndCdesUpdaterTool {
           logger.info("Downloading most recent categories");
           File categoriesZipFile = FtpUtil.downloadMostRecentFile(settings.getFtpHost(), settings.getFtpUser(), settings.getFtpPassword(), settings.getFtpCategoriesFolder(), categoriesOutputFolder);
           UnzipUtility.unzip(categoriesZipFile.getAbsolutePath(), unzippedCategoriesFolder);
-        }
-
-        if (settings.getDeleteCategories()) {
-          logger.info("Deleting all existing caDSR categories in CEDAR.");
-          CategoryUtil.deleteAllNciCadsrCategories(settings.getCedarEnvironment(), settings.getCadsrAdminApikey());
-          CategoryStats.resetStats();
         }
 
         File classificationsFile = (new File(unzippedCategoriesFolder)).listFiles()[0];
