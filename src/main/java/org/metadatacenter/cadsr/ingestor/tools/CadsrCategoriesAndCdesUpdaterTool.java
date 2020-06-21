@@ -70,12 +70,14 @@ public class CadsrCategoriesAndCdesUpdaterTool {
       logger.info("#####################################################################\n");
 
       if (settings.getDeleteCategories()) {
-        logger.info("Deleting all existing CEDAR categories.");
+        logger.info("#########################################");
+        logger.info("#      Deleting caDSR Categories...     #");
+        logger.info("#########################################");
         CategoryUtil.deleteAllNciCadsrCategories(settings.getCedarEnvironment(), settings.getCadsrAdminApikey());
-        CategoryStats.resetStats();
       }
 
       if (settings.getUpdateCategories()) {
+        CategoryStats.resetStats();
 
         /*** UPDATE CATEGORIES ***/
         logger.info("#########################################");
@@ -142,7 +144,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 
       }
 
-      printSummary(stopwatch, startTime, settings.getUpdateCategories(), settings.getUpdateCdes(), ontologyFilePath);
+      printSummary(stopwatch, startTime, settings.getUpdateCategories() || settings.getDeleteCategories(), settings.getUpdateCdes(), ontologyFilePath);
 
     } catch (IOException | JAXBException e) {
       logger.error("Error: " + e.getMessage());
