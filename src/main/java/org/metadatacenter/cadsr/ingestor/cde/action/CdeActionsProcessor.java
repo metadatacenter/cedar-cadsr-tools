@@ -31,7 +31,7 @@ public class CdeActionsProcessor {
     this.apiKey = apiKey;
     // Save stats
     CdeStats.getInstance().numberOfCdesToBeCreated = createCdeActions.size();
-    CdeStats.getInstance().numberOfCdesRetired = retireCdeActions.size();
+    CdeStats.getInstance().numberOfCdesToBeRetired = retireCdeActions.size();
   }
 
   public Map<String, CdeSummary> getCdesMap() {
