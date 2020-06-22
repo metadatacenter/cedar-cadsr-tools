@@ -30,16 +30,16 @@ public class CedarServices {
 
   /*** Field services ***/
 
-  public static void deleteAllFieldsInFolder(String folderShortId, CedarEnvironment environment, String apiKey) throws IOException {
-    List<String> fieldIds = findFieldsInFolder(folderShortId, environment, apiKey);
+  public static void deleteAllFieldsInFolder(String folderId, CedarEnvironment environment, String apiKey) throws IOException {
+    List<String> fieldIds = findFieldsInFolder(folderId, environment, apiKey);
     for (String fieldId : fieldIds) {
       deleteField(fieldId, environment, apiKey);
     }
   }
 
   // Returns the @ids of all the CEDAR fields in the given folder
-  public static List<String> findFieldsInFolder(String folderShortId, CedarEnvironment environment, String apiKey) throws IOException {
-    String endpoint = CedarServerUtil.getFolderContentsEndPoint(folderShortId, environment);
+  public static List<String> findFieldsInFolder(String folderId, CedarEnvironment environment, String apiKey) throws IOException {
+    String endpoint = CedarServerUtil.getFolderContentsEndPoint(folderId, environment);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
     int responseCode = connection.getResponseCode();
     if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -59,7 +59,7 @@ public class CedarServices {
     }
   }
 
-  public static List<CdeSummary> findCdeSummariesInFolder(String folderShortId, List<String> fieldNames,
+  public static List<CdeSummary> findCdeSummariesInFolder(String cedarFolderId, List<String> fieldNames,
                                                           boolean includeCategoryIds, CedarEnvironment environment, String apiKey) throws IOException {
 
     List<CdeSummary> cdeSummaries = new ArrayList<>();
@@ -68,7 +68,7 @@ public class CedarServices {
     int offset = 0;
     int limit = 100;
     while (!finished) {
-      String endpoint = CedarServerUtil.getCdesInFolderExtractEndPoint(folderShortId, fieldNames, includeCategoryIds,  environment);
+      String endpoint = CedarServerUtil.getCdesInFolderExtractEndPoint(cedarFolderId, fieldNames, includeCategoryIds,  environment);
       endpoint = endpoint + "&offset=" + offset + "&limit=" + limit;
       HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
       int responseCode = connection.getResponseCode();
@@ -108,7 +108,7 @@ public class CedarServices {
     connection.disconnect();
   }
 
-  public static String createCde(Map<String, Object> cdeFieldMap, String cdeHashCode, String cedarFolderShortId,
+  public static String createCde(Map<String, Object> cdeFieldMap, String cdeHashCode, String cedarFolderId,
                                  Optional<List<String>> cedarCategoryIds, CedarEnvironment cedarEnvironment,
                                  String apiKey) {
 
@@ -116,7 +116,7 @@ public class CedarServices {
     String cedarCdeId = null;
     try {
 
-      String templateFieldsEndpoint = CedarServerUtil.getTemplateFieldsEndpoint(cedarFolderShortId, cedarEnvironment);
+      String templateFieldsEndpoint = CedarServerUtil.getTemplateFieldsEndpoint(cedarFolderId, cedarEnvironment);
 
       // Extract the categories from the map if they are still there. They are not part of the CEDAR model so we
       // don't want to post them

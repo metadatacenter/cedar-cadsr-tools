@@ -56,7 +56,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
       logger.info("#   - Delete existing categories before updating them? " + (settings.getDeleteCategories() ?
           "Yes" : "No"));
       logger.info("#   - Update CDEs? " + (settings.getUpdateCdes() ? "Yes" : "No"));
-      logger.info("#   - CEDAR folder short Id: " + settings.getCedarCdeFolderShortId());
+      logger.info("#   - CEDAR folder Id: " + settings.getCedarCdeFolderId());
       logger.info("#   - CEDAR environment: " + settings.getCedarEnvironment().name());
       logger.info("#   - CEDAR caDSR Admin api key: " + "******");
       logger.info("#   - Local execution folder: " + settings.getExecutionFolder());
@@ -148,10 +148,10 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         ontologyFilePath = settings.getOntologyOutputFolderPath() + "/" + Constants.ONTOLOGY_FILE;
 
         existingCdesMap =
-            CdeUtil.getExistingCedarCdeSummaries(settings.getCedarCdeFolderShortId(), settings.getCedarEnvironment(),
+            CdeUtil.getExistingCedarCdeSummaries(settings.getCedarCdeFolderId(), settings.getCedarEnvironment(),
                 settings.getCadsrAdminApikey());
 
-        updateCDEs(newDataElements, existingCdesMap, settings.getCedarCdeFolderShortId(), ontologyFilePath,
+        updateCDEs(newDataElements, existingCdesMap, settings.getCedarCdeFolderId(), ontologyFilePath,
             settings.getCedarEnvironment(), settings.getCadsrAdminApikey());
 
         // Remove temporal files
@@ -252,7 +252,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 
   private static Map<String, CdeSummary> updateCDEs(List<DataElement> newDataElements,
                                                     Map<String, CdeSummary> existingCdesMap,
-                                                    String cedarFolderShortId, String ontologyFilePath,
+                                                    String cedarFolderId, String ontologyFilePath,
                                                     CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
 
     // Read the categoryIds from CEDAR to be able to link CDEs to them
@@ -292,7 +292,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
           }
         } else {
           // The CDE doesn't exist in CEDAR. We'll have to create it.
-          createCdeActions.add(new CreateCdeAction(newCdeFieldMap, newCdeHashCode, cedarFolderShortId,
+          createCdeActions.add(new CreateCdeAction(newCdeFieldMap, newCdeHashCode, cedarFolderId,
               categoryCedarIds, categoryCadsrIds));
         }
         // Update the map to remove the cdes that have been visited.

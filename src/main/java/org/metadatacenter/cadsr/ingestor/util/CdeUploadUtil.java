@@ -20,17 +20,17 @@ public class CdeUploadUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(CdeUploadUtil.class);
 
-  public static void uploadCdeFromDirectory(File inputDir, String cedarFolderShortId,
+  public static void uploadCdeFromDirectory(File inputDir, String cedarFolderId,
                                             boolean attachCategories, Map<String, Set<String>> categoryCadsrIdsToCedarCategoryIds,
                                             CedarEnvironment cedarEnvironment, String apiKey)
       throws IOException, JAXBException {
 
     for (final File inputFile : inputDir.listFiles()) {
-      uploadCdeFromFile(inputFile, cedarFolderShortId, attachCategories, categoryCadsrIdsToCedarCategoryIds, cedarEnvironment, apiKey);
+      uploadCdeFromFile(inputFile, cedarFolderId, attachCategories, categoryCadsrIdsToCedarCategoryIds, cedarEnvironment, apiKey);
     }
   }
 
-  public static void uploadCdeFromFile(File inputFile, String cedarFolderShortId,
+  public static void uploadCdeFromFile(File inputFile, String cedarFolderId,
                                        boolean attachCategories, Map<String, Set<String>> categoryCadsrIdsToCedarCategoryIds,
                                        CedarEnvironment cedarEnvironment, String apiKey) throws IOException, JAXBException {
 
@@ -45,7 +45,7 @@ public class CdeUploadUtil {
       if (attachCategories) {
         cedarCategoryIds = Optional.of(CategoryUtil.extractCategoryCedarIdsFromCdeField(fieldMap, categoryCadsrIdsToCedarCategoryIds));
       }
-      CedarServices.createCde(fieldMap, hashCode, cedarFolderShortId, cedarCategoryIds, cedarEnvironment, apiKey);
+      CedarServices.createCde(fieldMap, hashCode, cedarFolderId, cedarCategoryIds, cedarEnvironment, apiKey);
     }
   }
 

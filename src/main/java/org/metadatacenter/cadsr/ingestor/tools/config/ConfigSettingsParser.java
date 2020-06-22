@@ -20,7 +20,7 @@ public class ConfigSettingsParser {
     // Create the Options
     Options options = new Options();
     options.addRequiredOption("k", "apikey", true, "[REQUIRED] API key of CEDAR's caDSR Admin user");
-    options.addRequiredOption( "f", "folder", true, "[REQUIRED] Short identifier of the CEDAR folder where the CDEs will be stored");
+    options.addRequiredOption( "f", "folder", true, "[REQUIRED] Identifier of the CEDAR folder where the CDEs will be stored");
     options.addRequiredOption( "s", "server", true, "[REQUIRED] Target CEDAR server. Possible values: local, staging, production");
     options.addOption( "x", "cadsr-exec-folder", true, "Path to a local folder with temporal files used during execution. The folder will be removed after execution");
     options.addOption( "t", "update-categories", false, "Update CEDAR categories");
@@ -84,7 +84,7 @@ public class ConfigSettingsParser {
       }
 
       if (cmd.hasOption("f")) {
-        settings.setCedarCdeFolderShortId(cmd.getOptionValue("f"));
+        settings.setCedarCdeFolderId(cmd.getOptionValue("f"));
       }
 
       if (cmd.hasOption("s")) {

@@ -120,12 +120,12 @@ public class CdeUtil {
         permissibleValuesItemDatesModified.toString() + categoryIds.toString());
   }
 
-  public static Map<String, CdeSummary> getExistingCedarCdeSummaries(String cedarFolderShortId, Constants.CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
+  public static Map<String, CdeSummary> getExistingCedarCdeSummaries(String cedarFolderId, Constants.CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
     // Retrieve existing CDEs from CEDAR
-    logger.info("Retrieving current CDEs from CEDAR (folder short id: " + cedarFolderShortId + ").");
+    logger.info("Retrieving current CDEs from CEDAR (folder id: " + cedarFolderId + ").");
     List fieldNamesToInclude = new ArrayList(Arrays.asList(new String[]{"schema:identifier", "pav:version",
         "sourceHash"}));
-    List<CdeSummary> cdeSummaries = CedarServices.findCdeSummariesInFolder(cedarFolderShortId,
+    List<CdeSummary> cdeSummaries = CedarServices.findCdeSummariesInFolder(cedarFolderId,
         fieldNamesToInclude, true, cedarEnvironment, apiKey);
     logger.info("Number of CDEs retrieved from CEDAR: " + cdeSummaries.size() + ".");
     CdeStats.getInstance().numberOfExistingCdes = cdeSummaries.size();

@@ -11,7 +11,7 @@ public class ConfigSettings {
   private boolean updateCategories;
   private boolean deleteCategories;
   private boolean updateCdes;
-  private String cedarCdeFolderShortId;
+  private String cedarCdeFolderId;
   private CedarEnvironment cedarEnvironment;
   private String cadsrAdminApikey;
   private String executionFolder;
@@ -55,12 +55,12 @@ public class ConfigSettings {
     this.updateCdes = updateCdes;
   }
 
-  public String getCedarCdeFolderShortId() {
-    return cedarCdeFolderShortId;
+  public String getCedarCdeFolderId() {
+    return cedarCdeFolderId;
   }
 
-  public void setCedarCdeFolderShortId(String cedarCdeFolderShortId) {
-    this.cedarCdeFolderShortId = cedarCdeFolderShortId;
+  public void setCedarCdeFolderId(String cedarCdeFolderId) {
+    this.cedarCdeFolderId = cedarCdeFolderId;
   }
 
   public CedarEnvironment getCedarEnvironment() {
