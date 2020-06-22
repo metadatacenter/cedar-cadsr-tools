@@ -15,6 +15,7 @@ public class CdeStats {
   public int numberOfCdesCreated;
   public int numberOfCdesToBeUpdatedOrDeleted;
   public int numberOfCdesUpdatedOrDeleted;
+  public int numberOfCdesChangedButVersionNotUpdated;
   public int numberOfCdesSkipped;
   public int numberOfCdesFailed;
   public int numberOfMissingCdeToCategoryRelations;
@@ -32,6 +33,7 @@ public class CdeStats {
     numberOfCdesToBeCreated = 0;
     numberOfCdesCreated = 0;
     numberOfCdesToBeUpdatedOrDeleted = 0;
+    numberOfCdesChangedButVersionNotUpdated = 0;
     numberOfCdesUpdatedOrDeleted = 0;
     numberOfCdesSkipped = 0;
     numberOfCdesFailed = 0;
