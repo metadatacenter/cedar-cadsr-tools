@@ -146,7 +146,7 @@ public class CedarServices {
         // Optionally, attach CDE to categories
         if (cedarCategoryIds.isPresent()) {
           String attachCategoriesEndpoint = CedarServerUtil.getAttachCategoriesEndpoint(cedarEnvironment);
-          CedarServices.attachCdeToCategories(cedarCdeId, cedarCategoryIds.get(), attachCategoriesEndpoint, apiKey);
+          CedarServices.attachCdeToCategories(cedarCdeId, cedarCategoryIds.get(), false, attachCategoriesEndpoint, apiKey);
         }
       }
     } catch (Exception e) {
@@ -208,7 +208,7 @@ public class CedarServices {
     HttpURLConnection conn = null;
     try {
       Thread.sleep(50);
-      logger.info("Trying to upload: " + category.getUniqueId());
+      logger.info("Creating category with unique id: " + category.getUniqueId());
       String payload = objectMapper.writeValueAsString(categoryFieldsMap);
       String url = CedarServerUtil.getCategoriesRestEndpoint(environment);
       conn = ConnectionUtil.createAndOpenConnection("POST", url, apiKey);
@@ -327,7 +327,7 @@ public class CedarServices {
   /**
    * Attach a CDE to multiple categories (making a single REST call)
    */
-  public static void attachCdeToCategories(String cedarCdeId, List<String> cedarCategoryIds,
+  public static void attachCdeToCategories(String cedarCdeId, List<String> cedarCategoryIds, boolean reviewMode,
                                            String endpoint,
                                            String apiKey) {
 
@@ -357,6 +357,13 @@ public class CedarServices {
           GeneralUtil.logErrorMessage(conn);
         } else {
           logger.info("CDE attached successfully to categories");
+          if (reviewMode) {
+            CdeStats.getInstance().numberOfCdeToCategoryRelationsCreatedAfterReview += cedarCategoryIds.size();
+          }
+          else {
+            CdeStats.getInstance().numberOfCdeToCategoryRelationsCreatedWhenCreatingCdes += cedarCategoryIds.size();
+          }
+
         }
       } catch (JsonProcessingException e) {
         e.printStackTrace();

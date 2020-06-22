@@ -60,11 +60,11 @@ public class CategoryActionsProcessor {
 
   public void logActionsSummary() {
     logger.info("Category actions: ");
-    logger.info(" - " + createCategoryActions.size() + " Create actions");
+    logger.info(" - " + createCategoryActions.size() + " Create actions (Note that 1 create action may involve creating multiple children categories)");
     logger.info(" - " + deleteCategoryActions.size() + " Delete actions");
     logger.info(" - " + updateCategoryActions.size() + " Update actions");
     if (createCategoryActions.size() > 0) {
-      logger.info("Categories to Create:");
+      logger.info("Categories to Create: (Note that these categories might have children that will be created as well");
       for (CreateCategoryAction action : createCategoryActions) {
         logger.info(" - " + action.getCategory().getUniqueId() + " (" + action.getCategory().getName() + ").");
       }

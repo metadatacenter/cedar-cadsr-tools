@@ -17,21 +17,21 @@ public class CdeActionsProcessor {
   private static final Logger logger = LoggerFactory.getLogger(CdeActionsProcessor.class);
 
   private List<CreateCdeAction> createCdeActions;
-  private List<RetireCdeAction> retireCdeActions;
+  private List<UpdateOrDeleteCdeAction> updateOrDeleteCdeActions;
   private Map<String, CdeSummary> cdesMap; // To store the final CDEs so that they can saved to a file
   private CedarEnvironment cedarEnvironment;
   private String apiKey;
 
-  public CdeActionsProcessor(List<CreateCdeAction> createCdeActions, List<RetireCdeAction> retireCdeActions,
+  public CdeActionsProcessor(List<CreateCdeAction> createCdeActions, List<UpdateOrDeleteCdeAction> updateOrDeleteCdeActions,
                              Map<String, CdeSummary> cdesMap, CedarEnvironment cedarEnvironment, String apiKey) {
     this.createCdeActions = createCdeActions;
-    this.retireCdeActions = retireCdeActions;
+    this.updateOrDeleteCdeActions = updateOrDeleteCdeActions;
     this.cdesMap = cdesMap;
     this.cedarEnvironment = cedarEnvironment;
     this.apiKey = apiKey;
     // Save stats
     CdeStats.getInstance().numberOfCdesToBeCreated = createCdeActions.size();
-    CdeStats.getInstance().numberOfCdesToBeRetired = retireCdeActions.size();
+    CdeStats.getInstance().numberOfCdesToBeUpdatedOrDeleted = updateOrDeleteCdeActions.size();
   }
 
   public Map<String, CdeSummary> getCdesMap() {
@@ -45,7 +45,7 @@ public class CdeActionsProcessor {
     }
     logger.info("Applying CDE actions: ");
     if (createCdeActions.size() > 0) {
-      executeRetireActions();
+      executeUpdateOrDeleteActions();
     }
     logger.info("Finished applying CDE actions.");
   }
@@ -70,10 +70,10 @@ public class CdeActionsProcessor {
     }
   }
 
-  private void executeRetireActions() {
-    logger.info("Executing CDE Retire actions");
-    for (RetireCdeAction retireCdeAction : retireCdeActions) {
-      retireCdeAction.execute(cedarEnvironment, apiKey);
+  private void executeUpdateOrDeleteActions() {
+    logger.info("Executing CDE Update/Delete actions");
+    for (UpdateOrDeleteCdeAction updateOrDeleteCdeAction : updateOrDeleteCdeActions) {
+      updateOrDeleteCdeAction.execute(cedarEnvironment, apiKey);
     }
   }
 }
