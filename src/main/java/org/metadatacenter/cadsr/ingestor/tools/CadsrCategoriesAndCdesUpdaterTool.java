@@ -284,11 +284,10 @@ public class CadsrCategoriesAndCdesUpdaterTool {
           if (existingCdesMap.get(newCdeUniqueId).getHashCode().equals(newCdeHashCode)) {
             // The CDE exists in CEDAR and it didn't change. Do nothing.
           } else {
-            // The CDE exists in CEDAR and it changed. This is wrong. In this case, a new version should have been
+            // The CDE exists in CEDAR and it changed. Is this correct? In this case, a new version should have been
             // generated in the caDSR XML. Different XMLs shouldn't contain different CDEs with the same public id
             // and version
-            String reason = "Error: The CDE has changed, but its public Id and Version were not updated in the XML";
-            logger.warn(reason + ": " + newCdeUniqueId);
+            logger.warn("The CDE has changed, but its public Id and Version were not updated in the XML: " + newCdeUniqueId);
             CdeStats.getInstance().numberOfCdesChangedButVersionNotUpdated++;
           }
         } else {
