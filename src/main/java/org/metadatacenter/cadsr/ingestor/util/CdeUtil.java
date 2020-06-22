@@ -11,7 +11,6 @@ import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
 import org.metadatacenter.cadsr.ingestor.cde.handler.VersionHandler;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
-import org.metadatacenter.config.CedarConfig;
 import org.metadatacenter.model.ModelNodeNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
