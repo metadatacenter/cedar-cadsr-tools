@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
@@ -154,5 +155,13 @@ public class GeneralUtil {
     return argGroups;
   }
 
+  public static boolean isURL(String url) {
+    try {
+      new URL(url);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
 
 }

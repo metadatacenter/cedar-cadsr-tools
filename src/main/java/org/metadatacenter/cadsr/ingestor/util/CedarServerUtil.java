@@ -82,10 +82,15 @@ public class CedarServerUtil {
     return serverUrl + "/command/attach-categories";
   }
 
-  public static String getTemplateFieldsEndpoint(String folderShortId, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
+  public static String getTemplateFieldsEndpoint(String folderId, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
     String resourceServerUrl = CedarServerUtil.getResourceServerUrl(targetEnvironment);
     String repoServerUrl = CedarServerUtil.getRepoServerUrl(targetEnvironment);
-    String folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderShortId);
+    if (GeneralUtil.isURL(folderId)) {
+      folderId = GeneralUtil.encodeIfNeeded(folderId);
+    }
+    else { // Short id
+      folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderId);
+    }
     return resourceServerUrl + "/template-fields?folder_id=" + folderId;
   }
 
@@ -95,18 +100,29 @@ public class CedarServerUtil {
     return serverUrl + "/template-fields/" + fieldId;
   }
 
-  public static String getFolderContentsEndPoint(String folderShortId, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
+  public static String getFolderContentsEndPoint(String folderId, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
     String resourceServerUrl = CedarServerUtil.getResourceServerUrl(targetEnvironment);
     String repoServerUrl = CedarServerUtil.getRepoServerUrl(targetEnvironment);
-    String folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderShortId);
+    if (GeneralUtil.isURL(folderId)) {
+      folderId = GeneralUtil.encodeIfNeeded(folderId);
+    }
+    else {
+      folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderId);
+    }
     return resourceServerUrl + "/folders/" + folderId + "/contents";
   }
 
-  public static String getCdesInFolderExtractEndPoint(String folderShortId, List<String> fieldNames,
+  public static String getCdesInFolderExtractEndPoint(String cedarFolderId, List<String> fieldNames,
                                                       boolean includeCategoryIds, CedarEnvironment targetEnvironment) throws UnsupportedEncodingException {
     String resourceServerUrl = CedarServerUtil.getResourceServerUrl(targetEnvironment);
     String repoServerUrl = CedarServerUtil.getRepoServerUrl(targetEnvironment);
-    String folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderShortId);
+    String folderId;
+    if (GeneralUtil.isURL(cedarFolderId)) {
+      folderId = GeneralUtil.encodeIfNeeded(cedarFolderId);
+    }
+    else { // Short id
+      folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + cedarFolderId);
+    }
     String url = resourceServerUrl + "/folders/" + folderId + "/contents-extract?resource_types=field";
     List<String> updatedFieldNames = new ArrayList<>(fieldNames); // Create a copy because we may update it to include 'categories'
     if (includeCategoryIds) {

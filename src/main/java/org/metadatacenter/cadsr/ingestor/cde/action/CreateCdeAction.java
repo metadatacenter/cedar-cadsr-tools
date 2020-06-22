@@ -17,15 +17,15 @@ public class CreateCdeAction implements CdeAction {
 
   private Map<String, Object> cdeFieldMap;
   private String hashCode;
-  private String cedarFolderShortId;
+  private String cedarFolderId;
   private List<String> cedarCategoryIds;
   private List<String> categoryCadsrIds;
 
-  public CreateCdeAction(Map<String, Object> cdeFieldMap, String hashCode, String cedarFolderShortId,
+  public CreateCdeAction(Map<String, Object> cdeFieldMap, String hashCode, String cedarFolderId,
                          List<String> cedarCategoryIds, List<String> categoryCadsrIds) {
     this.cdeFieldMap = cdeFieldMap;
     this.hashCode = hashCode;
-    this.cedarFolderShortId = cedarFolderShortId;
+    this.cedarFolderId = cedarFolderId;
     this.cedarCategoryIds = cedarCategoryIds;
     this.categoryCadsrIds = categoryCadsrIds;
   }
@@ -42,8 +42,8 @@ public class CreateCdeAction implements CdeAction {
     return hashCode;
   }
 
-  public String getCedarFolderShortId() {
-    return cedarFolderShortId;
+  public String getCedarFolderId() {
+    return cedarFolderId;
   }
 
   public List<String> getCedarCategoryIds() {
@@ -62,6 +62,6 @@ public class CreateCdeAction implements CdeAction {
     if (cedarCategoryIds != null && cedarCategoryIds.size() > 0) {
       cedarCatIds = Optional.of(cedarCategoryIds);
     }
-    return CedarServices.createCde(cdeFieldMap, hashCode, cedarFolderShortId, cedarCatIds, cedarEnvironment, apiKey);
+    return CedarServices.createCde(cdeFieldMap, hashCode, cedarFolderId, cedarCatIds, cedarEnvironment, apiKey);
   }
 }
