@@ -2,7 +2,6 @@ package org.metadatacenter.cadsr.ingestor.category;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.elasticsearch.cluster.ClusterStateTaskConfig;
 
 import java.util.List;
 
