@@ -7,9 +7,11 @@ import org.metadatacenter.cadsr.cde.schema.DataElementsList;
 import org.metadatacenter.cadsr.cde.schema.PermissibleValuesITEM;
 import org.metadatacenter.cadsr.ingestor.cde.CdeParser;
 import org.metadatacenter.cadsr.ingestor.cde.CdeStats;
+import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
 import org.metadatacenter.cadsr.ingestor.cde.handler.VersionHandler;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
+import org.metadatacenter.config.CedarConfig;
 import org.metadatacenter.model.ModelNodeNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,6 +119,25 @@ public class CdeUtil {
 
     return GeneralUtil.getSha1(publicId + version + dataElementDateModified + valueDomainDateModified +
         permissibleValuesItemDatesModified.toString() + categoryIds.toString());
+  }
+
+  public static Map<String, CdeSummary> getExistingCedarCdeSummaries(String cedarFolderShortId, Constants.CedarEnvironment cedarEnvironment, String apiKey) throws IOException {
+    // Retrieve existing CDEs from CEDAR
+    logger.info("Retrieving current CDEs from CEDAR (folder short id: " + cedarFolderShortId + ").");
+    List fieldNamesToInclude = new ArrayList(Arrays.asList(new String[]{"schema:identifier", "pav:version",
+        "sourceHash"}));
+    List<CdeSummary> cdeSummaries = CedarServices.findCdeSummariesInFolder(cedarFolderShortId,
+        fieldNamesToInclude, true, cedarEnvironment, apiKey);
+    logger.info("Number of CDEs retrieved from CEDAR: " + cdeSummaries.size() + ".");
+    CdeStats.getInstance().numberOfExistingCdes = cdeSummaries.size();
+
+    // Create CDE Map (key: cdeId (PublicId + "V" + Version); Value: CdeSummary)
+    Map<String, CdeSummary> existingCdesMap = new HashMap<>();
+    for (CdeSummary cdeSummary : cdeSummaries) {
+      String cdeMapKey = CdeUtil.generateCdeUniqueId(cdeSummary.getId(), cdeSummary.getVersion());
+      existingCdesMap.put(cdeMapKey, cdeSummary);
+    }
+    return existingCdesMap;
   }
 
 }

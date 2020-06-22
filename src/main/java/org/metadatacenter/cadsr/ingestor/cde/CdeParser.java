@@ -47,7 +47,12 @@ public class CdeParser {
       setProperties(fieldMap, dataElement, new PropertiesHandler());
       setPermissibleValues(fieldMap, dataElement, new PermissibleValuesHandler());
       setCategories(fieldMap, dataElement, new CategoriesHandler());
-      cdeCache.put(cdeId, fieldMap);
+      if (fieldMap.size() > 0) {
+        cdeCache.put(cdeId, fieldMap);
+      }
+      else {
+        cdeCache.put(cdeId, null);
+      }
     }
     //logger.info("CDE cache hits: " + cacheHitsCount + " CDE cache misses: " + cacheMissesCount);
   }
