@@ -288,9 +288,8 @@ public class CadsrCategoriesAndCdesUpdaterTool {
             // generated in the caDSR XML. Different XMLs shouldn't contain different CDEs with the same public id
             // and version
             String reason = "Error: The CDE has changed, but its public Id and Version were not updated in the XML";
-            logger.error(reason + ": " + newCdeUniqueId);
-            CdeStats.getInstance().numberOfCdesFailed++;
-            CdeStats.getInstance().addFailed(reason);
+            logger.warn(reason + ": " + newCdeUniqueId);
+            CdeStats.getInstance().numberOfCdesChangedButVersionNotUpdated++;
           }
         } else {
           // The CDE doesn't exist in CEDAR. We'll have to create it.
@@ -393,6 +392,8 @@ public class CadsrCategoriesAndCdesUpdaterTool {
       logger.info("#    - Number of CEDAR CDE fields that are not part of the accepted CDEs anymore and they will need to be UPDATED/DELETED: "
           + countFormat.format(CdeStats.getInstance().numberOfCdesToBeUpdatedOrDeleted));
       logger.info("#    - Number of CEDAR CDE fields successfully updated/deleted: " + countFormat.format(CdeStats.getInstance().numberOfCdesUpdatedOrDeleted));
+      logger.info("#    - Number of CEDAR CDE fields that changed but whose version was not updated: "
+          + countFormat.format(CdeStats.getInstance().numberOfCdesChangedButVersionNotUpdated));
       logger.info("#  CDE-CATEGORY RELATIONS SUMMARY:");
       logger.info("#    - Number of CDE-Category relations created when creating CDEs: " + countFormat.format(CdeStats.getInstance().numberOfCdeToCategoryRelationsCreatedWhenCreatingCdes));
       logger.info("#    - Number of missing CDE-Category relations when conducting review: " + countFormat.format(CdeStats.getInstance().numberOfMissingCdeToCategoryRelations));
