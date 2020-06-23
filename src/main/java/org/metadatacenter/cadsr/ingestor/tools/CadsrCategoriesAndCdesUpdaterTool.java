@@ -49,7 +49,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
       logger.info("# Execution started at " + startTime);
       logger.info("# Execution settings:");
       logger.info("#   - Command-line arguments: ");
-      for (String argGroup : GeneralUtil.commandLineArgumentsGrouped(args, "-p", "--ftp-password", "-k", "apikey")) {
+      for (String argGroup : GeneralUtil.commandLineArgumentsGrouped(args, "-p", "--ftp-password", "-k", "--apikey")) {
         logger.info("#     " + argGroup);
       }
       logger.info("#   - Update categories? " + (settings.getUpdateCategories() ? "Yes" : "No"));
