@@ -6,29 +6,47 @@ import java.util.Map;
 /**
  * This class is a singleton that stores execution statistics that are used to generate a report for the user
  */
-public class CadsrTransformationStats {
+public class CdeStats {
 
   public int numberOfInputCdes;
+  public int numberOfExistingCdes;
   public int numberOfCdesProcessedOk;
+  public int numberOfCdesToBeCreated;
+  public int numberOfCdesCreated;
+  public int numberOfCdesToBeUpdatedOrDeleted;
+  public int numberOfCdesUpdatedOrDeleted;
+  public int numberOfCdesChangedButVersionNotUpdated;
   public int numberOfCdesSkipped;
   public int numberOfCdesFailed;
+  public int numberOfMissingCdeToCategoryRelations;
+  public int numberOfCdeToCategoryRelationsCreatedWhenCreatingCdes;
+  public int numberOfCdeToCategoryRelationsCreatedAfterReview;
   private Map<String, Integer> skippedReasons; // stores the reason and the count of CDEs skipped for that reason
   private Map<String, Integer> failedReasons;
 
-  private static CadsrTransformationStats singleInstance = null;
+  private static CdeStats singleInstance = null;
 
-  private CadsrTransformationStats() {
+  private CdeStats() {
     numberOfInputCdes = 0;
+    numberOfExistingCdes = 0;
     numberOfCdesProcessedOk = 0;
+    numberOfCdesToBeCreated = 0;
+    numberOfCdesCreated = 0;
+    numberOfCdesToBeUpdatedOrDeleted = 0;
+    numberOfCdesChangedButVersionNotUpdated = 0;
+    numberOfCdesUpdatedOrDeleted = 0;
     numberOfCdesSkipped = 0;
     numberOfCdesFailed = 0;
+    numberOfMissingCdeToCategoryRelations = 0;
+    numberOfCdeToCategoryRelationsCreatedWhenCreatingCdes = 0;
+    numberOfCdeToCategoryRelationsCreatedAfterReview = 0;
     skippedReasons = new HashMap<>();
     failedReasons = new HashMap<>();
   }
 
-  public static CadsrTransformationStats getInstance() {
+  public static CdeStats getInstance() {
     if (singleInstance == null) {
-      singleInstance = new CadsrTransformationStats();
+      singleInstance = new CdeStats();
     }
     return singleInstance;
   }

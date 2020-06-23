@@ -26,7 +26,7 @@ public class InputTypeHandler implements ModelHandler {
     } else if (NON_ENUMERATED.equals(valueDomainType)) {
       handleNonEnumeratedType(dataElement);
     } else {
-      String reason = String.format("Value domain is not either enumerated or non-enumerated = %s (Unknown)",
+      String reason = String.format("Value domain is neither enumerated or non-enumerated = %s (Unknown)",
           valueDomainType);
       throw new UnsupportedDataElementException(dataElement, reason);
     }
