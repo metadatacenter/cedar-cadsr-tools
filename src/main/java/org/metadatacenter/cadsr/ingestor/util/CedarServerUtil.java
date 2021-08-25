@@ -106,6 +106,16 @@ public class CedarServerUtil {
     return serverUrl + "/command/attach-category";
   }
 
+  public static String getLoadValueSetsOntologyEndpoint(CedarServer cedarServer) {
+    String serverUrl = getResourceServerUrl(cedarServer);
+    return serverUrl + "/command/load-valuesets-ontology";
+  }
+
+  public static String getLoadValueSetsOntologyStatusEndpoint(CedarServer cedarServer) {
+    String serverUrl = getResourceServerUrl(cedarServer);
+    return serverUrl + "/command/load-valuesets-ontology-status";
+  }
+
   public static String getAttachCategoriesEndpoint(CedarServer cedarServer) {
     String serverUrl = getResourceServerUrl(cedarServer);
     return serverUrl + "/command/attach-categories";

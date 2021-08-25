@@ -17,11 +17,18 @@ import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
 import org.metadatacenter.cadsr.ingestor.cde.ValueSetsOntologyManager;
 import org.metadatacenter.cadsr.ingestor.cde.action.CdeActionsProcessor;
 import org.metadatacenter.cadsr.ingestor.cde.action.CreateCdeAction;
+import org.metadatacenter.cadsr.ingestor.cde.action.LoadValueSetsOntologyAction;
 import org.metadatacenter.cadsr.ingestor.cde.action.UpdateOrDeleteCdeAction;
 import org.metadatacenter.cadsr.ingestor.tools.cde.config.ConfigSettings;
 import org.metadatacenter.cadsr.ingestor.tools.cde.config.ConfigSettingsParser;
-import org.metadatacenter.cadsr.ingestor.util.*;
+import org.metadatacenter.cadsr.ingestor.util.CategoryUtil;
+import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
+import org.metadatacenter.cadsr.ingestor.util.CedarServices;
+import org.metadatacenter.cadsr.ingestor.util.Constants;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarServer;
+import org.metadatacenter.cadsr.ingestor.util.FtpUtil;
+import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
+import org.metadatacenter.cadsr.ingestor.util.UnzipUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +38,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class CadsrCategoriesAndCdesUpdaterTool {
@@ -129,6 +141,8 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         logger.info("#            Updating CDEs...           #");
         logger.info("#########################################");
 
+        ontologyFilePath = settings.getOntologyOutputFolderPath() + "/" + Constants.ONTOLOGY_FILE;
+
         // Delete CDEs temporal folder if it exists
         FileUtils.deleteDirectory(new File(settings.getExecutionFolder()));
 
@@ -152,8 +166,6 @@ public class CadsrCategoriesAndCdesUpdaterTool {
           DataElementsList newDataElementList = CdeUtil.getDataElementLists(new FileInputStream(inputFile));
           newDataElements.addAll(newDataElementList.getDataElement());
         }
-
-        ontologyFilePath = settings.getOntologyOutputFolderPath() + "/" + Constants.ONTOLOGY_FILE;
 
         existingCdesMap =
             CdeUtil.getExistingCedarCdeSummaries(settings.getCedarCdeFolderId(), settings.getCedarServer(),
@@ -271,6 +283,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
 
     // Check CDE changes
     logger.info("Checking CDEs changes and generating actions.");
+    LoadValueSetsOntologyAction loadValueSetsOntologyAction = new LoadValueSetsOntologyAction();
     List<CreateCdeAction> createCdeActions = new ArrayList<>();
     List<UpdateOrDeleteCdeAction> updateOrDeleteCdeActions = new ArrayList<>();
     Map<String, CdeSummary> cdesToDeleteMap = new HashMap<>(existingCdesMap);
@@ -327,15 +340,16 @@ public class CadsrCategoriesAndCdesUpdaterTool {
           cdeSummary.getHashCode()));
     }
 
+    // Save ontology. Must be saved before invoking the action processor since a LoadValueSetsOntologyAction
+    // calls the resource server to reload this ontology
+    ValueSetsOntologyManager.saveOntology(new File(ontologyFilePath));
+
     // Process CDE actions
     CdeActionsProcessor cdeActionsProcessor =
-        new CdeActionsProcessor(createCdeActions, updateOrDeleteCdeActions,
+        new CdeActionsProcessor(loadValueSetsOntologyAction, createCdeActions, updateOrDeleteCdeActions,
             new HashMap<>(existingCdesMap), cedarServer, apiKey);
     cdeActionsProcessor.logActionsSummary();
     cdeActionsProcessor.executeCdeActions();
-
-    // Save ontology
-    ValueSetsOntologyManager.saveOntology(new File(ontologyFilePath));
 
     return cdeActionsProcessor.getCdesMap();
   }

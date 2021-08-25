@@ -109,7 +109,7 @@ public class PermissibleValuesHandler implements ModelHandler {
       // use “VM” plus the Value Meaning PublicID and Version
       String publicId = permissibleItem.getVMPUBLICID().getContent();
       String version = permissibleItem.getVMVERSION().getContent();
-      conceptUri = CDE_VALUESETS_ONTOLOGY_IRI + "/VM" + publicId + "v" + version;
+      conceptUri = CDE_VALUESETS_ONTOLOGY_IRI + "VM" + publicId + "v" + version;
     } else {
       String conceptOrigin = permissibleItem.getMEANINGCONCEPTORIGIN().getContent();
       String ontologyIri = CadsrConceptOrigins.ONTOLOGY_IRI_MAP.get(conceptOrigin);

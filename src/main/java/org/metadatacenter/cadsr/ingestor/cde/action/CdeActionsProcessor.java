@@ -18,12 +18,16 @@ public class CdeActionsProcessor {
 
   private List<CreateCdeAction> createCdeActions;
   private List<UpdateOrDeleteCdeAction> updateOrDeleteCdeActions;
+  private LoadValueSetsOntologyAction loadValueSetsOntologyAction;
   private Map<String, CdeSummary> cdesMap; // To store the final CDEs so that they can saved to a file
   private CedarServer cedarEnvironment;
   private String apiKey;
 
-  public CdeActionsProcessor(List<CreateCdeAction> createCdeActions, List<UpdateOrDeleteCdeAction> updateOrDeleteCdeActions,
-                             Map<String, CdeSummary> cdesMap, CedarServer cedarEnvironment, String apiKey) {
+  public CdeActionsProcessor(LoadValueSetsOntologyAction loadValueSetsOntologyAction,
+    List<CreateCdeAction> createCdeActions, List<UpdateOrDeleteCdeAction> updateOrDeleteCdeActions,
+    Map<String, CdeSummary> cdesMap, CedarServer cedarEnvironment, String apiKey) {
+
+    this.loadValueSetsOntologyAction = loadValueSetsOntologyAction;
     this.createCdeActions = createCdeActions;
     this.updateOrDeleteCdeActions = updateOrDeleteCdeActions;
     this.cdesMap = cdesMap;
@@ -40,6 +44,10 @@ public class CdeActionsProcessor {
 
   public void executeCdeActions() throws IOException {
     logger.info("Applying CDE actions: ");
+
+    if (loadValueSetsOntologyAction != null)
+      executeLoadValueSetsOntologyAction();
+
     if (createCdeActions.size() > 0) {
       executeCreateActions();
     }
@@ -56,6 +64,11 @@ public class CdeActionsProcessor {
   }
 
   /*** Private methods to execute actions ***/
+
+  private void executeLoadValueSetsOntologyAction() {
+    logger.info("Executing load value set ontology action");
+    loadValueSetsOntologyAction.execute(cedarEnvironment, apiKey);
+  }
 
   private void executeCreateActions() {
     logger.info("Executing CDE Create actions");

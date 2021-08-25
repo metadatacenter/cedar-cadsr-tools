@@ -7,7 +7,7 @@ public final class Constants {
   public static final String TEMPLATE_TYPE = "https://schema.metadatacenter.org/core/Template";
   public static final String FIELD_TYPE = "https://schema.metadatacenter.org/core/TemplateField";
 
-  public static final int MAX_CDES_TO_PROCESS = Integer.MAX_VALUE; // It can be used to limit the number of CDEs to be processed when debugging or testing
+  public static final int MAX_CDES_TO_PROCESS = 10000; // Integer.MAX_VALUE; // It can be used to limit the number of CDEs to be processed when debugging or testing
 
   public enum CedarServer {LOCAL, STAGING, PRODUCTION}
 
@@ -53,7 +53,7 @@ public final class Constants {
   public static final int MAX_ENUMERATED_TERMS = 0;
 
   public static final String CDE_VALUESETS_ONTOLOGY_ID = "CADSR-VS";
-  public static final String CDE_VALUESETS_ONTOLOGY_IRI = "https://cadsr.nci.nih.gov/metadata/" + CDE_VALUESETS_ONTOLOGY_ID;
+  public static final String CDE_VALUESETS_ONTOLOGY_IRI = "https://cadsr.nci.nih.gov/metadata/" + CDE_VALUESETS_ONTOLOGY_ID + "/";
 
   // Categories
   public static final String CADSR_CATEGORY_SCHEMA_ORG_ID = "CADSR-CATEGORY-ID";

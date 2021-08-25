@@ -3,6 +3,7 @@ package org.metadatacenter.cadsr.ingestor.util;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.cde.Value;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
+import org.semanticweb.owlapi.model.IRI;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.CDE_VALUESETS_ONTOLOGY_IRI;
 
@@ -17,7 +18,7 @@ public class ValueSetUtil {
   public static String generateValueSetIRI(String valueSetId, String valueSetVersion) {
     String valueSetIRI = null;
     try {
-      valueSetIRI = CDE_VALUESETS_ONTOLOGY_IRI + "/" + generateValueSetId(valueSetId, valueSetVersion);
+      valueSetIRI = CDE_VALUESETS_ONTOLOGY_IRI + generateValueSetId(valueSetId, valueSetVersion);
     } catch (InvalidIdentifierException e) {
       e.printStackTrace();
     }
@@ -37,8 +38,8 @@ public class ValueSetUtil {
     }
   }
 
-  public static String generateValueIRI(String valueSetId, Value value) {
-    return CDE_VALUESETS_ONTOLOGY_IRI + "/" + generateValueId(valueSetId, value);
+  public static IRI generateValueIRI(String valueSetId, Value value) {
+    return IRI.create(CDE_VALUESETS_ONTOLOGY_IRI + generateValueId(valueSetId, value));
   }
 
   public static String generateValueId(String valueSetId, Value value) {
