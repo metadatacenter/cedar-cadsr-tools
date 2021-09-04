@@ -348,7 +348,16 @@ public class CadsrCategoriesAndCdesUpdaterTool {
     CdeActionsProcessor cdeActionsProcessor =
         new CdeActionsProcessor(loadValueSetsOntologyAction, createCdeActions, updateOrDeleteCdeActions,
             new HashMap<>(existingCdesMap), cedarServer, apiKey);
+
     cdeActionsProcessor.logActionsSummary();
+
+    String status = cdeActionsProcessor.executeLoadValueSetsOntologyAction();
+
+    if (!status.equals("Done"))
+      logger.error("Server did not successfully load the value sets ontology: status=" + status);
+    else
+      logger.info("Server successfully uploaded value sets ontology");
+
     cdeActionsProcessor.executeCdeActions();
 
     return cdeActionsProcessor.getCdesMap();

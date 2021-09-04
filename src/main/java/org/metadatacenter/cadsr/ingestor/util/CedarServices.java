@@ -43,6 +43,7 @@ public class CedarServices {
     }
   }
 
+  // Returns: "NOT_YET_INITIATED", "IN_PROGRESS", "COMPLETE", "ERROR"
   public static String loadValueSetsOntologyStatus(CedarServer server, String apiKey) throws IOException {
     String endpoint = CedarServerUtil.getLoadValueSetsOntologyStatusEndpoint(server);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
@@ -51,7 +52,7 @@ public class CedarServices {
       String response = ConnectionUtil.readResponseMessage(connection.getInputStream());
       String importStatus = JsonUtil.extractJsonFieldValueAsText(response, "importStatus");
       connection.disconnect();
-      return importStatus; // NOT_YET_INITIATED, IN_PROGRESS, COMPLETE, ERROR
+      return importStatus;
     } else {
       String message = "Error calling resource server to get value sets ontology loading status; response code = " + responseCode;
       logger.error(message);

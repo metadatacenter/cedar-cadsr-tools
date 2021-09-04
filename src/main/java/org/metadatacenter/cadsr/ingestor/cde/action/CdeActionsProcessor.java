@@ -42,11 +42,19 @@ public class CdeActionsProcessor {
     return cdesMap;
   }
 
+  public String executeLoadValueSetsOntologyAction()
+  {
+    if (loadValueSetsOntologyAction != null) {
+      logger.info("Executing load value set ontology action");
+      return loadValueSetsOntologyAction.execute(cedarEnvironment, apiKey);
+    } else {
+      logger.info("Missing load value sets ontology action");
+      return "Missing load value sets ontology action";
+    }
+  }
+
   public void executeCdeActions() throws IOException {
     logger.info("Applying CDE actions: ");
-
-    if (loadValueSetsOntologyAction != null)
-      executeLoadValueSetsOntologyAction();
 
     if (createCdeActions.size() > 0) {
       executeCreateActions();
@@ -65,10 +73,6 @@ public class CdeActionsProcessor {
 
   /*** Private methods to execute actions ***/
 
-  private void executeLoadValueSetsOntologyAction() {
-    logger.info("Executing load value set ontology action");
-    loadValueSetsOntologyAction.execute(cedarEnvironment, apiKey);
-  }
 
   private void executeCreateActions() {
     logger.info("Executing CDE Create actions");
