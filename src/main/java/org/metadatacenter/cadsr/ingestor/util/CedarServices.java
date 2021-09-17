@@ -12,6 +12,7 @@ import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
 import org.metadatacenter.cadsr.ingestor.cde.CdeStats;
 import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarServer;
+import org.metadatacenter.constant.CedarHeaderParameters;
 import org.metadatacenter.model.CedarResourceType;
 import org.metadatacenter.server.neo4j.cypher.NodeProperty;
 import org.slf4j.Logger;
@@ -207,7 +208,7 @@ public class CedarServices {
 
       String templateFieldsEndpoint = CedarServerUtil.getTemplateFieldsEndpoint(cedarFolderId, cedarEnvironment);
 
-      // Extract the categories from the map if they are still there. They are not part of the CEDAR model so we
+      // Extract the categories from the map if they are still there. They are not part of the CEDAR model, so we
       // don't want to post them
       if (cdeFieldMap.containsKey(CDE_CATEGORY_IDS_FIELD)) {
         cdeFieldMap.remove(CDE_CATEGORY_IDS_FIELD);
@@ -217,7 +218,7 @@ public class CedarServices {
       conn = ConnectionUtil.createAndOpenConnection("POST", templateFieldsEndpoint, apiKey);
 
       // Set hash code
-      conn.setRequestProperty("CEDAR-Source-Hash", cdeHashCode);
+      conn.setRequestProperty(CedarHeaderParameters.SOURCE_HASH, cdeHashCode);
 
       OutputStream os = conn.getOutputStream();
       os.write(payload.getBytes());
@@ -452,7 +453,6 @@ public class CedarServices {
           else {
             CdeStats.getInstance().numberOfCdeToCategoryRelationsCreatedWhenCreatingCdes += cedarCategoryIds.size();
           }
-
         }
       } catch (JsonProcessingException e) {
         e.printStackTrace();
