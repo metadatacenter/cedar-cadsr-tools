@@ -1,6 +1,7 @@
 package org.metadatacenter.cadsr.ingestor.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -10,6 +11,7 @@ import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
 import org.metadatacenter.cadsr.ingestor.cde.CdeStats;
 import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
+import org.metadatacenter.cadsr.ingestor.util.Constants.CedarServer;
 import org.metadatacenter.model.CedarResourceType;
 import org.metadatacenter.server.neo4j.cypher.NodeProperty;
 import org.slf4j.Logger;
@@ -17,11 +19,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.security.InvalidParameterException;
 import java.util.*;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
 import static org.metadatacenter.model.ModelNodeNames.*;
+import static org.metadatacenter.util.json.JsonMapper.MAPPER;
 
 public class CedarServices {
 

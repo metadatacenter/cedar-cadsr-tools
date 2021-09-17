@@ -11,9 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class CdeActionsProcessor {
 
@@ -24,7 +21,6 @@ public class CdeActionsProcessor {
   private Map<String, CdeSummary> cdesMap; // To store the final CDEs so that they can saved to a file
   private CedarServer cedarEnvironment;
   private String apiKey;
-  private int count;
 
   public CdeActionsProcessor(List<CreateCdeAction> createCdeActions, List<UpdateOrDeleteCdeAction> updateOrDeleteCdeActions,
                              Map<String, CdeSummary> cdesMap, CedarServer cedarEnvironment, String apiKey) {
@@ -62,31 +58,15 @@ public class CdeActionsProcessor {
   /*** Private methods to execute actions ***/
 
   private void executeCreateActions() {
-    final int NUM_THREADS = 8;
     logger.info("Executing CDE Create actions");
-    ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
+    int count = 0;
     for (CreateCdeAction createCdeAction : createCdeActions) {
-      Runnable worker = new ActionsRunnable(this, createCdeAction);
-      executor.execute(worker);
-    }
-    shutdownAndAwaitTermination(executor);
-  }
-
-  private void shutdownAndAwaitTermination(ExecutorService executor) {
-    executor.shutdown(); // Disable new tasks from being submitted
-    try {
-      // Wait a while for existing tasks to terminate
-      if (!executor.awaitTermination(120, TimeUnit.SECONDS)) {
-        executor.shutdownNow(); // Cancel currently executing tasks
-        // Wait a while for tasks to respond to being cancelled
-        if (!executor.awaitTermination(120, TimeUnit.SECONDS))
-          System.err.println("Pool did not terminate");
-      }
-    } catch (InterruptedException ie) {
-      // (Re-)Cancel if current thread also interrupted
-      executor.shutdownNow();
-      // Preserve interrupt status
-      Thread.currentThread().interrupt();
+      logger.info("Progress: " + count++ + "/" + createCdeActions.size());
+      String createdCdeCedarId = createCdeAction.execute(cedarEnvironment, apiKey);
+      String createdCdeUniqueId = CdeUtil.generateCdeUniqueId(createCdeAction.getCdeFieldMap());
+      CdeSummary cdeSummary = new CdeSummary(createdCdeCedarId, null, null, createCdeAction.getHashCode(),
+          new ArrayList<>());
+      cdesMap.put(createdCdeUniqueId, cdeSummary);
     }
   }
 
@@ -94,28 +74,6 @@ public class CdeActionsProcessor {
     logger.info("Executing CDE Update/Delete actions");
     for (UpdateOrDeleteCdeAction updateOrDeleteCdeAction : updateOrDeleteCdeActions) {
       updateOrDeleteCdeAction.execute(cedarEnvironment, apiKey);
-    }
-  }
-
-  /*** Runnable class to execute actions in multiple threads ***/
-
-  public static class ActionsRunnable implements Runnable {
-    private CdeActionsProcessor processor;
-    private CreateCdeAction createCdeAction;
-
-    ActionsRunnable(CdeActionsProcessor processor, CreateCdeAction createCdeAction) {
-      this.processor = processor;
-      this.createCdeAction = createCdeAction;
-    }
-
-    @Override
-    public void run() {
-      logger.info("Progress: " + processor.count++ + "/" + processor.createCdeActions.size());
-      String createdCdeCedarId = createCdeAction.execute(processor.cedarEnvironment, processor.apiKey);
-      String createdCdeUniqueId = CdeUtil.generateCdeUniqueId(createCdeAction.getCdeFieldMap());
-      CdeSummary cdeSummary = new CdeSummary(createdCdeCedarId, null, null, createCdeAction.getHashCode(),
-          new ArrayList<>());
-      processor.cdesMap.put(createdCdeUniqueId, cdeSummary);
     }
   }
 }
