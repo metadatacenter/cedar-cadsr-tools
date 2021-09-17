@@ -62,19 +62,31 @@ public class CdeActionsProcessor {
   /*** Private methods to execute actions ***/
 
   private void executeCreateActions() {
-    final int NUM_THREADS = 10;
+    final int NUM_THREADS = 8;
     logger.info("Executing CDE Create actions");
     ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
     for (CreateCdeAction createCdeAction : createCdeActions) {
       Runnable worker = new ActionsRunnable(this, createCdeAction);
       executor.execute(worker);
     }
-    executor.shutdown();
+    shutdownAndAwaitTermination(executor);
+  }
+
+  private void shutdownAndAwaitTermination(ExecutorService executor) {
+    executor.shutdown(); // Disable new tasks from being submitted
     try {
-      executor.awaitTermination(1, TimeUnit.MINUTES);
-      // all tasks have finished or the time has been reached.
-    } catch (InterruptedException e) {
-      logger.error("Error while waiting for all tasks to be finished", e);
+      // Wait a while for existing tasks to terminate
+      if (!executor.awaitTermination(120, TimeUnit.SECONDS)) {
+        executor.shutdownNow(); // Cancel currently executing tasks
+        // Wait a while for tasks to respond to being cancelled
+        if (!executor.awaitTermination(120, TimeUnit.SECONDS))
+          System.err.println("Pool did not terminate");
+      }
+    } catch (InterruptedException ie) {
+      // (Re-)Cancel if current thread also interrupted
+      executor.shutdownNow();
+      // Preserve interrupt status
+      Thread.currentThread().interrupt();
     }
   }
 
