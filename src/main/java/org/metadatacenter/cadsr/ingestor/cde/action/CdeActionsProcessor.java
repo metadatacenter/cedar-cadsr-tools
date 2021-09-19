@@ -85,7 +85,7 @@ public class CdeActionsProcessor {
         CdeSummary cdeSummary = new CdeSummary(createdCdeCedarId, null, null, createCdeAction.getHashCode(),
             new ArrayList<>());
         cdesMap.put(createdCdeUniqueId, cdeSummary);
-        if (createCdeAction.getCedarCategoryIds().size() > 0) {
+        if (createdCdeCedarId != null && createCdeAction.getCedarCategoryIds().size() > 0) {
           attachCdeToCategoriesActions.add(new AttachCdeToCategoriesAction(createdCdeCedarId,
               createCdeAction.getCedarCategoryIds()));
         }
