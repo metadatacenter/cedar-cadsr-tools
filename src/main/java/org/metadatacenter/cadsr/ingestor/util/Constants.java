@@ -52,9 +52,6 @@ public final class Constants {
   // value set. A value of 0 means that all value sets will be created as BioPortal value sets.
   public static final int MAX_ENUMERATED_TERMS = 0;
 
-  public static final String CDE_VALUESETS_ONTOLOGY_ID = "CADSR-VS";
-  public static final String CDE_VALUESETS_ONTOLOGY_IRI = "https://cadsr.nci.nih.gov/metadata/" + CDE_VALUESETS_ONTOLOGY_ID + "/";
-
   // Categories
   public static final String CADSR_CATEGORY_SCHEMA_ORG_ID = "CADSR-CATEGORY-ID";
   public static final String CDE_CATEGORY_IDS_FIELD = "categoryIds"; // This field is not part of the CEDAR model
@@ -68,7 +65,6 @@ public final class Constants {
   public static final String CDES_FOLDER = "cdes";
   public static final String UNZIPPED_FOLDER = "unzipped";
   public static final String ONTOLOGY_FOLDER = "ontology";
-  public static final String ONTOLOGY_FILE = CDE_VALUESETS_ONTOLOGY_ID + ".owl";
 
   // CEDAR CDE folder. Used to check that the CDEs retrieved when searching for them by id are the right ones
   public static final String CEDAR_CDES_FOLDER_PATH = "/Shared/CDE";

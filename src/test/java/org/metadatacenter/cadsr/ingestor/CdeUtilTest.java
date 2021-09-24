@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.WORKFLOWSTATUS1;
 import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
+import org.metadatacenter.constant.OntologyAndValueSetConstants;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
 
@@ -34,7 +35,7 @@ public class CdeUtilTest {
     assertThat(getValueSetsConstraintMap(fieldMap).size(), is(1));
     assertThat(getValueSetName(fieldMap, 0), is("Yes No Indicator"));
     assertThat(getValueSetNumTerms(fieldMap, 0), is(2));
-    assertThat(getValueSetVsCollection(fieldMap, 0), is("CADSR-VS"));
+    assertThat(getValueSetVsCollection(fieldMap, 0), is(OntologyAndValueSetConstants.CADSR_VALUE_SETS_ONTOLOGY_ID));
     assertThat(getValueSetUri(fieldMap, 0), is("https://cadsr.nci.nih.gov/metadata/CADSR-VS/VD3506068v1"));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_TYPE), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.RDFS_LABEL), is(not(nullValue())));
@@ -173,7 +174,7 @@ public class CdeUtilTest {
     assertThat(getValueSetsConstraintMap(fieldMap).size(), is(1));
     assertThat(getValueSetName(fieldMap, 0), is("True False Boolean Value Code"));
     assertThat(getValueSetNumTerms(fieldMap, 0), is(2));
-    assertThat(getValueSetVsCollection(fieldMap, 0), is("CADSR-VS"));
+    assertThat(getValueSetVsCollection(fieldMap, 0), is(OntologyAndValueSetConstants.CADSR_VALUE_SETS_ONTOLOGY_ID));
     assertThat(getValueSetUri(fieldMap, 0), is("https://cadsr.nci.nih.gov/metadata/CADSR-VS/VD2321242v1.1"));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.JSON_LD_TYPE), is(not(nullValue())));
     assertThat(getProperties(fieldMap).get(ModelNodeNames.SKOS_NOTATION), is(not(nullValue())));

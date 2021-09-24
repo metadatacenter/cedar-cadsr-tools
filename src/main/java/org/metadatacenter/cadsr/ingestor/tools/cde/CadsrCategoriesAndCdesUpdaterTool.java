@@ -29,6 +29,7 @@ import org.metadatacenter.cadsr.ingestor.util.Constants.CedarServer;
 import org.metadatacenter.cadsr.ingestor.util.FtpUtil;
 import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
 import org.metadatacenter.cadsr.ingestor.util.UnzipUtility;
+import org.metadatacenter.constant.OntologyAndValueSetConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +142,7 @@ public class CadsrCategoriesAndCdesUpdaterTool {
         logger.info("#            Updating CDEs...           #");
         logger.info("#########################################");
 
-        ontologyFilePath = settings.getOntologyOutputFolderPath() + "/" + Constants.ONTOLOGY_FILE;
+        ontologyFilePath = settings.getOntologyOutputFolderPath() + "/" + OntologyAndValueSetConstants.CADSR_VALUE_SETS_ONTOLOGY_FILE;
 
         // Delete CDEs temporal folder if it exists
         FileUtils.deleteDirectory(new File(settings.getExecutionFolder()));

@@ -15,6 +15,7 @@ import org.metadatacenter.cadsr.ingestor.exception.DuplicatedAxiomException;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
+import org.metadatacenter.constant.OntologyAndValueSetConstants;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
 import org.slf4j.Logger;
@@ -109,7 +110,7 @@ public class PermissibleValuesHandler implements ModelHandler {
       // use “VM” plus the Value Meaning PublicID and Version
       String publicId = permissibleItem.getVMPUBLICID().getContent();
       String version = permissibleItem.getVMVERSION().getContent();
-      conceptUri = CDE_VALUESETS_ONTOLOGY_IRI + "VM" + publicId + "v" + version;
+      conceptUri = OntologyAndValueSetConstants.CADSR_VALUE_SETS_ONTOLOGY_IRI + "VM" + publicId + "v" + version;
     } else {
       String conceptOrigin = permissibleItem.getMEANINGCONCEPTORIGIN().getContent();
       String ontologyIri = CadsrConceptOrigins.ONTOLOGY_IRI_MAP.get(conceptOrigin);
@@ -144,7 +145,7 @@ public class PermissibleValuesHandler implements ModelHandler {
   private void setValueSet(DataElement dataElement, int size) {
     Map<String, Object> valueSet = Maps.newHashMap();
     valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_NAME, dataElement.getVALUEDOMAIN().getLongName().getContent());
-    valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_VS_COLLECTION, CDE_VALUESETS_ONTOLOGY_ID);
+    valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_VS_COLLECTION, OntologyAndValueSetConstants.CADSR_VALUE_SETS_ONTOLOGY_ID);
     valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_URI, ValueSetUtil.generateValueSetIRI(dataElement));
     valueSet.put(ModelNodeNames.VALUE_CONSTRAINTS_NUM_TERMS, size);
     valueSets.add(valueSet);

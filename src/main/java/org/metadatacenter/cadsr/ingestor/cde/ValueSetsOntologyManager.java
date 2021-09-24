@@ -5,6 +5,7 @@ import org.metadatacenter.cadsr.ingestor.exception.DuplicatedAxiomException;
 import org.metadatacenter.cadsr.ingestor.exception.InvalidIdentifierException;
 import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
 import org.metadatacenter.cadsr.ingestor.util.ValueSetUtil;
+import org.metadatacenter.constant.OntologyAndValueSetConstants;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.Set;
 
-import static org.metadatacenter.cadsr.ingestor.util.Constants.CDE_VALUESETS_ONTOLOGY_IRI;
 import static org.metadatacenter.cadsr.ingestor.util.Constants.DUBLINCORE_IDENTIFIER_IRI;
 import static org.metadatacenter.cadsr.ingestor.util.Constants.DUBLINCORE_VERSION_IRI;
 import static org.metadatacenter.cadsr.ingestor.util.Constants.SCHEMAORG_ENDTIME_IRI;
@@ -61,7 +61,7 @@ public class ValueSetsOntologyManager
     // Create the ontology that will contain the value sets. The root classes will represent value sets. All
     // subclasses of a rootclass will represent the values of the value set.
     try {
-      ontology = manager.createOntology(IRI.create(CDE_VALUESETS_ONTOLOGY_IRI));
+      ontology = manager.createOntology(IRI.create(OntologyAndValueSetConstants.CADSR_VALUE_SETS_ONTOLOGY_IRI));
     } catch (OWLOntologyCreationException e) {
       logger.error("Error while creating ontology: " + e);
     }
