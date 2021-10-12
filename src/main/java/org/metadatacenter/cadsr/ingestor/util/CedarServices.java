@@ -1,7 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -11,7 +10,7 @@ import org.metadatacenter.cadsr.ingestor.category.CategoryTreeNode;
 import org.metadatacenter.cadsr.ingestor.category.CedarCategory;
 import org.metadatacenter.cadsr.ingestor.cde.CdeStats;
 import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
-import org.metadatacenter.cadsr.ingestor.util.Constants.CedarServer;
+import org.metadatacenter.constant.CedarHeaderParameters;
 import org.metadatacenter.model.CedarResourceType;
 import org.metadatacenter.server.neo4j.cypher.NodeProperty;
 import org.slf4j.Logger;
@@ -19,19 +18,47 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.security.InvalidParameterException;
 import java.util.*;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
 import static org.metadatacenter.model.ModelNodeNames.*;
-import static org.metadatacenter.util.json.JsonMapper.MAPPER;
 
 public class CedarServices {
 
   private static final Logger logger = LoggerFactory.getLogger(CedarServices.class);
-  private static ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
+
+  public static void loadValueSetsOntology(CedarServer server, String apiKey) throws IOException {
+    String endpoint = CedarServerUtil.getLoadValueSetsOntologyEndpoint(server);
+    HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("POST", endpoint, apiKey);
+    int responseCode = connection.getResponseCode();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+
+      connection.disconnect();
+    } else {
+      String message = "Error calling resource server to load the value sets ontology; response code = " + responseCode;
+      logger.error(message);
+      throw new InternalError(message);
+    }
+  }
+
+  // Returns: "NOT_YET_INITIATED", "IN_PROGRESS", "COMPLETE", "ERROR"
+  public static String loadValueSetsOntologyStatus(CedarServer server, String apiKey) throws IOException {
+    String endpoint = CedarServerUtil.getLoadValueSetsOntologyStatusEndpoint(server);
+    HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
+    int responseCode = connection.getResponseCode();
+    if (responseCode == HttpURLConnection.HTTP_OK) {
+      String response = ConnectionUtil.readResponseMessage(connection.getInputStream());
+      String importStatus = JsonUtil.extractJsonFieldValueAsText(response, "importStatus");
+      connection.disconnect();
+      return importStatus;
+    } else {
+      String message = "Error calling resource server to get value sets ontology loading status; response code = " + responseCode;
+      logger.error(message);
+      throw new InternalError(message);
+    }
+  }
 
   /*** Field services ***/
 
@@ -198,8 +225,7 @@ public class CedarServices {
   }
 
   public static String createCde(Map<String, Object> cdeFieldMap, String cdeHashCode, String cedarFolderId,
-                                 Optional<List<String>> cedarCategoryIds, CedarServer cedarEnvironment,
-                                 String apiKey) {
+                                 CedarServer cedarEnvironment, String apiKey) {
 
     HttpURLConnection conn = null;
     String cedarCdeId = null;
@@ -207,7 +233,7 @@ public class CedarServices {
 
       String templateFieldsEndpoint = CedarServerUtil.getTemplateFieldsEndpoint(cedarFolderId, cedarEnvironment);
 
-      // Extract the categories from the map if they are still there. They are not part of the CEDAR model so we
+      // Extract the categories from the map if they are still there. They are not part of the CEDAR model, so we
       // don't want to post them
       if (cdeFieldMap.containsKey(CDE_CATEGORY_IDS_FIELD)) {
         cdeFieldMap.remove(CDE_CATEGORY_IDS_FIELD);
@@ -217,7 +243,7 @@ public class CedarServices {
       conn = ConnectionUtil.createAndOpenConnection("POST", templateFieldsEndpoint, apiKey);
 
       // Set hash code
-      conn.setRequestProperty("CEDAR-Source-Hash", cdeHashCode);
+      conn.setRequestProperty(CedarHeaderParameters.SOURCE_HASH, cdeHashCode);
 
       OutputStream os = conn.getOutputStream();
       os.write(payload.getBytes());
@@ -232,11 +258,6 @@ public class CedarServices {
 
         logger.info("CDE created successfully: " + CdeUtil.generateCdeUniqueId(cdeFieldMap) + "; CEDAR Id: " + cedarCdeId);
         CdeStats.getInstance().numberOfCdesCreated++;
-        // Optionally, attach CDE to categories
-        if (cedarCategoryIds.isPresent()) {
-          String attachCategoriesEndpoint = CedarServerUtil.getAttachCategoriesEndpoint(cedarEnvironment);
-          CedarServices.attachCdeToCategories(cedarCdeId, cedarCategoryIds.get(), false, attachCategoriesEndpoint, apiKey);
-        }
       }
     } catch (Exception e) {
       logger.error(e.toString());
@@ -413,12 +434,17 @@ public class CedarServices {
 
   /*** CDE-Category Services ***/
 
+  public static void attachCdeToCategories(String cedarCdeId, List<String> cedarCategoryIds, boolean reviewMode,
+                                 CedarServer cedarEnvironment, String apiKey) {
+    attachCdeToCategories(cedarCdeId, cedarCategoryIds, reviewMode,
+        CedarServerUtil.getAttachCategoriesEndpoint(cedarEnvironment), apiKey);
+  }
+
   /**
    * Attach a CDE to multiple categories (making a single REST call)
    */
   public static void attachCdeToCategories(String cedarCdeId, List<String> cedarCategoryIds, boolean reviewMode,
-                                           String endpoint,
-                                           String apiKey) {
+                                           String endpoint, String apiKey) {
 
     if (cedarCategoryIds.size() > 0) {
       logger.info("Attaching CDE to the following categories: ");
@@ -452,7 +478,6 @@ public class CedarServices {
           else {
             CdeStats.getInstance().numberOfCdeToCategoryRelationsCreatedWhenCreatingCdes += cedarCategoryIds.size();
           }
-
         }
       } catch (JsonProcessingException e) {
         e.printStackTrace();

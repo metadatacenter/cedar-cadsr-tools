@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class CreateCdeAction implements CdeAction {
 
@@ -58,10 +57,6 @@ public class CreateCdeAction implements CdeAction {
   public String execute(CedarServer cedarEnvironment, String apiKey) {
     logger.info("-----------------------------------------");
     logger.info("Creating CDE: " + CdeUtil.generateCdeUniqueId(cdeFieldMap) + " (" + cdeFieldMap.get(ModelNodeNames.SCHEMA_ORG_NAME).toString() + ")");
-    Optional<List<String>> cedarCatIds = Optional.empty();
-    if (cedarCategoryIds != null && cedarCategoryIds.size() > 0) {
-      cedarCatIds = Optional.of(cedarCategoryIds);
-    }
-    return CedarServices.createCde(cdeFieldMap, hashCode, cedarFolderId, cedarCatIds, cedarEnvironment, apiKey);
+    return CedarServices.createCde(cdeFieldMap, hashCode, cedarFolderId, cedarEnvironment, apiKey);
   }
 }
