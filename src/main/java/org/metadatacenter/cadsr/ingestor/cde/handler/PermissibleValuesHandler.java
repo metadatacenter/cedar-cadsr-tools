@@ -116,7 +116,7 @@ public class PermissibleValuesHandler implements ModelHandler {
       String ontologyIri = CadsrConceptOrigins.ONTOLOGY_IRI_MAP.get(conceptOrigin);
       if (isComplexConcept(permissibleItem)) {
         // Use the rightmost concept (last) in the list of concepts
-        conceptUri = ontologyIri + extractLastConcept(permissibleItem.getMEANINGCONCEPTS().getContent());
+        conceptUri = ontologyIri + extractFirstConcept(permissibleItem.getMEANINGCONCEPTS().getContent());
       } else { // regular concept
         conceptUri = ontologyIri + permissibleItem.getMEANINGCONCEPTS().getContent();
       }
@@ -173,6 +173,23 @@ public class PermissibleValuesHandler implements ModelHandler {
       throw new UnknownSeparatorException("Found a complex concept with an unknown separator: " + complexConcept);
     }
     return lastConcept;
+  }
+
+  private static String extractFirstConcept(String complexConcept) throws UnknownSeparatorException {
+    String firstConcept = null;
+    int indexColon = complexConcept.indexOf(":");
+    int indexComma = complexConcept.indexOf(",");
+    if (indexColon > indexComma) {
+      firstConcept = complexConcept.substring(0, indexComma);
+    } else if (indexColon < indexComma) {
+      if (indexColon == -1)
+        firstConcept = complexConcept.substring(0, indexComma);
+      else
+        firstConcept = complexConcept.substring(0, indexColon);
+    } else {
+      throw new UnknownSeparatorException("Found a complex concept with an unknown separator: " + complexConcept);
+    }
+    return firstConcept;
   }
 
   private void handleNonEnumeratedType(DataElement dataElement) {
