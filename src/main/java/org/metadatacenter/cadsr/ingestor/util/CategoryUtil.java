@@ -91,7 +91,7 @@ public class CategoryUtil {
     // Note that CLASSIFICATIONSLISTCATEGORIES is a class name that we created to diferentiate the categories extracted
     // from the categories file that the NCI sent us from the CLASSIFICATIONSLIST elements extracted from the original
     // caDSR CDEs XML file
-    JAXBContext jaxbContext = JAXBContext.newInstance(Classifications.class);
+    JAXBContext jaxbContext = JAXBContext.newInstance(Classifications.class.getPackage().getName());
     Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
     InputStream cleanIs = GeneralUtil.processInvalidXMLCharacters(is);
     return (Classifications) jaxbUnmarshaller.unmarshal(new InputStreamReader(cleanIs, Constants.CHARSET));
