@@ -1,16 +1,15 @@
 package org.metadatacenter.cadsr.ingestor.form;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 import org.metadatacenter.cadsr.form.schema.Form;
 import org.metadatacenter.cadsr.ingestor.util.Constants;
 import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,6 +38,7 @@ public class FormUtil {
 
   /**
    * Preprocess the field name to ensure it's valid according to the CEDAR validator
+   *
    * @param fieldName
    * @return
    */

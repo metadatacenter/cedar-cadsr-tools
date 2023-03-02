@@ -179,7 +179,7 @@ public class PermissibleValuesHandler implements ModelHandler {
     String firstConcept = null;
     int indexColon = complexConcept.indexOf(":");
     int indexComma = complexConcept.indexOf(",");
-    if (indexColon > indexComma) {
+    if (indexColon > indexComma && indexColon > -1 && indexComma > -1) {
       firstConcept = complexConcept.substring(0, indexComma);
     } else if (indexColon < indexComma) {
       if (indexColon == -1)
