@@ -41,7 +41,7 @@ The NCI provided us with [an XML file](https://github.com/metadatacenter/cedar-c
 
 To build this library you must have the following items installed:
 
-+ [Java 11 (or later)](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
++ [Java 17 (or later)](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 + A tool for checking out a [Git](http://git-scm.com/) repository.
 + Apache's [Maven](http://maven.apache.org/index.html).
 

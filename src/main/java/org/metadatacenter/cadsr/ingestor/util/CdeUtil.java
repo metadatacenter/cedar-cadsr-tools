@@ -4,22 +4,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.DataElementsList;
 import org.metadatacenter.cadsr.ingestor.cde.CdeParser;
 import org.metadatacenter.cadsr.ingestor.cde.CdeStats;
 import org.metadatacenter.cadsr.ingestor.cde.CdeSummary;
-import org.metadatacenter.cadsr.ingestor.cde.handler.VersionHandler;
 import org.metadatacenter.cadsr.ingestor.exception.UnknownSeparatorException;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.CDE_CATEGORY_IDS_FIELD;
@@ -113,7 +115,6 @@ public class CdeUtil {
 //
 //    return GeneralUtil.getSha1(publicId + version + dataElementDateModified);
 //  }
-
   public static String generateCdeHashCode(DataElement dataElement) throws JsonProcessingException {
     return generateCdeHashCode(getFieldMapFromDataElement(dataElement));
   }
@@ -125,7 +126,9 @@ public class CdeUtil {
     return GeneralUtil.getSha1(fieldMapJson);
   }
 
-  public static Map<String, CdeSummary> getExistingCedarCdeSummaries(String cedarFolderId, Constants.CedarServer cedarEnvironment, String apiKey) throws IOException {
+  public static Map<String, CdeSummary> getExistingCedarCdeSummaries(String cedarFolderId,
+                                                                     Constants.CedarServer cedarEnvironment,
+                                                                     String apiKey) throws IOException {
     // Retrieve existing CDEs from CEDAR
     logger.info("Retrieving current CDEs from CEDAR (folder id: " + cedarFolderId + ").");
     List fieldNamesToInclude = new ArrayList(Arrays.asList(new String[]{"schema:identifier", "pav:version",
