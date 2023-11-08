@@ -182,7 +182,7 @@ public class CedarServices {
   public static Optional<Map<String, Object>> searchCdeByPublicIdAndVersion(String publicId, String version,
                                                                             CedarServer cedarServer, String apiKey) throws IOException {
     String reformattedVersion = CdeUtil.reformatVersioningNumber(version);
-    List<CedarResourceType> resourceTypes = Arrays.asList(new CedarResourceType[]{CedarResourceType.FIELD});
+    List<CedarResourceType> resourceTypes = List.of(CedarResourceType.FIELD);
     String searchEndpoint = CedarServerUtil.getSearchEndPoint(publicId, resourceTypes, cedarServer);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", searchEndpoint, apiKey);
     int responseCode = connection.getResponseCode();
@@ -235,9 +235,7 @@ public class CedarServices {
 
       // Extract the categories from the map if they are still there. They are not part of the CEDAR model, so we
       // don't want to post them
-      if (cdeFieldMap.containsKey(CDE_CATEGORY_IDS_FIELD)) {
-        cdeFieldMap.remove(CDE_CATEGORY_IDS_FIELD);
-      }
+      cdeFieldMap.remove(CDE_CATEGORY_IDS_FIELD);
 
       String payload = objectMapper.writeValueAsString(cdeFieldMap);
       conn = ConnectionUtil.createAndOpenConnection("POST", templateFieldsEndpoint, apiKey);
@@ -448,8 +446,8 @@ public class CedarServices {
 
     if (cedarCategoryIds.size() > 0) {
       logger.info("Attaching CDE to the following categories: ");
-      for (int i=0; i<cedarCategoryIds.size(); i++) {
-        logger.info(" - " + cedarCategoryIds.get(i));
+      for (String cedarCategoryId : cedarCategoryIds) {
+        logger.info(" - " + cedarCategoryId);
       }
     }
 

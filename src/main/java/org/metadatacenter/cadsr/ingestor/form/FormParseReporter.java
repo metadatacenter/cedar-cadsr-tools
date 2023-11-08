@@ -39,9 +39,7 @@ public class FormParseReporter {
   }
 
   public void remove(String reportId) {
-    if (messagesMap.containsKey(reportId)) {
-      messagesMap.remove(reportId);
-    }
+    messagesMap.remove(reportId);
   }
 
 }

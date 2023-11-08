@@ -2,7 +2,6 @@ package org.metadatacenter.cadsr.ingestor.cde.handler;
 
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.cde.schema.VALUEDOMAIN;
-import org.metadatacenter.cadsr.ingestor.cde.CadsrConstants;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;

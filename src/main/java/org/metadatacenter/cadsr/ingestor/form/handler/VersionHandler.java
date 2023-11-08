@@ -1,17 +1,5 @@
 package org.metadatacenter.cadsr.ingestor.form.handler;
 
-import com.google.common.base.Strings;
-import org.metadatacenter.cadsr.cde.schema.DataElement;
-import org.metadatacenter.cadsr.form.schema.Form;
-import org.metadatacenter.cadsr.ingestor.cde.CadsrStatus;
-import org.metadatacenter.cadsr.ingestor.cde.handler.ModelHandler;
-import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
-import org.metadatacenter.model.BiboStatus;
-import org.metadatacenter.model.ModelNodeNames;
-
-import javax.annotation.Nullable;
-import java.util.Map;
-
 //public class VersionHandler implements ModelHandler {
 //
 //  private String status = null;

@@ -15,7 +15,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -31,15 +30,15 @@ public class GeneralUtil {
       e.printStackTrace();
     }
     byte[] result = mDigest.digest(input.getBytes());
-    StringBuffer sb = new StringBuffer();
-    for (int i = 0; i < result.length; i++) {
-      sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
+    StringBuilder sb = new StringBuilder();
+    for (byte b : result) {
+      sb.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
     }
     return sb.toString();
   }
 
   public static String getValueOrNull(String input) {
-    if (input != null & input.trim().length() > 0) {
+    if (input != null & !input.trim().isEmpty()) {
       return input;
     } else {
       return null;
@@ -64,7 +63,7 @@ public class GeneralUtil {
   }
 
   public static InputStream processInvalidXMLCharacters(InputStream in) throws IOException {
-    StringBuffer out = new StringBuffer(); // Used to hold the output.
+    StringBuilder out = new StringBuilder(); // Used to hold the output.
     Reader r = new InputStreamReader(in, Constants.CHARSET);
     int intChar;
     while ((intChar = r.read()) != -1) {
@@ -191,7 +190,7 @@ public class GeneralUtil {
 
   public static <T> List<List<T>> getBatches(List<T> collection, int batchSize){
     int i = 0;
-    List<List<T>> batches = new ArrayList<List<T>>();
+    List<List<T>> batches = new ArrayList<>();
     while(i<collection.size()){
       int nextInc = Math.min(collection.size()-i,batchSize);
       List<T> batch = collection.subList(i,i+nextInc);

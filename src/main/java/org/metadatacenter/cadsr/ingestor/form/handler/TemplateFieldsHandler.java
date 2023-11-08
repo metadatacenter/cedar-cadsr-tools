@@ -17,7 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 
-import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
+import static org.metadatacenter.cadsr.ingestor.util.Constants.LARGE_PAGE_SIZE;
+import static org.metadatacenter.cadsr.ingestor.util.Constants.MOVE_ACTIONS_THRESHOLD;
 import static org.metadatacenter.model.ModelNodeNames.*;
 
 public class TemplateFieldsHandler implements ModelHandler {
@@ -137,8 +138,7 @@ public class TemplateFieldsHandler implements ModelHandler {
       // also sort them alphabetically in the UI, so we need to make that comparison. We cannot retrieve the values
       // alphabetically sorted by BioPortal, so we sort them here. We will compare their position to the valid values
       // display order later (see generateMoveActions method) to determine if it's necessary to generate move actions.
-      Collections.sort(cdeValues,
-          (v1, v2) -> v1.get("notation").compareTo(v2.get("notation")));
+      cdeValues.sort((v1, v2) -> v1.get("notation").compareTo(v2.get("notation")));
 
       // Create Map with the values indexed by prefLabel to access them quickly. We save the position as a new
       // attribute. We'll use it to generate the move actions
@@ -156,8 +156,7 @@ public class TemplateFieldsHandler implements ModelHandler {
       // 2. Compare (ignoring case) the retrieved values to the values in the form's XML to identify exclusions
       // Correspondences between CEDAR's CDE model and the form's xml validValue model:
       //  - notation <-> value
-      Map<String, Map<String, String>> excludedCdeValuesMap = new HashMap<>();
-      excludedCdeValuesMap.putAll(cdeValuesMap);
+      Map<String, Map<String, String>> excludedCdeValuesMap = new HashMap<>(cdeValuesMap);
       for (ValidValue validValue : validValues) {
         String valueKey = validValue.getValue().toLowerCase();
         if (excludedCdeValuesMap.containsKey(valueKey)) {
@@ -252,11 +251,9 @@ public class TemplateFieldsHandler implements ModelHandler {
   private Map<String, Object> getUpdatedPropertiesContextProperties(String fieldName, Map<String, Object> templateMap) {
     Map<String, Object> properties = (Map<String, Object>) templateMap.get(JSON_SCHEMA_PROPERTIES);
     Map<String, Object> propertiesContext = (Map<String, Object>) properties.get(JSON_LD_CONTEXT);
-    Map<String, Object> propertiesContextProperties =
-        (Map<String, Object>) propertiesContext.get(JSON_SCHEMA_PROPERTIES);
+    Map<String, Object> propertiesContextProperties = (Map<String, Object>) propertiesContext.get(JSON_SCHEMA_PROPERTIES);
     propertiesContextProperties.put(fieldName, new HashMap<String, List<String>>() {{
-      put(JSON_SCHEMA_ENUM,
-          Arrays.asList(new String[]{"https://schema.metadatacenter.org/properties/" + UUID.randomUUID()}));
+      put(JSON_SCHEMA_ENUM, List.of("https://schema.metadatacenter.org/properties/" + UUID.randomUUID()));
     }});
     return propertiesContextProperties;
   }
@@ -285,17 +282,15 @@ public class TemplateFieldsHandler implements ModelHandler {
    * @param modules
    */
   private void sortModules(List<Module> modules) {
-    Collections.sort(modules, new Comparator<>() {
-      public int compare(Module m1, Module m2) {
-        if (m1.getDisplayOrder() == null && m2.getDisplayOrder() == null) {
-          return 0;
-        } else if (m1.getDisplayOrder() == null) {
-          return 1;
-        } else if (m2.getDisplayOrder() == null) {
-          return -1;
-        }
-        return Integer.compare(Integer.parseInt(m1.getDisplayOrder()), Integer.parseInt(m2.getDisplayOrder()));
+    modules.sort((m1, m2) -> {
+      if (m1.getDisplayOrder() == null && m2.getDisplayOrder() == null) {
+        return 0;
+      } else if (m1.getDisplayOrder() == null) {
+        return 1;
+      } else if (m2.getDisplayOrder() == null) {
+        return -1;
       }
+      return Integer.compare(Integer.parseInt(m1.getDisplayOrder()), Integer.parseInt(m2.getDisplayOrder()));
     });
   }
 
@@ -305,17 +300,15 @@ public class TemplateFieldsHandler implements ModelHandler {
    * @param questions
    */
   private void sortQuestions(List<Question> questions) {
-    Collections.sort(questions, new Comparator<>() {
-      public int compare(Question q1, Question q2) {
-        if (q1.getDisplayOrder() == null && q2.getDisplayOrder() == null) {
-          return 0;
-        } else if (q1.getDisplayOrder() == null) {
-          return 1;
-        } else if (q2.getDisplayOrder() == null) {
-          return -1;
-        }
-        return Integer.compare(Integer.parseInt(q1.getDisplayOrder()), Integer.parseInt(q2.getDisplayOrder()));
+    questions.sort((q1, q2) -> {
+      if (q1.getDisplayOrder() == null && q2.getDisplayOrder() == null) {
+        return 0;
+      } else if (q1.getDisplayOrder() == null) {
+        return 1;
+      } else if (q2.getDisplayOrder() == null) {
+        return -1;
       }
+      return Integer.compare(Integer.parseInt(q1.getDisplayOrder()), Integer.parseInt(q2.getDisplayOrder()));
     });
   }
 

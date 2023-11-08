@@ -24,8 +24,8 @@ public class JsonUtil {
   }
 
   public static Map<String, Object> readJsonAsMap(String json) throws IOException {
-    TypeReference<HashMap<String, Object>> typeRef
-        = new TypeReference<HashMap<String, Object>>() {};
+    TypeReference<HashMap<String, Object>> typeRef = new TypeReference<>() {
+    };
     return objectMapper.readValue(json, typeRef);
   }
 

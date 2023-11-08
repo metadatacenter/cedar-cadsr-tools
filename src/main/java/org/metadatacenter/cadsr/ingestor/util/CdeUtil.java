@@ -131,8 +131,7 @@ public class CdeUtil {
                                                                      String apiKey) throws IOException {
     // Retrieve existing CDEs from CEDAR
     logger.info("Retrieving current CDEs from CEDAR (folder id: " + cedarFolderId + ").");
-    List fieldNamesToInclude = new ArrayList(Arrays.asList(new String[]{"schema:identifier", "pav:version",
-        "sourceHash"}));
+    List fieldNamesToInclude = new ArrayList(List.of("schema:identifier", "pav:version", "sourceHash"));
     List<CdeSummary> cdeSummaries = CedarServices.findCdeSummariesInFolder(cedarFolderId,
         fieldNamesToInclude, true, cedarEnvironment, apiKey);
     logger.info("Number of CDEs retrieved from CEDAR: " + cdeSummaries.size() + ".");
@@ -188,9 +187,7 @@ public class CdeUtil {
   public static String reformatVersioningNumber(String version) {
     String[] originalVersion = version.split("\\.");
     String[] baseVersion = {"0", "0", "0"};
-    for (int i = 0; i < originalVersion.length; i++) {
-      baseVersion[i] = originalVersion[i];
-    }
+    System.arraycopy(originalVersion, 0, baseVersion, 0, originalVersion.length);
     return String.join(".", baseVersion);
   }
 

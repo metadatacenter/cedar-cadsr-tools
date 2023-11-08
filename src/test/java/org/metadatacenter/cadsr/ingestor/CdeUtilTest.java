@@ -3,7 +3,6 @@ package org.metadatacenter.cadsr.ingestor;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
-import org.metadatacenter.cadsr.cde.schema.WORKFLOWSTATUS1;
 import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
 import org.metadatacenter.constant.OntologyAndValueSetConstants;
 import org.metadatacenter.model.ModelNodeNames;
