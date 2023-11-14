@@ -9,7 +9,6 @@ import org.metadatacenter.cadsr.ingestor.form.handler.TemplateHeaderAndFooterHan
 import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
 import org.metadatacenter.cadsr.ingestor.util.CedarServerUtil;
 import org.metadatacenter.cadsr.ingestor.util.Constants;
-import org.metadatacenter.cadsr.ingestor.util.Constants.*;
 import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
 import org.metadatacenter.config.CedarConfig;
 import org.metadatacenter.config.environment.CedarEnvironmentVariableProvider;
@@ -21,10 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
 
@@ -188,8 +184,7 @@ public class FormParser {
 
   // Target: required
   private static Object setRequired() {
-    return Arrays.asList(new String[]{
-        ModelNodeNames.JSON_LD_CONTEXT,
+    return Arrays.asList(ModelNodeNames.JSON_LD_CONTEXT,
         ModelNodeNames.JSON_LD_ID,
         ModelNodeNames.SCHEMA_IS_BASED_ON,
         ModelNodeNames.SCHEMA_ORG_NAME,
@@ -197,8 +192,7 @@ public class FormParser {
         ModelNodeNames.PAV_CREATED_ON,
         ModelNodeNames.PAV_CREATED_BY,
         ModelNodeNames.PAV_LAST_UPDATED_ON,
-        ModelNodeNames.OSLC_MODIFIED_BY,
-    });
+        ModelNodeNames.OSLC_MODIFIED_BY);
   }
 
   // Target: properties
@@ -278,7 +272,7 @@ public class FormParser {
     Map<String, Object> content = Maps.newHashMap();
     content.put(ModelNodeNames.JSON_SCHEMA_TYPE, ModelNodeValues.STRING);
     content.put(ModelNodeNames.JSON_SCHEMA_FORMAT, ModelNodeValues.URI);
-    content.put(ModelNodeNames.JSON_SCHEMA_ENUM, Arrays.asList(new String[]{uri}));
+    content.put(ModelNodeNames.JSON_SCHEMA_ENUM, Collections.singletonList(uri));
     return content;
   }
 
@@ -297,7 +291,7 @@ public class FormParser {
     // Target: X.properties.@type
     Map<String, Object> contentPropertiesAtType = Maps.newHashMap();
     contentPropertiesAtType.put(ModelNodeNames.JSON_SCHEMA_TYPE, ModelNodeValues.STRING);
-    contentPropertiesAtType.put(ModelNodeNames.JSON_SCHEMA_ENUM, Arrays.asList(new String[]{type}));
+    contentPropertiesAtType.put(ModelNodeNames.JSON_SCHEMA_ENUM, Collections.singletonList(type));
 
     // Target: X.properties
     Map<String, Object> contentProperties = Maps.newHashMap();
@@ -333,7 +327,7 @@ public class FormParser {
 
   private static Map<String, Object> setUriStringOrNull() {
     Map<String, Object> uriString = Maps.newHashMap();
-    uriString.put(ModelNodeNames.JSON_SCHEMA_TYPE, Arrays.asList(new String[]{ModelNodeValues.STRING, ModelNodeValues.NULL}));
+    uriString.put(ModelNodeNames.JSON_SCHEMA_TYPE, List.of(ModelNodeValues.STRING, ModelNodeValues.NULL));
     uriString.put(ModelNodeNames.JSON_SCHEMA_FORMAT, ModelNodeValues.URI);
     return uriString;
   }
@@ -358,7 +352,7 @@ public class FormParser {
 
   private static Map<String, Object> setDateTimeStringOrNull() { // We allow null because the value is set by the server
     Map<String, Object> uriString = Maps.newHashMap();
-    uriString.put(ModelNodeNames.JSON_SCHEMA_TYPE, Arrays.asList(new String[]{ModelNodeValues.STRING, ModelNodeValues.NULL}));
+    uriString.put(ModelNodeNames.JSON_SCHEMA_TYPE, List.of(ModelNodeValues.STRING, ModelNodeValues.NULL));
     uriString.put(ModelNodeNames.JSON_SCHEMA_FORMAT, ModelNodeValues.DATE_TIME);
     return uriString;
   }

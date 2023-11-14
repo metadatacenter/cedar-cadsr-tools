@@ -39,16 +39,13 @@ public class LoadValueSetsOntologyAction implements CdeAction {
         status = CedarServices.loadValueSetsOntologyStatus(cedarEnvironment, apiKey);
       }
 
-      if (status.equals("COMPLETE"))
-        return "Done";
-      else if (status.equals("ERROR"))
-        return "Error";
-      else if (status.equals("NOT_YET_INITIATED"))
-        return "Failed to start";
-      else if (status.equals("IN_PROGRESS"))
-        return "Failed to finish";
-      else
-        return "Error - unknown status";
+      return switch (status) {
+        case "COMPLETE" -> "Done";
+        case "ERROR" -> "Error";
+        case "NOT_YET_INITIATED" -> "Failed to start";
+        case "IN_PROGRESS" -> "Failed to finish";
+        default -> "Error - unknown status";
+      };
 
     } catch (IOException | InterruptedException e) {
       String message = "Error calling load value sets ontology endpoint: " + e.getMessage();

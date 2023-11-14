@@ -91,10 +91,9 @@ public class Value {
     if (obj == null) {
       return false;
     }
-    if (!(obj instanceof Value)) {
+    if (!(obj instanceof Value other)) {
       return false;
     }
-    Value other = (Value) obj;
     return Objects.equals(id, other.id)
         && Objects.equals(version, other.version)
         && Objects.equals(dbLabel, other.dbLabel)

@@ -25,7 +25,7 @@ public class VersionHandler implements ModelHandler {
   private void setDataElementStatus(DataElement dataElement) throws UnsupportedDataElementException {
     String status = dataElement.getWORKFLOWSTATUS().getContent();
     if (Strings.isNullOrEmpty(status)) {
-      String reason = String.format("Data element status is empty (Unknown)");
+      String reason = "Data element status is empty (Unknown)";
       throw new UnsupportedDataElementException(dataElement, reason);
     }
     if (!CadsrStatus.STATUS_LIST.contains(status)) {
@@ -40,7 +40,7 @@ public class VersionHandler implements ModelHandler {
   private void setDataElementVersion(DataElement dataElement) throws UnsupportedDataElementException {
     String version = dataElement.getVERSION().getContent();
     if (Strings.isNullOrEmpty(version)) {
-      String reason = String.format("Data element version is empty (Unknown)");
+      String reason = "Data element version is empty (Unknown)";
       throw new UnsupportedDataElementException(dataElement, reason);
     }
     this.version = CdeUtil.reformatVersioningNumber(version);

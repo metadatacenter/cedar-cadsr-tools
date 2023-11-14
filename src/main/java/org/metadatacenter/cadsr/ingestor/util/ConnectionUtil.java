@@ -34,7 +34,7 @@ public class ConnectionUtil {
   //@formatter:on
 
   public static String readResponseMessage(InputStream is) {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
       String messageLine;
       while ((messageLine = br.readLine()) != null) {

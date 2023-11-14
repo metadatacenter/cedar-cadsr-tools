@@ -2,15 +2,10 @@ package org.metadatacenter.cadsr.ingestor.tools.form;
 
 import com.google.common.base.Stopwatch;
 import org.metadatacenter.cadsr.form.schema.Form;
-import org.metadatacenter.cadsr.ingestor.form.FormParser;
 import org.metadatacenter.cadsr.ingestor.form.FormUtil;
 import org.metadatacenter.cadsr.ingestor.tools.form.config.ConfigSettings;
 import org.metadatacenter.cadsr.ingestor.tools.form.config.ConfigSettingsParser;
-import org.metadatacenter.cadsr.ingestor.util.CedarServices;
 import org.metadatacenter.cadsr.ingestor.util.GeneralUtil;
-import org.metadatacenter.config.CedarConfig;
-import org.metadatacenter.config.environment.CedarEnvironmentVariableProvider;
-import org.metadatacenter.model.SystemComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

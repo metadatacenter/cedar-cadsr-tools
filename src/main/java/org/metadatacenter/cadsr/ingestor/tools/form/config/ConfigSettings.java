@@ -1,6 +1,5 @@
 package org.metadatacenter.cadsr.ingestor.tools.form.config;
 
-import org.metadatacenter.cadsr.ingestor.util.Constants.CedarServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,17 +1,10 @@
 package org.metadatacenter.cadsr.ingestor.form.handler;
 
 import org.metadatacenter.cadsr.form.schema.Form;
-import org.metadatacenter.cadsr.form.schema.Module;
-import org.metadatacenter.cadsr.form.schema.Question;
-import org.metadatacenter.cadsr.ingestor.util.CedarFieldUtil;
-import org.metadatacenter.cadsr.ingestor.util.CedarServices;
-import org.metadatacenter.cadsr.ingestor.util.Constants.CedarServer;
-import org.metadatacenter.model.ModelNodeNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.*;
 
 import static org.metadatacenter.model.ModelNodeNames.*;
