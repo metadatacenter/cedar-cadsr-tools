@@ -175,7 +175,6 @@ public class FormParser {
   // Target: _ui
   private static Object setDefaultUi() {
     Map<String, Object> ui = Maps.newHashMap();
-    ui.put(ModelNodeNames.UI_PAGES, new ArrayList());
     ui.put(ModelNodeNames.UI_ORDER, new ArrayList());
     ui.put(ModelNodeNames.UI_PROPERTY_LABELS, Maps.newHashMap());
     ui.put(ModelNodeNames.UI_PROPERTY_DESCRIPTIONS, Maps.newHashMap());
