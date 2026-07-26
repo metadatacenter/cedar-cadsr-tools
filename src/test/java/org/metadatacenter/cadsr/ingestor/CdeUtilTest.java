@@ -1,7 +1,7 @@
 package org.metadatacenter.cadsr.ingestor;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
 import org.metadatacenter.constant.OntologyAndValueSetConstants;
@@ -61,7 +61,7 @@ public class CdeUtilTest {
     assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_MAX_STRING_LENGTH), is(1));
   }
 
-  @Ignore // Ignored because there are no CDEs that use this data type
+  @Disabled // Ignored because there are no CDEs that use this data type
   @Test
   public void shouldProduceFieldMap_NUMERIC_ANY() throws Exception { }
 
@@ -205,7 +205,7 @@ public class CdeUtilTest {
     assertThat(getLiteralsConstraintMap(fieldMap).get(1).get(ModelNodeNames.VALUE_CONSTRAINTS_LABEL), is("False"));
   }
 
-  @Ignore // Ignored because there are no CDEs that use this type
+  @Disabled // Ignored because there are no CDEs that use this type
   @Test
   public void shouldProduceFieldMap_URI() { }
 
