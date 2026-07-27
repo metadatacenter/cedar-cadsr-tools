@@ -1,7 +1,7 @@
 package org.metadatacenter.cadsr.ingestor;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.cde.handler.UIHandler;
 import org.metadatacenter.model.ModelNodeValues;
@@ -13,7 +13,7 @@ public class UIHandlerTest {
 
   private UIHandler handler;
 
-  @Before
+  @BeforeEach
   public void init() {
     handler = new UIHandler();
   }

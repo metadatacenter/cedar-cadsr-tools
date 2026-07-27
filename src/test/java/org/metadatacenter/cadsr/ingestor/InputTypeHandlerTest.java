@@ -1,8 +1,8 @@
 package org.metadatacenter.cadsr.ingestor;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.cde.handler.InputTypeHandler;
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementException;
@@ -18,7 +18,7 @@ public class InputTypeHandlerTest {
 
   private InputTypeHandler handler;
 
-  @Before
+  @BeforeEach
   public void init() {
     handler = new InputTypeHandler();
   }
@@ -127,7 +127,7 @@ public class InputTypeHandlerTest {
     assertThat(inputType.get(ModelNodeNames.UI_FIELD_INPUT_TYPE).toString(), is(equalTo(ModelNodeNames.FIELD_INPUT_TYPE_NUMERIC)));
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void shouldDefineTextArea_CHARACTER() throws Exception {
     DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2182451.xml");
