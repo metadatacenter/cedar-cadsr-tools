@@ -1,6 +1,8 @@
 CEDAR caDSR Tools
 =================
 
+[![CI](https://github.com/metadatacenter/cedar-cadsr-tools/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/metadatacenter/cedar-cadsr-tools/actions/workflows/ci.yml)
+
 This project contains command-line tools to perform the following actions:
 
 - caDSR CDEs:
