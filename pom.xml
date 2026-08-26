@@ -40,11 +40,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.metadatacenter</groupId>
-      <artifactId>cedar-rest-library</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
     </dependency>
