@@ -1,6 +1,5 @@
 package org.metadatacenter.cadsr.ingestor;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
@@ -60,10 +59,6 @@ public class CdeUtilTest {
     shouldProduceStringNonEnumerated(fieldMap);
     assertThat(getValueConstraints(fieldMap).get(ModelNodeNames.VALUE_CONSTRAINTS_MAX_STRING_LENGTH), is(1));
   }
-
-  @Disabled // Ignored because there are no CDEs that use this data type
-  @Test
-  public void shouldProduceFieldMap_NUMERIC_ANY() throws Exception { }
 
   @Test
   public void shouldProduceFieldMap_NUMERIC_INTEGER() throws Exception {
@@ -204,10 +199,6 @@ public class CdeUtilTest {
     assertThat(getLiteralsConstraintMap(fieldMap).get(0).get(ModelNodeNames.VALUE_CONSTRAINTS_LABEL), is("True"));
     assertThat(getLiteralsConstraintMap(fieldMap).get(1).get(ModelNodeNames.VALUE_CONSTRAINTS_LABEL), is("False"));
   }
-
-  @Disabled // Ignored because there are no CDEs that use this type
-  @Test
-  public void shouldProduceFieldMap_URI() { }
 
   /* Helpers */
 
