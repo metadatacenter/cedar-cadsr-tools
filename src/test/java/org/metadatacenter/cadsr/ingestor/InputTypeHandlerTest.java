@@ -1,7 +1,6 @@
 package org.metadatacenter.cadsr.ingestor;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.cde.handler.InputTypeHandler;
@@ -125,14 +124,5 @@ public class InputTypeHandlerTest {
     Map<String, Object> inputType = handler.handle(dataElement).getInputType();
     // Assert
     assertThat(inputType.get(ModelNodeNames.UI_FIELD_INPUT_TYPE).toString(), is(equalTo(ModelNodeNames.FIELD_INPUT_TYPE_NUMERIC)));
-  }
-
-  @Disabled
-  @Test
-  public void shouldDefineTextArea_CHARACTER() throws Exception {
-    DataElement dataElement = FileUtils.readDataElementResource("cde-sample-2182451.xml");
-    Map<String, Object> inputType = handler.handle(dataElement).getInputType();
-    // Assert
-    assertThat(inputType.get(ModelNodeNames.UI_FIELD_INPUT_TYPE).toString(), is(equalTo(ModelNodeNames.FIELD_INPUT_TYPE_TEXTAREA)));
   }
 }
