@@ -126,33 +126,27 @@ public class CedarServerUtil {
     return serverUrl + "/bioportal/integrated-search";
   }
 
+  private static String folderSelector(String value) {
+    if (value.contains("%")) value = java.net.URLDecoder.decode(value, java.nio.charset.StandardCharsets.UTF_8);
+    String selector = org.metadatacenter.id.CedarResourceAddress.selector(value);
+    return selector.contains("/") ? selector : "folders/" + selector;
+  }
+
   public static String getTemplatesEndpoint(String folderId, CedarServer cedarServer) throws UnsupportedEncodingException {
     String resourceServerUrl = CedarServerUtil.getResourceServerUrl(cedarServer);
-    String repoServerUrl = CedarServerUtil.getRepoServerUrl(cedarServer);
-    if (GeneralUtil.isURL(folderId)) {
-      folderId = GeneralUtil.encodeIfNeeded(folderId);
-    }
-    else { // Short id
-      folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderId);
-    }
+    folderId = java.net.URLEncoder.encode(folderSelector(folderId), java.nio.charset.StandardCharsets.UTF_8);
     return resourceServerUrl + "/templates?folder_id=" + folderId;
   }
 
   public static String getTemplateFieldsEndpoint(String folderId, CedarServer cedarServer) throws UnsupportedEncodingException {
     String resourceServerUrl = CedarServerUtil.getResourceServerUrl(cedarServer);
-    String repoServerUrl = CedarServerUtil.getRepoServerUrl(cedarServer);
-    if (GeneralUtil.isURL(folderId)) {
-      folderId = GeneralUtil.encodeIfNeeded(folderId);
-    }
-    else { // Short id
-      folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderId);
-    }
+    folderId = java.net.URLEncoder.encode(folderSelector(folderId), java.nio.charset.StandardCharsets.UTF_8);
     return resourceServerUrl + "/template-fields?folder_id=" + folderId;
   }
 
   public static String getTemplateFieldEndPoint(String fieldId, CedarServer cedarServer) throws UnsupportedEncodingException {
     String serverUrl = getResourceServerUrl(cedarServer);
-    fieldId = GeneralUtil.encodeIfNeeded(fieldId);
+    fieldId = GeneralUtil.encodeIfNeeded(org.metadatacenter.id.CedarResourceAddress.pathId(fieldId));
     return serverUrl + "/template-fields/" + fieldId;
   }
 
@@ -162,14 +156,9 @@ public class CedarServerUtil {
 
   public static String getFolderContentsEndPoint(String folderId, CedarServer cedarServer) throws UnsupportedEncodingException {
     String resourceServerUrl = CedarServerUtil.getResourceServerUrl(cedarServer);
-    String repoServerUrl = CedarServerUtil.getRepoServerUrl(cedarServer);
-    if (GeneralUtil.isURL(folderId)) {
-      folderId = GeneralUtil.encodeIfNeeded(folderId);
-    }
-    else {
-      folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + folderId);
-    }
-    return resourceServerUrl + "/folders/" + folderId + "/contents";
+    String pathId = org.metadatacenter.id.CedarResourceAddress.pathId(folderSelector(folderId));
+    return resourceServerUrl + "/folders/" + java.net.URLEncoder.encode(pathId, java.nio.charset.StandardCharsets.UTF_8)
+        + "/contents";
   }
 
   public static String getSearchEndPoint(String q, List<CedarResourceType> resourceTypes, CedarServer cedarServer) {
@@ -187,14 +176,7 @@ public class CedarServerUtil {
   public static String getCdesInFolderExtractEndPoint(String cedarFolderId, List<String> fieldNames,
                                                       boolean includeCategoryIds, CedarServer cedarServer) throws UnsupportedEncodingException {
     String resourceServerUrl = CedarServerUtil.getResourceServerUrl(cedarServer);
-    String repoServerUrl = CedarServerUtil.getRepoServerUrl(cedarServer);
-    String folderId;
-    if (GeneralUtil.isURL(cedarFolderId)) {
-      folderId = GeneralUtil.encodeIfNeeded(cedarFolderId);
-    }
-    else { // Short id
-      folderId = GeneralUtil.encodeIfNeeded(repoServerUrl + "/folders/" + cedarFolderId);
-    }
+    String folderId = java.net.URLEncoder.encode(org.metadatacenter.id.CedarResourceAddress.pathId(folderSelector(cedarFolderId)), java.nio.charset.StandardCharsets.UTF_8);
     String url = resourceServerUrl + "/folders/" + folderId + "/contents-extract?resource_types=field";
     List<String> updatedFieldNames = new ArrayList<>(fieldNames); // Create a copy because we may update it to include 'categories'
     if (includeCategoryIds) {
