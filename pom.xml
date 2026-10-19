@@ -212,6 +212,23 @@
           </execution>
         </executions>
       </plugin>
+      <!-- The coverage report leaves out the classes xjc generates from the caDSR schemas. Each
+           schema's classes sit in a schema package of their own, and the hand-written code is
+           under ingestor. -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>coverage-report</id>
+            <configuration>
+              <excludes>
+                <exclude>org/metadatacenter/cadsr/*/schema/**</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>
