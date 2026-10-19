@@ -44,16 +44,9 @@
       <artifactId>jakarta.xml.bind-api</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sun.activation</groupId>
-      <artifactId>jakarta.activation</artifactId>
-    </dependency>
-
+    <!-- The classes xjc generates from the caDSR schemas need a JAXB runtime, and jaxb-impl is the
+         only one. org.glassfish.jaxb:jaxb-runtime holds the same classes and the same service entry,
+         so declaring both put two copies of the runtime on the classpath. -->
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
       <artifactId>jaxb-impl</artifactId>
@@ -92,10 +85,6 @@
     <dependency>
       <groupId>net.sourceforge.owlapi</groupId>
       <artifactId>owlapi-distribution</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jaxb</groupId>
-      <artifactId>jaxb-runtime</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-net</groupId>
