@@ -11,13 +11,112 @@ public class ConfigSettingsParser {
   private static final Logger logger = LoggerFactory.getLogger(ConfigSettingsParser.class);
 
   public static ConfigSettings parse(String[] args) {
+    try {
+      return parseOrRefuse(args);
+    } catch (ParseException e) {
+      logger.error("Error parsing command-line arguments: " + e.getMessage());
+      logger.info("Please, follow the instructions below:");
+      HelpFormatter formatter = new HelpFormatter();
+      formatter.printHelp( "mvn exec:java@cedar-cadsr-updater -Dexec.args=\"[options]\"\nOptions:", options());
+      System.exit(1);
+      return null;
+    }
+  }
+
+  /**
+   * Reads the arguments into settings, and refuses with a {@link ParseException} an argument list the updater
+   * cannot run: a missing required option, an unknown server, or a source of categories or CDEs that is missing or
+   * only partly given.
+   */
+  static ConfigSettings parseOrRefuse(String[] args) throws ParseException {
 
     ConfigSettings settings = new ConfigSettings();
+    CommandLine cmd = new DefaultParser().parse(options(), args);
 
-    // Create command line parser
-    CommandLineParser parser = new DefaultParser();
+    if (cmd.hasOption("x")) {
+      settings.setExecutionFolder(cmd.getOptionValue("x"));
+    } else { // Use default execution folder
+      settings.setExecutionFolder(Constants.EXECUTION_FOLDER);
+    }
 
-    // Create the Options
+    if (cmd.hasOption("t")) {
+      settings.setUpdateCategories(true);
+      if (!cmd.hasOption("g") && (!cmd.hasOption("G"))) {
+        throw new ParseException("Missing required option when updating categories: [-g, -G]");
+      }
+    } else {
+      settings.setUpdateCategories(false);
+    }
+
+    if (cmd.hasOption("c")) {
+      settings.setUpdateCdes(true);
+      if (!cmd.hasOption("e") && (!cmd.hasOption("E"))) {
+        throw new ParseException("Missing required option when updating CDEs: [-e, -E]");
+      }
+    } else {
+      settings.setUpdateCdes(false);
+    }
+
+    if (cmd.hasOption("d")) {
+      settings.setDeleteCategories(true);
+    } else {
+      settings.setDeleteCategories(false);
+    }
+
+    if (cmd.hasOption("k")) {
+      settings.setCadsrAdminApikey(cmd.getOptionValue("k"));
+    }
+
+    if (cmd.hasOption("f")) {
+      settings.setCedarCdeFolderId(cmd.getOptionValue("f"));
+    }
+
+    if (cmd.hasOption("s")) {
+      String cedarEnvironmentStr = cmd.getOptionValue("s");
+      try {
+        settings.setCedarServer(CedarServerUtil.toCedarServerFromServerName(cedarEnvironmentStr));
+      } catch(IllegalArgumentException e) {
+        throw new ParseException(e.getMessage());
+      }
+    }
+
+    // Check that the full FTP configuration has been provided
+    if (cmd.hasOption("g") || (cmd.hasOption("e"))) {
+      if (cmd.hasOption("g")) {
+        settings.setFtpCategoriesFolder(cmd.getOptionValue("g"));
+      }
+      if (cmd.hasOption("e")) {
+        settings.setFtpCdesFolder(cmd.getOptionValue("e"));
+      }
+      if (!cmd.hasOption("h") || !cmd.hasOption("u") || !cmd.hasOption("p")) {
+        throw new ParseException("Missing any of the required options for FTP download: host (-h), user name (-u), password (-p)");
+      }
+      else {
+        settings.setFtpHost(cmd.getOptionValue("h"));
+        settings.setFtpUser(cmd.getOptionValue("u"));
+        settings.setFtpPassword(cmd.getOptionValue("p"));
+      }
+    }
+
+    if (cmd.hasOption("G")) {
+      settings.setCategoriesFilePath(cmd.getOptionValue("G"));
+    }
+
+    if (cmd.hasOption("E")) {
+      settings.setCdesFilePath(cmd.getOptionValue("E"));
+    }
+
+    if (cmd.hasOption("o")) {
+      settings.setOntologyOutputFolderPath(cmd.getOptionValue("o"));
+    }
+    else {
+      settings.setOntologyOutputFolderPath(Constants.ONTOLOGY_FOLDER);
+    }
+
+    return settings;
+  }
+
+  private static Options options() {
     Options options = new Options();
     options.addRequiredOption("k", "apikey", true, "[REQUIRED] API key of CEDAR's caDSR Admin user");
     options.addRequiredOption( "f", "folder", true, "[REQUIRED] Identifier of the CEDAR folder where the CDEs will be stored");
@@ -45,105 +144,7 @@ public class ConfigSettingsParser {
     cdesGroup.addOption(new Option( "E", "cdes-file", true, "caDSR XML CDEs .zip file path"));
     cdesGroup.setRequired(false); // Only required when updating CDEs
     options.addOptionGroup(cdesGroup);
-
-    try {
-      CommandLine cmd = parser.parse(options, args);
-
-      if (cmd.hasOption("x")) {
-        settings.setExecutionFolder(cmd.getOptionValue("x"));
-      } else { // Use default execution folder
-        settings.setExecutionFolder(Constants.EXECUTION_FOLDER);
-      }
-
-      if (cmd.hasOption("t")) {
-        settings.setUpdateCategories(true);
-        if (!cmd.hasOption("g") && (!cmd.hasOption("G"))) {
-          throw new ParseException("Missing required option when updating categories: [-g, -G]");
-        }
-      } else {
-        settings.setUpdateCategories(false);
-      }
-
-      if (cmd.hasOption("c")) {
-        settings.setUpdateCdes(true);
-        if (!cmd.hasOption("e") && (!cmd.hasOption("E"))) {
-          throw new ParseException("Missing required option when updating CDEs: [-e, -E]");
-        }
-      } else {
-        settings.setUpdateCdes(false);
-      }
-
-      if (cmd.hasOption("d")) {
-        settings.setDeleteCategories(true);
-      } else {
-        settings.setDeleteCategories(false);
-      }
-
-      if (cmd.hasOption("k")) {
-        settings.setCadsrAdminApikey(cmd.getOptionValue("k"));
-      }
-
-      if (cmd.hasOption("f")) {
-        settings.setCedarCdeFolderId(cmd.getOptionValue("f"));
-      }
-
-      if (cmd.hasOption("s")) {
-        String cedarEnvironmentStr = cmd.getOptionValue("s");
-        try {
-          settings.setCedarServer(CedarServerUtil.toCedarServerFromServerName(cedarEnvironmentStr));
-        } catch(IllegalArgumentException e) {
-          throw new ParseException(e.getMessage());
-        }
-      }
-
-      // Check that the full FTP configuration has been provided
-      if (cmd.hasOption("g") || (cmd.hasOption("e"))) {
-        if (cmd.hasOption("g")) {
-          settings.setFtpCategoriesFolder(cmd.getOptionValue("g"));
-        }
-        if (cmd.hasOption("e")) {
-          settings.setFtpCdesFolder(cmd.getOptionValue("e"));
-        }
-        if (!cmd.hasOption("h") || !cmd.hasOption("u") || !cmd.hasOption("p")) {
-          throw new ParseException("Missing any of the required options for FTP download: host (-h), user name (-u), password (-p)");
-        }
-        else {
-          settings.setFtpHost(cmd.getOptionValue("h"));
-          settings.setFtpUser(cmd.getOptionValue("u"));
-          settings.setFtpPassword(cmd.getOptionValue("p"));
-        }
-      }
-
-      if (cmd.hasOption("G")) {
-        settings.setCategoriesFilePath(cmd.getOptionValue("G"));
-      }
-
-      if (cmd.hasOption("E")) {
-        settings.setCdesFilePath(cmd.getOptionValue("E"));
-      }
-
-      if (cmd.hasOption("o")) {
-        settings.setOntologyOutputFolderPath(cmd.getOptionValue("o"));
-      }
-      else {
-        settings.setOntologyOutputFolderPath(Constants.ONTOLOGY_FOLDER);
-      }
-
-
-    } catch (ParseException e) {
-      logger.error("Error parsing command-line arguments: " + e.getMessage());
-//      logger.error("Arguments entered: ");
-//      for (String argGroup : GeneralUtil.commandLineArgumentsGrouped(args, "-p", "--ftp-password", "-k", "apikey")) {
-//        logger.info("  " + argGroup);
-//      }
-      logger.info("Please, follow the instructions below:");
-      HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp( "mvn exec:java@cedar-cadsr-updater -Dexec.args=\"[options]\"\nOptions:", options);
-      System.exit(1);
-    }
-
-    return settings;
-
+    return options;
   }
 
 }

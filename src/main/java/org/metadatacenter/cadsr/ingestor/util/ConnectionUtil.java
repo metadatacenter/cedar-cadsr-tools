@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class ConnectionUtil {
 
@@ -17,7 +18,7 @@ public class ConnectionUtil {
 
   public static String readResponseMessage(InputStream is) {
     StringBuilder sb = new StringBuilder();
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
       String messageLine;
       while ((messageLine = br.readLine()) != null) {
         sb.append(messageLine);
