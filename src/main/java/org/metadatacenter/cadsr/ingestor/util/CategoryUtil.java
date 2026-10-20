@@ -124,10 +124,11 @@ public class CategoryUtil {
             version, ctxCategory.getUniqueId());
         addCategoryToList(csCategory, categories);
 
-        // Levels 3 and beyond
+        // Levels 3 and beyond. Every item goes into the one list, so an item is compared with its
+        // siblings under the same scheme and not only with its own descendants.
         for (CSI csi : cs.getCSI()) {
-          categories.addAll(classificationSchemeItemToCategories(csi, Optional.of(ctxCategory.getLocalId()),
-              Optional.of(csCategory.getLocalId()), csCategory.getUniqueId(), new ArrayList<>()));
+          classificationSchemeItemToCategories(csi, Optional.of(ctxCategory.getLocalId()),
+              Optional.of(csCategory.getLocalId()), csCategory.getUniqueId(), categories);
         }
       }
     }
@@ -163,20 +164,19 @@ public class CategoryUtil {
    */
   public static List<Category> addCategoryToList(Category newCategory, List<Category> categories) {
 
-    List<Integer> positionOfCategoriesWithSameName = new ArrayList<>();
-
-    for (int i = 0; i < categories.size(); i++) {
-      Category category = categories.get(i);
+    // Collected before any is moved: removing by index while walking the indexes shifted every later
+    // one, so with two existing matches one was renamed twice and the other not at all.
+    List<Category> categoriesWithSameName = new ArrayList<>();
+    for (Category category : categories) {
       if (newCategory.getParentUniqueId().equals(category.getParentUniqueId()) && newCategory.getName().equals(category.getName())) {
         logger.warn("Found two categories with the same name at the same level! Name: " + category.getName() + ". Category Ids: " + category.getUniqueId() + "; " + newCategory.getUniqueId());
-        positionOfCategoriesWithSameName.add(i);
+        categoriesWithSameName.add(category);
       }
     }
 
     // Update names of categories with the same name than newCategory
-    for (int position : positionOfCategoriesWithSameName) {
-      Category existingCategory = categories.get(position);
-      categories.remove(position);
+    for (Category existingCategory : categoriesWithSameName) {
+      categories.remove(existingCategory);
       String existingCategoryNewName = existingCategory.getName() + " " + existingCategory.getVersion();
       logger.info("Updating category name to avoid confusion: " + existingCategory.getName() + " (" + existingCategory.getUniqueId() + ")" + " -> " + existingCategoryNewName);
       existingCategory.setName(existingCategoryNewName);
@@ -184,7 +184,7 @@ public class CategoryUtil {
     }
 
     // Update name of newCategory
-    if (!positionOfCategoriesWithSameName.isEmpty()) {
+    if (!categoriesWithSameName.isEmpty()) {
       String newName = newCategory.getName() + " " + newCategory.getVersion();
       logger.info("Updating category name to avoid confusion: " + newCategory.getName() + " (" + newCategory.getUniqueId() + ")" + " -> " + newName);
       newCategory.setName(newName);
