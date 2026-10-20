@@ -49,8 +49,9 @@ public class CdeParser {
       setProperties(fieldMap, dataElement, new PropertiesHandler());
       setPermissibleValues(fieldMap, dataElement, new PermissibleValuesHandler());
       setCategories(fieldMap, dataElement, new CategoriesHandler());
-      // Add to cache
-      cdeCache.put(cdeId, fieldMap);
+      // Add to cache. The cache keeps a copy, since callers remove the keys CEDAR does not store from the map they
+      // were given, and a later read must still find them.
+      cdeCache.put(cdeId, new HashMap<>(fieldMap));
     }
     //logger.info("CDE cache hits: " + cacheHitsCount + " CDE cache misses: " + cacheMissesCount);
   }

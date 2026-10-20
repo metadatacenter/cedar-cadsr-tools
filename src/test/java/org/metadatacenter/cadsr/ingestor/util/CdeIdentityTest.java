@@ -77,6 +77,22 @@ class CdeIdentityTest {
     assertNotEquals(hash, CdeUtil.generateCdeHashCode(changed));
   }
 
+  /**
+   * The parser reads each CDE once and answers later reads from a cache. A caller that removes keys from the map it
+   * was given, as hashing and creating a CDE both do, must not remove them from what a later read finds.
+   */
+  @Test
+  void aCallersChangeDoesNotReachTheNextRead() throws Exception {
+    DataElement element = firstElement();
+    Map<String, Object> first = CdeUtil.getFieldMapFromDataElement(element);
+    CdeUtil.generateCdeHashCode(first);
+    first.remove(Constants.CDE_CATEGORY_IDS_FIELD);
+
+    Map<String, Object> again = CdeUtil.getFieldMapFromDataElement(element);
+    assertTrue(again.containsKey(Constants.CDE_CATEGORY_IDS_FIELD), "the categories survive: " + again.keySet());
+    assertTrue(again.containsKey("@id"), "the identifier key survives: " + again.keySet());
+  }
+
   private DataElement firstElement() throws Exception {
     try (InputStream in = getClass().getResourceAsStream("/cde-sample-" + SAMPLES.get(0) + ".xml")) {
       return CdeUtil.getDataElement(in);

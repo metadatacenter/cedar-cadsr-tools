@@ -56,8 +56,6 @@ class CedarServerUtilTest {
           CedarServerUtil.getTemplateFieldsEndpoint(folder, CedarServer.LOCAL), folder);
       assertEquals("https://resource.metadatacenter.orgx/templates?folder_id=folders%2F" + FOLDER_UUID,
           CedarServerUtil.getTemplatesEndpoint(folder, CedarServer.LOCAL), folder);
-      assertEquals("https://resource.metadatacenter.orgx/folders/" + FOLDER_UUID + "/contents",
-          CedarServerUtil.getFolderContentsEndPoint(folder, CedarServer.LOCAL), folder);
     }
   }
 
@@ -87,11 +85,9 @@ class CedarServerUtilTest {
     String resource = "https://resource.staging.metadatacenter.org";
     CedarServer staging = CedarServer.STAGING;
     assertEquals(resource + "/categories", CedarServerUtil.getCategoriesRestEndpoint(staging));
-    assertEquals(resource + "/categories/root", CedarServerUtil.getRootCategoryRestEndpoint(staging));
     assertEquals(resource + "/categories/tree", CedarServerUtil.getCategoryTreeEndpoint(staging));
     assertEquals(resource + "/categories/https%3A%2F%2Frepo.staging.metadatacenter.org%2Fcategories%2Fc1",
         CedarServerUtil.getCategoryRestEndpoint("https://repo.staging.metadatacenter.org/categories/c1", staging));
-    assertEquals(resource + "/command/attach-category", CedarServerUtil.getAttachCategoryEndpoint(staging));
     assertEquals(resource + "/command/attach-categories", CedarServerUtil.getAttachCategoriesEndpoint(staging));
     assertEquals(resource + "/command/load-valuesets-ontology",
         CedarServerUtil.getLoadValueSetsOntologyEndpoint(staging));

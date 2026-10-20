@@ -16,6 +16,14 @@ public class CedarServerUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(CedarServerUtil.class);
 
+  // When set, one address serves the resource, repository and terminology servers of every deployment, under
+  // /resource, /repo and /terminology. The tools' tests set it to answer for CEDAR; nothing else does.
+  private static String serverBaseUrlOverride;
+
+  static void overrideServerBaseUrl(String baseUrl) {
+    serverBaseUrlOverride = baseUrl;
+  }
+
   public static CedarServer toCedarServerFromServerName(String targetServer) {
     if (targetServer.compareToIgnoreCase(CedarServer.LOCAL.name()) == 0) {
       return CedarServer.LOCAL;
@@ -48,6 +56,9 @@ public class CedarServerUtil {
   }
 
   public static String getResourceServerUrl(CedarServer cedarServer) {
+    if (serverBaseUrlOverride != null) {
+      return serverBaseUrlOverride + "/resource";
+    }
     if (Constants.CedarServer.LOCAL.equals(cedarServer)) {
       return LOCAL_RESOURCE_SERVER_URL;
     } else if (Constants.CedarServer.STAGING.equals(cedarServer)) {
@@ -59,6 +70,9 @@ public class CedarServerUtil {
   }
 
   public static String getRepoServerUrl(CedarServer cedarServer) {
+    if (serverBaseUrlOverride != null) {
+      return serverBaseUrlOverride + "/repo";
+    }
     if (Constants.CedarServer.LOCAL.equals(cedarServer)) {
       return LOCAL_REPO_SERVER_URL;
     } else if (Constants.CedarServer.STAGING.equals(cedarServer)) {
@@ -70,6 +84,9 @@ public class CedarServerUtil {
   }
 
   public static String getTerminologyServerUrl(CedarServer cedarServer) {
+    if (serverBaseUrlOverride != null) {
+      return serverBaseUrlOverride + "/terminology";
+    }
     if (Constants.CedarServer.LOCAL.equals(cedarServer)) {
       return LOCAL_TERMINOLOGY_SERVER_URL;
     } else if (Constants.CedarServer.STAGING.equals(cedarServer)) {
@@ -91,19 +108,9 @@ public class CedarServerUtil {
     return serverUrl + "/categories/" + categoryId;
   }
 
-  public static String getRootCategoryRestEndpoint(CedarServer cedarServer) {
-    String serverUrl = getResourceServerUrl(cedarServer);
-    return serverUrl + "/categories/root";
-  }
-
   public static String getCategoryTreeEndpoint(CedarServer cedarServer) {
     String serverUrl = getResourceServerUrl(cedarServer);
     return serverUrl + "/categories/tree";
-  }
-
-  public static String getAttachCategoryEndpoint(CedarServer cedarServer) {
-    String serverUrl = getResourceServerUrl(cedarServer);
-    return serverUrl + "/command/attach-category";
   }
 
   public static String getLoadValueSetsOntologyEndpoint(CedarServer cedarServer) {
@@ -152,13 +159,6 @@ public class CedarServerUtil {
 
   public static String getTemplateFieldReportEndPoint(String fieldId, CedarServer cedarServer) throws UnsupportedEncodingException {
     return getTemplateFieldEndPoint(fieldId, cedarServer) + "/report";
-  }
-
-  public static String getFolderContentsEndPoint(String folderId, CedarServer cedarServer) throws UnsupportedEncodingException {
-    String resourceServerUrl = CedarServerUtil.getResourceServerUrl(cedarServer);
-    String pathId = org.metadatacenter.id.CedarResourceAddress.pathId(folderSelector(folderId));
-    return resourceServerUrl + "/folders/" + java.net.URLEncoder.encode(pathId, java.nio.charset.StandardCharsets.UTF_8)
-        + "/contents";
   }
 
   public static String getSearchEndPoint(String q, List<CedarResourceType> resourceTypes, CedarServer cedarServer) {

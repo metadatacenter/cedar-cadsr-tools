@@ -95,7 +95,7 @@ public class GeneralUtil {
   }
 
   public static void logErrorMessage(final HttpURLConnection conn) {
-    String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
+    String response = ConnectionUtil.readErrorMessage(conn);
     logger.error(response);
     throw new RuntimeException(response);
   }

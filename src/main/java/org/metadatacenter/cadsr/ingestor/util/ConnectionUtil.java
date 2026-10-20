@@ -45,8 +45,14 @@ public class ConnectionUtil {
     }
   }
 
+  /** The body of an unsuccessful response, which the server sends on the error stream, or "" when it sent none. */
+  public static String readErrorMessage(HttpURLConnection conn) {
+    InputStream error = conn.getErrorStream();
+    return error == null ? "" : readResponseMessage(error);
+  }
+
   public static void logErrorMessageAndThrowException(String message, final HttpURLConnection conn) {
-    String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
+    String response = readErrorMessage(conn);
     logger.error(response);
     throw new RuntimeException(message + "\nError message: " + response);
   }

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.metadatacenter.cadsr.ingestor.util.Constants.*;
@@ -62,35 +63,6 @@ public class CedarServices {
 
   /*** Field services ***/
 
-  public static void deleteAllFieldsInFolder(String folderId, CedarServer server, String apiKey) throws IOException {
-    List<String> fieldIds = findFieldsInFolder(folderId, server, apiKey);
-    for (String fieldId : fieldIds) {
-      deleteField(fieldId, server, apiKey);
-    }
-  }
-
-  // Returns the @ids of all the CEDAR fields in the given folder
-  public static List<String> findFieldsInFolder(String folderId, CedarServer server, String apiKey) throws IOException {
-    String endpoint = CedarServerUtil.getFolderContentsEndPoint(folderId, server);
-    HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
-    int responseCode = connection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      String response = ConnectionUtil.readResponseMessage(connection.getInputStream());
-      connection.disconnect();
-      List<JsonNode> resources = JsonUtil.extractJsonFieldAsList(response, "resources");
-      List<String> fieldIds = new ArrayList<>();
-      for (JsonNode resource : resources) {
-        if (resource.get("resourceType").asText().equals("field")) {
-          fieldIds.add(resource.get(JSON_LD_ID).asText());
-        }
-      }
-      return fieldIds;
-    } else {
-      logger.error("Error retrieving fields in folder");
-      throw new InternalError("Error retrieving fields in folder");
-    }
-  }
-
   public static List<CdeSummary> findCdeSummariesInFolder(String cedarFolderId, List<String> fieldNames,
                                                           boolean includeCategoryIds, CedarServer server, String apiKey) throws IOException {
 
@@ -120,7 +92,7 @@ public class CedarServices {
         }
         logger.info(cdeSummaries.size() + "/" + totalCount + " CDEs retrieved.");
       } else {
-        String message = "Error retrieving CDE summaries: " + ConnectionUtil.readResponseMessage(connection.getInputStream());
+        String message = "Error retrieving CDE summaries: " + ConnectionUtil.readErrorMessage(connection);
         logger.error(message);
         throw new InternalError(message);
       }
@@ -137,7 +109,7 @@ public class CedarServices {
       connection.disconnect();
       return JsonUtil.readJsonAsMap(response);
     } else {
-      String message = "Error retrieving field: " + ConnectionUtil.readResponseMessage(connection.getInputStream());
+      String message = "Error retrieving field: " + ConnectionUtil.readErrorMessage(connection);
       throw new InternalError(message);
     }
   }
@@ -151,7 +123,7 @@ public class CedarServices {
       connection.disconnect();
       return JsonUtil.readJsonAsMap(response);
     } else {
-      String message = "Error retrieving field report: " + ConnectionUtil.readResponseMessage(connection.getInputStream());
+      String message = "Error retrieving field report: " + ConnectionUtil.readErrorMessage(connection);
       throw new InternalError(message);
     }
   }
@@ -207,21 +179,9 @@ public class CedarServices {
       }
       return Optional.empty();
     } else {
-      String message = "Error retrieving CDE: " + ConnectionUtil.readResponseMessage(connection.getInputStream());
+      String message = "Error retrieving CDE: " + ConnectionUtil.readErrorMessage(connection);
       throw new InternalError(message);
     }
-  }
-
-  public static void deleteField(String fieldId, CedarServer server, String apiKey) throws IOException {
-    String fieldEndpoint = CedarServerUtil.getTemplateFieldEndPoint(fieldId, server);
-    HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("DELETE", fieldEndpoint, apiKey);
-    int responseCode = connection.getResponseCode();
-    if (responseCode != HttpURLConnection.HTTP_NO_CONTENT) {
-      String message = "Error deleting field: " + ConnectionUtil.readResponseMessage(connection.getInputStream());
-      logger.error(message);
-      throw new InternalError(message);
-    }
-    connection.disconnect();
   }
 
   public static String createCde(Map<String, Object> cdeFieldMap, String cdeHashCode, String cedarFolderId,
@@ -244,7 +204,7 @@ public class CedarServices {
       conn.setRequestProperty(CedarHeaderParameters.SOURCE_HASH, cdeHashCode);
 
       OutputStream os = conn.getOutputStream();
-      os.write(payload.getBytes());
+      os.write(payload.getBytes(StandardCharsets.UTF_8));
       os.flush();
       int responseCode = conn.getResponseCode();
       if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
@@ -269,27 +229,13 @@ public class CedarServices {
 
   /*** Category Services ***/
 
-  public static String getRootCategoryId(CedarServer targetEnvironment, String apiKey) throws IOException {
-    String endpoint = CedarServerUtil.getRootCategoryRestEndpoint(targetEnvironment);
-    HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
-    int responseCode = connection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-      String response = ConnectionUtil.readResponseMessage(connection.getInputStream());
-      connection.disconnect();
-      return JsonUtil.extractJsonFieldValueAsText(response, "@id");
-    } else {
-      logger.error("Error retrieving root category id");
-      throw new InternalError("Error retrieving root category id");
-    }
-  }
-
   public static void deleteCategory(String categoryCedarId, CedarServer targetEnvironment, String apiKey) throws IOException {
     String endpoint = CedarServerUtil.getCategoryRestEndpoint(categoryCedarId, targetEnvironment);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("DELETE", endpoint, apiKey);
     int responseCode = connection.getResponseCode();
     if (responseCode != HttpURLConnection.HTTP_NO_CONTENT) {
       String message = "Error deleting category (" + categoryCedarId + "): " +
-          ConnectionUtil.readResponseMessage(connection.getInputStream());
+          ConnectionUtil.readErrorMessage(connection);
       logger.error(message);
       throw new InternalError(message);
     }
@@ -321,7 +267,7 @@ public class CedarServices {
       String url = CedarServerUtil.getCategoriesRestEndpoint(server);
       conn = ConnectionUtil.createAndOpenConnection("POST", url, apiKey);
       OutputStream os = conn.getOutputStream();
-      os.write(payload.getBytes());
+      os.write(payload.getBytes(StandardCharsets.UTF_8));
       os.flush();
       int responseCode = conn.getResponseCode();
       if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED) {
@@ -408,7 +354,7 @@ public class CedarServices {
       String url = CedarServerUtil.getCategoryRestEndpoint(categoryCedarId, server);
       conn = ConnectionUtil.createAndOpenConnection("PUT", url, apiKey);
       OutputStream os = conn.getOutputStream();
-      os.write(payload.getBytes());
+      os.write(payload.getBytes(StandardCharsets.UTF_8));
       os.flush();
       int responseCode = conn.getResponseCode();
       if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -463,7 +409,7 @@ public class CedarServices {
         String payload = objectMapper.writeValueAsString(node);
         conn = ConnectionUtil.createAndOpenConnection("POST", endpoint, apiKey);
         OutputStream os = conn.getOutputStream();
-        os.write(payload.getBytes());
+        os.write(payload.getBytes(StandardCharsets.UTF_8));
         os.flush();
         int responseCode = conn.getResponseCode();
         if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
@@ -506,7 +452,7 @@ public class CedarServices {
       String payload = objectMapper.writeValueAsString(templateMap);
       conn = ConnectionUtil.createAndOpenConnection("POST", templatesEndpoint, apiKey);
       OutputStream os = conn.getOutputStream();
-      os.write(payload.getBytes());
+      os.write(payload.getBytes(StandardCharsets.UTF_8));
       os.flush();
       int responseCode = conn.getResponseCode();
       if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
@@ -541,7 +487,7 @@ public class CedarServices {
       String payload = objectMapper.writeValueAsString(payloadMap);
       conn = ConnectionUtil.createAndOpenConnection("POST", integratedSearchEndpoint, apiKey);
       OutputStream os = conn.getOutputStream();
-      os.write(payload.getBytes());
+      os.write(payload.getBytes(StandardCharsets.UTF_8));
       os.flush();
       int responseCode = conn.getResponseCode();
       if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {

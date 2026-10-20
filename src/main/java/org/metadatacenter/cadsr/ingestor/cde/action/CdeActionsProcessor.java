@@ -61,8 +61,7 @@ public class CdeActionsProcessor {
     if (createCdeActions.size() > 0) {
       executeCreateActions();
     }
-    logger.info("Applying CDE actions: ");
-    if (createCdeActions.size() > 0) {
+    if (updateOrDeleteCdeActions.size() > 0) {
       executeUpdateOrDeleteActions();
     }
     logger.info("Finished applying CDE actions.");
