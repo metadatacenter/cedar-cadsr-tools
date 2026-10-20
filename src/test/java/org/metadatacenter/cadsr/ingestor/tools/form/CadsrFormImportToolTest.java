@@ -2,6 +2,7 @@ package org.metadatacenter.cadsr.ingestor.tools.form;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.metadatacenter.cadsr.ingestor.util.StubCedar;
 
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * The form import's command line reads one caDSR form and prints the template it becomes, as JSON, for an operator
  * to inspect or post. Here CEDAR holds none of the form's CDEs, so the template holds the form's two sections.
  */
+@Tag("integration")
 class CadsrFormImportToolTest {
 
   @Test

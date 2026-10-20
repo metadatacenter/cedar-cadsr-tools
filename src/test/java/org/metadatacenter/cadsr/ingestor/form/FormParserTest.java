@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.metadatacenter.cadsr.form.schema.Form;
 import org.metadatacenter.cadsr.form.schema.Module;
@@ -29,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * The example form has two modules and nine questions. CEDAR here holds the CDEs of two of them: the patient's
  * initials, a plain text field, and the patient's gender, whose value set has a value the form does not offer.
  */
+@Tag("integration")
 class FormParserTest {
 
   private static final ObjectMapper JSON = new ObjectMapper();

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.xml.bind.JAXBContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.metadatacenter.cadsr.category.schema.CSI;
@@ -57,6 +58,7 @@ import static org.metadatacenter.cadsr.ingestor.util.Constants.CADSR_CATEGORY_SC
  * The stub answers for CEDAR and keeps the category tree as the run changes it, since the run reads it again after
  * creating categories.
  */
+@Tag("integration")
 class CadsrCategoriesAndCdesUpdaterToolTest {
 
   private static final ObjectMapper JSON = new ObjectMapper();

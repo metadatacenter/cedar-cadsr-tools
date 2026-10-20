@@ -2,6 +2,7 @@ package org.metadatacenter.cadsr.ingestor.util;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * updater fetches the newest file in the folder it is given. It must fetch from that folder only, so a login or a
  * folder the server refuses stops it.
  */
+@Tag("integration")
 class FtpUtilTest {
 
   private StubFtp ftp;

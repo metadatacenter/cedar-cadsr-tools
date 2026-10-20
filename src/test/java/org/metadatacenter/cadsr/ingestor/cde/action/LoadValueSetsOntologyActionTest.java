@@ -1,5 +1,6 @@
 package org.metadatacenter.cadsr.ingestor.cde.action;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.metadatacenter.cadsr.ingestor.util.Constants.CedarServer;
 import org.metadatacenter.cadsr.ingestor.util.StubCedar;
@@ -10,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * After writing the value-sets ontology, the updater asks the resource server to load it, and reports any outcome
  * but a completed load before going on to create the CDEs. A server that refuses the request is such an outcome.
  */
+@Tag("integration")
 class LoadValueSetsOntologyActionTest {
 
   @Test
