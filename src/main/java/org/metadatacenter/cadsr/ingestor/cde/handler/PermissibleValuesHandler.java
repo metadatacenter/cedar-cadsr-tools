@@ -115,7 +115,7 @@ public class PermissibleValuesHandler implements ModelHandler {
       String conceptOrigin = permissibleItem.getMEANINGCONCEPTORIGIN().getContent();
       String ontologyIri = CadsrConceptOrigins.ONTOLOGY_IRI_MAP.get(conceptOrigin);
       if (isComplexConcept(permissibleItem)) {
-        // Use the rightmost concept (last) in the list of concepts
+        // Use the first concept in the list of concepts
         conceptUri = ontologyIri + extractFirstConcept(permissibleItem.getMEANINGCONCEPTS().getContent());
       } else { // regular concept
         conceptUri = ontologyIri + permissibleItem.getMEANINGCONCEPTS().getContent();
@@ -161,35 +161,15 @@ public class PermissibleValuesHandler implements ModelHandler {
     return (conceptId.contains(",") || conceptId.contains(":"));
   }
 
-  private static String extractLastConcept(String complexConcept) throws UnknownSeparatorException {
-    String lastConcept = null;
-    int indexColon = complexConcept.lastIndexOf(":");
-    int indexComma = complexConcept.lastIndexOf(",");
-    if (indexColon > indexComma) {
-      lastConcept = complexConcept.substring(indexColon + 1);
-    } else if (indexColon < indexComma) {
-      lastConcept = complexConcept.substring(indexComma + 1);
-    } else {
-      throw new UnknownSeparatorException("Found a complex concept with an unknown separator: " + complexConcept);
-    }
-    return lastConcept;
-  }
-
+  /** The concept before the first separator, a colon or a comma, of a list of concepts. */
   private static String extractFirstConcept(String complexConcept) throws UnknownSeparatorException {
-    String firstConcept = null;
     int indexColon = complexConcept.indexOf(":");
     int indexComma = complexConcept.indexOf(",");
-    if (indexColon > indexComma && indexColon > -1 && indexComma > -1) {
-      firstConcept = complexConcept.substring(0, indexComma);
-    } else if (indexColon < indexComma) {
-      if (indexColon == -1)
-        firstConcept = complexConcept.substring(0, indexComma);
-      else
-        firstConcept = complexConcept.substring(0, indexColon);
-    } else {
+    int firstSeparator = indexColon == -1 ? indexComma : indexComma == -1 ? indexColon : Math.min(indexColon, indexComma);
+    if (firstSeparator == -1) {
       throw new UnknownSeparatorException("Found a complex concept with an unknown separator: " + complexConcept);
     }
-    return firstConcept;
+    return complexConcept.substring(0, firstSeparator);
   }
 
   private void handleNonEnumeratedType(DataElement dataElement) {

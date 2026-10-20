@@ -127,7 +127,7 @@ public class ConfigSettingsParser {
     options.addOption( "d", "delete-categories", false, "Delete existing CEDAR caDSR categories (excluding its root)");
     options.addOption( "o", "ontology-folder", true, "Path to the folder the CADSR-VS ontology will be saved in");
 
-    options.addOption( "h", "ftp-host", true, "caDSR FTP host");
+    options.addOption( "h", "ftp-host", true, "caDSR FTP host, optionally followed by :port");
     options.addOption( "u", "ftp-user", true, "caDSR FTP user name");
     options.addOption( "p", "ftp-password", true, "caDSR FTP password");
 

@@ -16,11 +16,12 @@ import org.metadatacenter.cadsr.category.schema.Context;
 import org.metadatacenter.cadsr.cde.schema.DataElement;
 import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
 import org.metadatacenter.cadsr.ingestor.util.StubCedar;
+import org.metadatacenter.cadsr.ingestor.util.StubFtp;
 import org.metadatacenter.cadsr.ingestor.util.StubCedar.Reply;
 import org.metadatacenter.cadsr.ingestor.util.StubCedar.Request;
 import org.metadatacenter.constant.OntologyAndValueSetConstants;
 
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -31,6 +32,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -100,22 +102,12 @@ class CadsrCategoriesAndCdesUpdaterToolTest {
     Path executionDir = dir.resolve("execution");
 
     String unchangedHash = CdeUtil.generateCdeHashCode(sample("5873923"));
-    serveTheCdeFolder(List.of(
+    List<String> createdCdes = serveTheCdeSide(List.of(
         summary("https://repo.metadatacenter.orgx/template-fields/aaaaaaaa-1111-2222-3333-444455556666", "5873923",
             unchangedHash),
         summary(CHANGED_CDE, "3017383", "a-hash-the-file-no-longer-gives"),
         summary("https://repo.metadatacenter.orgx/template-fields/ffffffff-1111-2222-3333-444455556666", "9999999",
             "h")));
-    List<String> createdCdes = new ArrayList<>();
-    cedar.answer("POST", "/resource/template-fields", request -> {
-      createdCdes.add(read(request).get("schema:identifier").asText());
-      return new Reply(201, "{\"@id\": \"cedar-cde-" + read(request).get("schema:identifier").asText() + "\"}");
-    });
-    cedar.answer("GET", "/resource/template-fields/eeeeeeee", 200,
-        "{\"@id\": \"" + CHANGED_CDE + "\", \"schema:identifier\": \"3017383\", \"schema:name\": \"Old name\"}");
-    cedar.answer("POST", "/resource/command/attach-categories", 200, "{}");
-    cedar.answer("POST", "/resource/command/load-valuesets-ontology", 200, "{}");
-    cedar.answer("GET", "/resource/command/load-valuesets-ontology-status", 200, "{\"importStatus\": \"COMPLETE\"}");
 
     CadsrCategoriesAndCdesUpdaterTool.main(new String[]{
         "-k", KEY, "-f", "https://repo.metadatacenter.orgx/folders/" + FOLDER_UUID, "-s", "local",
@@ -160,6 +152,52 @@ class CadsrCategoriesAndCdesUpdaterToolTest {
     assertTrue(Files.size(ontologyDir.resolve(OntologyAndValueSetConstants.CADSR_VALUE_SETS_ONTOLOGY_FILE)) > 0);
     assertEquals(1, cedar.requests("POST", "/resource/command/load-valuesets-ontology").size());
     assertFalse(Files.exists(executionDir));
+  }
+
+  /** Without local archives, the run fetches the newest archive of each kind from NCI's FTP server. */
+  @Test
+  void aRunFetchesTheNewestArchivesFromNcisFtpServer(@TempDir Path dir) throws Exception {
+    List<String> createdCdes = serveTheCdeSide(List.of());
+    Path executionDir = dir.resolve("execution");
+    try (StubFtp ftp = new StubFtp("cadsr", "secret")) {
+      ftp.file("categories", "categories-2026-01.zip", new byte[0], LocalDate.of(2026, 1, 1))
+          .file("categories", "categories-2026-09.zip", zipBytes("categories.xml", classificationsXml()),
+              LocalDate.of(2026, 9, 1))
+          .file("cdes", "cdes-2026-09.zip", zipBytes("cdes.xml", cdeListXml("2182451")), LocalDate.of(2026, 9, 1));
+
+      CadsrCategoriesAndCdesUpdaterTool.main(new String[]{
+          "-k", KEY, "-f", "https://repo.metadatacenter.orgx/folders/" + FOLDER_UUID, "-s", "local",
+          "-t", "-g", "categories", "-c", "-e", "cdes", "-h", ftp.address(), "-u", "cadsr", "-p", "secret",
+          "-x", executionDir.toString(), "-o", Files.createDirectories(dir.resolve("ontology")).toString()});
+    }
+
+    assertEquals(cedarId(NCIA), parentOf(RIDER), "the categories came from the newest archive");
+    assertEquals(List.of("2182451"), createdCdes);
+    assertFalse(Files.exists(executionDir));
+  }
+
+  /** The delete option removes every caDSR category from CEDAR, and keeps caDSR's root for the next run. */
+  @Test
+  void deletingCategoriesKeepsCaDsrsRoot() {
+    CadsrCategoriesAndCdesUpdaterTool.main(new String[]{
+        "-k", KEY, "-f", "https://repo.metadatacenter.orgx/folders/" + FOLDER_UUID, "-s", "local", "-d"});
+
+    assertEquals(List.of("root", "cedar-cadsr"), List.copyOf(categories.keySet()));
+  }
+
+  private List<String> serveTheCdeSide(List<ObjectNode> existingCdes) {
+    serveTheCdeFolder(existingCdes);
+    List<String> createdCdes = new ArrayList<>();
+    cedar.answer("POST", "/resource/template-fields", request -> {
+      createdCdes.add(read(request).get("schema:identifier").asText());
+      return new Reply(201, "{\"@id\": \"cedar-cde-" + read(request).get("schema:identifier").asText() + "\"}");
+    });
+    cedar.answer("GET", "/resource/template-fields/eeeeeeee", 200,
+        "{\"@id\": \"" + CHANGED_CDE + "\", \"schema:identifier\": \"3017383\", \"schema:name\": \"Old name\"}");
+    cedar.answer("POST", "/resource/command/attach-categories", 200, "{}");
+    cedar.answer("POST", "/resource/command/load-valuesets-ontology", 200, "{}");
+    cedar.answer("GET", "/resource/command/load-valuesets-ontology-status", 200, "{\"importStatus\": \"COMPLETE\"}");
+    return createdCdes;
   }
 
   private void category(String cedarId, String identifier, String name, String parent) {
@@ -296,12 +334,18 @@ class CadsrCategoriesAndCdesUpdaterToolTest {
   }
 
   private static Path zip(Path zip, String entry, String content) throws IOException {
-    try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zip.toFile()))) {
+    Files.write(zip, zipBytes(entry, content));
+    return zip;
+  }
+
+  private static byte[] zipBytes(String entry, String content) throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    try (ZipOutputStream out = new ZipOutputStream(bytes)) {
       out.putNextEntry(new ZipEntry(entry));
       out.write(content.getBytes(StandardCharsets.UTF_8));
       out.closeEntry();
     }
-    return zip;
+    return bytes.toByteArray();
   }
 
   private static JsonNode read(Request request) {

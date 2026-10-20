@@ -47,7 +47,8 @@ public class LoadValueSetsOntologyAction implements CdeAction {
         default -> "Error - unknown status";
       };
 
-    } catch (IOException | InterruptedException e) {
+    } catch (IOException | InterruptedException | InternalError e) {
+      // CedarServices reports a refused call as an InternalError. The run reports any status but "Done" and goes on.
       String message = "Error calling load value sets ontology endpoint: " + e.getMessage();
       logger.warn(message);
       return message;

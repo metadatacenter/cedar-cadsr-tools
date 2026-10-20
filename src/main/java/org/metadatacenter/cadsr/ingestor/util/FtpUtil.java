@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -16,24 +17,40 @@ public class FtpUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(FtpUtil.class);
 
+  /**
+   * Downloads the most recently modified file in a folder of an FTP server. The server is a host name, optionally
+   * followed by a colon and a port. A refused login or a missing folder is refused rather than answered with the
+   * newest file of another folder, and subfolders are not candidates.
+   */
   public static File downloadMostRecentFile(String server, String user, String password,
                                             String workingDirectory, String destinationFolder) throws IOException {
 
+    String host = server;
+    int port = FTP.DEFAULT_PORT;
+    int colon = server.lastIndexOf(':');
+    if (colon > 0 && server.indexOf(':') == colon && server.substring(colon + 1).matches("\\d+")) {
+      host = server.substring(0, colon);
+      port = Integer.parseInt(server.substring(colon + 1));
+    }
 
     FTPClient ftpClient = new FTPClient();
     try {
 
-      ftpClient.connect(server);
-      ftpClient.login(user, password);
+      ftpClient.connect(host, port);
+      if (!ftpClient.login(user, password)) {
+        throw new IOException("The FTP server refused the login of " + user + ": " + ftpClient.getReplyString().trim());
+      }
       ftpClient.enterLocalPassiveMode();
       ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 
-      ftpClient.changeWorkingDirectory(workingDirectory);
+      if (!ftpClient.changeWorkingDirectory(workingDirectory)) {
+        throw new IOException("The FTP server has no folder " + workingDirectory + ": "
+            + ftpClient.getReplyString().trim());
+      }
 
-      FTPFile[] files = ftpClient.listFiles();
+      List<FTPFile> filesList = new ArrayList<>(Arrays.stream(ftpClient.listFiles()).filter(FTPFile::isFile).toList());
 
-      if (files.length > 0) {
-        List<FTPFile> filesList = Arrays.asList(files);
+      if (filesList.size() > 0) {
         filesList.sort(Comparator.comparing(FTPFile::getTimestamp).reversed());
         FTPFile mostRecentFile = filesList.get(0);
 
