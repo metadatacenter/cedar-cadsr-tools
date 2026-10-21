@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class ConnectionUtil {
 
@@ -17,7 +18,7 @@ public class ConnectionUtil {
 
   public static String readResponseMessage(InputStream is) {
     StringBuilder sb = new StringBuilder();
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+    try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
       String messageLine;
       while ((messageLine = br.readLine()) != null) {
         sb.append(messageLine);
@@ -44,8 +45,14 @@ public class ConnectionUtil {
     }
   }
 
+  /** The body of an unsuccessful response, which the server sends on the error stream, or "" when it sent none. */
+  public static String readErrorMessage(HttpURLConnection conn) {
+    InputStream error = conn.getErrorStream();
+    return error == null ? "" : readResponseMessage(error);
+  }
+
   public static void logErrorMessageAndThrowException(String message, final HttpURLConnection conn) {
-    String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
+    String response = readErrorMessage(conn);
     logger.error(response);
     throw new RuntimeException(message + "\nError message: " + response);
   }

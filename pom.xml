@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.metadatacenter</groupId>
     <artifactId>cedar-parent</artifactId>
-    <version>2.9.26</version>
+    <version>2.9.27</version>
   </parent>
 
   <groupId>org.metadatacenter</groupId>
   <artifactId>cedar-cadsr-tools</artifactId>
-  <version>2.9.26</version>
+  <version>2.9.27</version>
   <packaging>jar</packaging>
 
   <name>CEDAR caDSR Tools</name>
@@ -21,6 +21,11 @@
     <url>https://github.com/metadatacenter/cedar-cadsr-tools</url>
     <tag>HEAD</tag>
   </scm>
+
+  <properties>
+    <!-- Line coverage measured on 2026-10-19: 91.2%. The build fails below this floor. -->
+    <cedar.coverage.line.minimum>0.89</cedar.coverage.line.minimum>
+  </properties>
 
   <dependencies>
 
@@ -211,6 +216,20 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <!-- The coverage report leaves out the classes xjc generates from the caDSR schemas. Each
+           schema's classes sit in a schema package of their own, and the hand-written code is
+           under ingestor. -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <!-- On the plugin rather than one execution, so the report and the coverage check count the
+             same classes. -->
+        <configuration>
+          <excludes>
+            <exclude>org/metadatacenter/cadsr/*/schema/**</exclude>
+          </excludes>
+        </configuration>
       </plugin>
     </plugins>
   </build>

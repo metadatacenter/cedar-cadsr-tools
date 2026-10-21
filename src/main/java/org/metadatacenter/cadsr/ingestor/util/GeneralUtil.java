@@ -2,13 +2,11 @@ package org.metadatacenter.cadsr.ingestor.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
@@ -38,7 +36,7 @@ public class GeneralUtil {
   }
 
   public static String getValueOrNull(String input) {
-    if (input != null & !input.trim().isEmpty()) {
+    if (input != null && !input.trim().isEmpty()) {
       return input;
     } else {
       return null;
@@ -53,53 +51,35 @@ public class GeneralUtil {
     return outputDir;
   }
 
-  public static File createDirectoryBasedOnInputFileName(File sourceFile, File outputDir) {
-    String outputLocation = outputDir.getAbsolutePath() + "/" + Files.getNameWithoutExtension(sourceFile.getName());
-    return checkDirectoryExists(outputLocation);
-  }
-
-  public static boolean multiplesOfAHundred(int counter) {
-    return counter != 0 && counter % 100 == 0;
-  }
-
+  /**
+   * Replaces each character the XML 1.0 standard does not allow with a space. The input is read as UTF-8 and the
+   * output is written as UTF-8, whatever the platform's default charset, and a character outside the Basic
+   * Multilingual Plane is kept whole rather than judged one half at a time.
+   */
   public static InputStream processInvalidXMLCharacters(InputStream in) throws IOException {
-    StringBuilder out = new StringBuilder(); // Used to hold the output.
-    Reader r = new InputStreamReader(in, Constants.CHARSET);
-    int intChar;
-    while ((intChar = r.read()) != -1) {
-      char inputChar = (char) intChar;
-      if (isValidXMLCharacter(inputChar)) {
-        out.append(inputChar);
+    String text = new String(in.readAllBytes(), Constants.CHARSET);
+    StringBuilder out = new StringBuilder(text.length());
+    text.codePoints().forEach(codePoint -> {
+      if (isValidXMLCharacter(codePoint)) {
+        out.appendCodePoint(codePoint);
+      } else {
+        out.append(' ');
       }
-      else {
-        out.append(" ");
-      }
-    }
-    return new ByteArrayInputStream(out.toString().getBytes());
+    });
+    return new ByteArrayInputStream(out.toString().getBytes(Constants.CHARSET));
   }
 
   /**
    * Check if the XML character is valid as specified by the XML 1.0 standard. For reference, please see
    * <a href="http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char">the standard</a>.
    */
-  private static boolean isValidXMLCharacter(char character) {
-    if ((character == 0x9) ||
-        (character == 0xA) ||
-        (character == 0xD) ||
-        ((character >= 0x20) && (character <= 0xD7FF)) ||
-        ((character >= 0xE000) && (character <= 0xFFFD)) ||
-        ((character >= 0x10000) && (character <= 0x10FFFF))) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  public static String getStackTrace(Exception e) {
-    StringWriter writer = new StringWriter();
-    PrintWriter printWriter = new PrintWriter(writer);
-    e.printStackTrace(printWriter);
-    return writer.toString();
+  private static boolean isValidXMLCharacter(int codePoint) {
+    return codePoint == 0x9 ||
+        codePoint == 0xA ||
+        codePoint == 0xD ||
+        (codePoint >= 0x20 && codePoint <= 0xD7FF) ||
+        (codePoint >= 0xE000 && codePoint <= 0xFFFD) ||
+        (codePoint >= 0x10000 && codePoint <= 0x10FFFF);
   }
 
   public static String encodeIfNeeded(String uri) throws UnsupportedEncodingException {
@@ -115,14 +95,9 @@ public class GeneralUtil {
   }
 
   public static void logErrorMessage(final HttpURLConnection conn) {
-    String response = ConnectionUtil.readResponseMessage(conn.getErrorStream());
+    String response = ConnectionUtil.readErrorMessage(conn);
     logger.error(response);
     throw new RuntimeException(response);
-  }
-
-  public static void logResponseMessage(final HttpURLConnection conn) throws IOException {
-    String response = ConnectionUtil.readResponseMessage(conn.getInputStream());
-    logger.debug(response);
   }
 
   public static String calculatePercentage(int amount, int total) {
@@ -130,40 +105,52 @@ public class GeneralUtil {
     return percentFormat.format(((float) amount / (float) total));
   }
 
+  /**
+   * Groups command-line arguments for logging, each option with its value, and hides the value of each secret option,
+   * whether it follows the option or is attached to it ({@code -kVALUE}, {@code --apikey=VALUE}).
+   */
   public static List<String> commandLineArgumentsGrouped(String[] args, String passwordShortOption, String passwordLongOption, String apikeyShortOption, String apikeyLongOption) {
+    List<String> shortSecretOptions = List.of(passwordShortOption, apikeyShortOption);
+    List<String> longSecretOptions = List.of(passwordLongOption, apikeyLongOption);
     List<String> argGroups = new ArrayList<>();
     String group = "";
-    for (int i=0; i<args.length; i++) {
+    for (int i = 0; i < args.length; i++) {
       String arg = args[i];
-      if (arg.equals(passwordShortOption) || arg.equals(passwordLongOption) || arg.equals(apikeyShortOption) || arg.equals(apikeyLongOption)) {
-        group = group.concat(arg + " ********"); // hide password or apikey
+      if (arg.startsWith("-") && group.length() > 0) {
+        argGroups.add(group);
+        group = "";
+      }
+      String attachedSecretOption = attachedSecretOption(arg, shortSecretOptions, longSecretOptions);
+      if (shortSecretOptions.contains(arg) || longSecretOptions.contains(arg)) {
+        argGroups.add(arg + " ********"); // hide password or apikey
         i++;
+      } else if (attachedSecretOption != null) {
+        argGroups.add(attachedSecretOption + " ********");
+      } else if (arg.startsWith("-")) {
+        group = arg;
+      } else {
+        argGroups.add(group.isEmpty() ? arg : group + " " + arg);
+        group = "";
       }
-      else {
-        if (arg.startsWith("-")) {
-          if (group.length() > 0) {
-            argGroups.add(group);
-            group = "";
-          }
-          group = group.concat(arg);
-        }
-        else {
-          group = group.concat(" " + arg);
-          argGroups.add(group);
-          group = "";
-        }
-      }
+    }
+    if (group.length() > 0) {
+      argGroups.add(group);
     }
     return argGroups;
   }
 
-  public static boolean isURL(String url) {
-    try {
-      new URL(url);
-      return true;
-    } catch (Exception e) {
-      return false;
+  private static String attachedSecretOption(String arg, List<String> shortSecretOptions, List<String> longSecretOptions) {
+    for (String option : longSecretOptions) {
+      if (arg.startsWith(option + "=")) {
+        return option;
+      }
     }
+    for (String option : shortSecretOptions) {
+      if (!arg.startsWith("--") && arg.startsWith(option) && arg.length() > option.length()) {
+        return option;
+      }
+    }
+    return null;
   }
 
   public static String convertMapToJson(Map map) {
