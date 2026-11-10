@@ -86,8 +86,8 @@
       <artifactId>hamcrest</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.owlapi</groupId>
@@ -196,25 +196,6 @@
                     Clearing the output directory removes the org.metadatacenter.cadsr.cde.schema schema from above.
                 -->
               <clearOutputDir>false</clearOutputDir>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Tell an IDE to include generated code in its compile phase. jsonschema2pojo uses ${basedir}/target/java-gen -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>test</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${basedir}/target/java-gen</source>
-              </sources>
             </configuration>
           </execution>
         </executions>
