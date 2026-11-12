@@ -8,7 +8,7 @@ import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementExcepti
 import org.metadatacenter.model.ModelNodeNames;
 import org.metadatacenter.model.ModelNodeValues;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

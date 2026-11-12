@@ -8,7 +8,7 @@ import org.metadatacenter.cadsr.ingestor.util.CdeUtil;
 import org.metadatacenter.model.BiboStatus;
 import org.metadatacenter.model.ModelNodeNames;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Map;
 
 public class VersionHandler implements ModelHandler {

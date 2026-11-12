@@ -9,7 +9,7 @@ import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataElementExcepti
 import org.metadatacenter.cadsr.ingestor.exception.UnsupportedDataTypeException;
 import org.metadatacenter.model.ModelNodeNames;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
