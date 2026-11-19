@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.metadatacenter</groupId>
     <artifactId>cedar-parent</artifactId>
-    <version>2.9.36</version>
+    <version>2.9.37</version>
   </parent>
 
   <groupId>org.metadatacenter</groupId>
   <artifactId>cedar-cadsr-tools</artifactId>
-  <version>2.9.36</version>
+  <version>2.9.37</version>
   <packaging>jar</packaging>
 
   <name>CEDAR caDSR Tools</name>
@@ -123,6 +123,18 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <!-- The value-set load waits five seconds before its first status check and three between
+                 later ones, which the tests' stand-in resource server does not need. -->
+            <cedar.cadsr.valueSetsLoad.initialWaitMillis>0</cedar.cadsr.valueSetsLoad.initialWaitMillis>
+            <cedar.cadsr.valueSetsLoad.waitMillis>0</cedar.cadsr.valueSetsLoad.waitMillis>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

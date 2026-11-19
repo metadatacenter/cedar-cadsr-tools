@@ -11,11 +11,28 @@ public class LoadValueSetsOntologyAction implements CdeAction {
 
   private static final Logger logger = LoggerFactory.getLogger(LoadValueSetsOntologyAction.class);
 
-  private final static int MAX_STATUS_CHECK_ATTEMPTS = 10;
-  private final static long STATUS_CHECK_INITIAL_SLEEP_TIME = 5000;
-  private final static long STATUS_CHECK_SLEEP_TIME = 3000;
+  static final int MAX_STATUS_CHECK_ATTEMPTS = 10;
+  private static final long STATUS_CHECK_INITIAL_SLEEP_TIME = 5000;
+  private static final long STATUS_CHECK_SLEEP_TIME = 3000;
+
+  /**
+   * The waits before the first status check and between later ones. The system properties exist so that tests,
+   * which run the updater through its command line, can set both to zero.
+   */
+  static final String INITIAL_WAIT_PROPERTY = "cedar.cadsr.valueSetsLoad.initialWaitMillis";
+  static final String WAIT_PROPERTY = "cedar.cadsr.valueSetsLoad.waitMillis";
+
+  private final long initialWaitMillis;
+  private final long waitMillis;
 
   public LoadValueSetsOntologyAction() {
+    this(Long.getLong(INITIAL_WAIT_PROPERTY, STATUS_CHECK_INITIAL_SLEEP_TIME),
+        Long.getLong(WAIT_PROPERTY, STATUS_CHECK_SLEEP_TIME));
+  }
+
+  LoadValueSetsOntologyAction(long initialWaitMillis, long waitMillis) {
+    this.initialWaitMillis = initialWaitMillis;
+    this.waitMillis = waitMillis;
   }
 
   public static Logger getLogger() {
@@ -27,14 +44,14 @@ public class LoadValueSetsOntologyAction implements CdeAction {
     try {
       CedarServices.loadValueSetsOntology(cedarEnvironment, apiKey);
 
-      Thread.sleep(STATUS_CHECK_INITIAL_SLEEP_TIME);
+      Thread.sleep(initialWaitMillis);
 
       String status = CedarServices.loadValueSetsOntologyStatus(cedarEnvironment, apiKey);
 
       for (int statusCheckNumber = 1; statusCheckNumber < MAX_STATUS_CHECK_ATTEMPTS; statusCheckNumber++) {
         if (status.equals("COMPLETE") || status.equals("ERROR")) break;
 
-        Thread.sleep(STATUS_CHECK_SLEEP_TIME);
+        Thread.sleep(waitMillis);
 
         status = CedarServices.loadValueSetsOntologyStatus(cedarEnvironment, apiKey);
       }
