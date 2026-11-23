@@ -64,8 +64,8 @@ class FormParserTest {
     cedar.answer("GET", "/resource/template-fields/22222222-1111-2222-3333-444455556666/report", 200,
         "{\"parentPath\": \"/Shared/CDE\"}");
     cedar.answer("POST", "/terminology/bioportal/integrated-search", request -> {
-      int page = read(request.body()).get("page").asInt();
-      String values = page > 1 ? "" : String.join(",", value("UNKNOWN"), value("FEMALE"), value("NOT REPORTED"),
+      int offset = read(request.body()).get("offset").asInt();
+      String values = offset > 0 ? "" : String.join(",", value("UNKNOWN"), value("FEMALE"), value("NOT REPORTED"),
           value("MALE"));
       return new Reply(200, "{\"collection\": [" + values + "]}");
     });
@@ -113,8 +113,8 @@ class FormParserTest {
     assertEquals("move", actions.get(1).get("action").asText());
     assertEquals(GENDER_VALUES + "/UNKNOWN", actions.get(1).get("termUri").asText());
     assertEquals(3, actions.get(1).get("to").asInt(), "UNKNOWN moves to the form's third place");
-    assertEquals(2, cedar.requests("POST", "/terminology/bioportal/integrated-search").size(),
-        "the value set is read until a page comes back empty");
+    assertEquals(1, cedar.requests("POST", "/terminology/bioportal/integrated-search").size(),
+        "the value set is read until a page comes back short");
 
     assertTrue(result.getReportMessages().containsAll(List.of(
         "Added section: DEMOGRAPHY",

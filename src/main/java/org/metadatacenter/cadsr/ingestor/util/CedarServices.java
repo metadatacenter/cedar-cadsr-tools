@@ -472,7 +472,7 @@ public class CedarServices {
   }
 
   /*** Terminology Services ***/
-  public static Map<String, Object> integratedSearch(Map<String, Object> valueConstraints, Integer page, Integer pageSize,
+  public static Map<String, Object> integratedSearch(Map<String, Object> valueConstraints, int offset, int limit,
                                                      CedarServer cedarEnvironment, String apiKey) throws IOException, RuntimeException {
     HttpURLConnection conn = null;
     Map<String, Object> resultsMap = new HashMap<>();
@@ -482,8 +482,8 @@ public class CedarServices {
       vcMap.put("valueConstraints", valueConstraints);
       Map<String, Object> payloadMap = new HashMap<>();
       payloadMap.put("parameterObject", vcMap);
-      payloadMap.put("page", page);
-      payloadMap.put("pageSize", pageSize);
+      payloadMap.put("offset", offset);
+      payloadMap.put("limit", limit);
       String payload = objectMapper.writeValueAsString(payloadMap);
       conn = ConnectionUtil.createAndOpenConnection("POST", integratedSearchEndpoint, apiKey);
       OutputStream os = conn.getOutputStream();

@@ -252,21 +252,23 @@ class CedarServicesTest {
   @Test
   void aValueSetIsSearchedThroughTheTerminologyServer() throws Exception {
     cedar.answer("POST", "/terminology/bioportal/integrated-search", 200,
-        "{\"collection\": [{\"notation\": \"Y\"}], \"page\": 1}");
+        "{\"collection\": [{\"notation\": \"Y\"}], \"totalCount\": 1}");
     Map<String, Object> constraints = Map.of("valueSets", List.of(Map.of("uri", "https://cadsr.example/VD1")));
 
-    Map<String, Object> result = CedarServices.integratedSearch(constraints, 2, 50, CedarServer.LOCAL, KEY);
+    Map<String, Object> result = CedarServices.integratedSearch(constraints, 50, 50, CedarServer.LOCAL, KEY);
 
     assertEquals(List.of(Map.of("notation", "Y")), result.get("collection"));
     JsonNode body = read(only(cedar.requests("POST", "/terminology/bioportal/integrated-search")));
-    assertEquals(2, body.get("page").asInt());
-    assertEquals(50, body.get("pageSize").asInt());
+    assertEquals(50, body.get("offset").asInt());
+    assertEquals(50, body.get("limit").asInt());
+    assertFalse(body.has("page"));
+    assertFalse(body.has("pageSize"));
     assertEquals("https://cadsr.example/VD1",
         body.get("parameterObject").get("valueConstraints").get("valueSets").get(0).get("uri").asText());
 
     cedar.answer("POST", "/terminology/bioportal/integrated-search", 502, "{}");
     assertThrows(RuntimeException.class,
-        () -> CedarServices.integratedSearch(constraints, 1, 50, CedarServer.LOCAL, KEY));
+        () -> CedarServices.integratedSearch(constraints, 0, 50, CedarServer.LOCAL, KEY));
   }
 
   /** The impex server creates the template it translated from a form in the folder the user chose. */

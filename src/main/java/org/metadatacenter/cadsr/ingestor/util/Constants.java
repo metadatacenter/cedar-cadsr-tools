@@ -71,7 +71,8 @@ public final class Constants {
 
   // Pagination
   public static final int PAGE_SIZE = 50;
-  public static final int LARGE_PAGE_SIZE = 5000;
+  // The largest page the terminology server's integrated search serves
+  public static final int LARGE_PAGE_SIZE = 500;
 
   // Max number of move actions that will be applied. If the value set has more move actions than this threshold, the
   // order returned by BioPortal will be used.

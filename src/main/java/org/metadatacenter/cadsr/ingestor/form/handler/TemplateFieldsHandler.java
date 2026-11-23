@@ -120,18 +120,14 @@ public class TemplateFieldsHandler implements ModelHandler {
       // 1. Retrieve all the values from BioPortal
       List<Map<String, String>> cdeValues = new ArrayList<>();
       List<Map<String, String>> values;
-      int page = 1;
       do {
         Map<String, Object> result =
-            CedarServices.integratedSearch((Map<String, Object>) cde.get("_valueConstraints"), page, LARGE_PAGE_SIZE,
-                cedarServer, apiKey);
+            CedarServices.integratedSearch((Map<String, Object>) cde.get("_valueConstraints"), cdeValues.size(),
+                LARGE_PAGE_SIZE, cedarServer, apiKey);
         values = result.containsKey("collection") ? (List<Map<String, String>>) result.get("collection") :
             new ArrayList<>();
-        if (values.size() > 0) {
-          cdeValues.addAll(values);
-          page++;
-        }
-      } while (values.size() > 0);
+        cdeValues.addAll(values);
+      } while (values.size() == LARGE_PAGE_SIZE);
 
       // If the displayOrder specified in the valid values matches the order of the values retrieved from BioPortal,
       // we won't need to generate move actions. In many cases, the valid values are ordered alphabetically, and we will
