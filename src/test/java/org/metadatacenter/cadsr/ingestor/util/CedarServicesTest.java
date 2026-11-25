@@ -236,16 +236,17 @@ class CedarServicesTest {
 
   @Test
   void theValueSetsOntologyIsLoadedAndItsStatusRead() throws Exception {
-    cedar.answer("POST", "/resource/command/load-valuesets-ontology", 200, "{}")
-        .answer("GET", "/resource/command/load-valuesets-ontology-status", 200, "{\"importStatus\": \"COMPLETE\"}");
+    cedar.answer("POST", "/resource/command/load-valuesets-ontology", 202, "{\"jobId\": \"import-1\"}")
+        .answer("GET", "/resource/jobs/import-1", 200, "{\"importStatus\": \"COMPLETE\"}");
 
-    CedarServices.loadValueSetsOntology(CedarServer.LOCAL, KEY);
-    assertEquals("COMPLETE", CedarServices.loadValueSetsOntologyStatus(CedarServer.LOCAL, KEY));
+    assertEquals("import-1", CedarServices.loadValueSetsOntology(CedarServer.LOCAL, KEY));
+    assertEquals("COMPLETE", CedarServices.loadValueSetsOntologyStatus("import-1", CedarServer.LOCAL, KEY));
 
     cedar.answer("POST", "/resource/command/load-valuesets-ontology", 500, "{}")
-        .answer("GET", "/resource/command/load-valuesets-ontology-status", 500, "{}");
+        .answer("GET", "/resource/jobs/import-1", 500, "{}");
     assertThrows(InternalError.class, () -> CedarServices.loadValueSetsOntology(CedarServer.LOCAL, KEY));
-    assertThrows(InternalError.class, () -> CedarServices.loadValueSetsOntologyStatus(CedarServer.LOCAL, KEY));
+    assertThrows(InternalError.class,
+        () -> CedarServices.loadValueSetsOntologyStatus("import-1", CedarServer.LOCAL, KEY));
   }
 
   /** The values of a CDE's value set are read a page at a time through the terminology server. */

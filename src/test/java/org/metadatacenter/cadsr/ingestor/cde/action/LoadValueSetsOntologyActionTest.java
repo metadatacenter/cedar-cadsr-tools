@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class LoadValueSetsOntologyActionTest {
 
   private static final String LOAD = "/resource/command/load-valuesets-ontology";
-  private static final String STATUS = "/resource/command/load-valuesets-ontology-status";
+  private static final String STATUS = "/resource/jobs/import-1";
 
   @Test
   void aRefusedLoadIsReportedRatherThanEndingTheRun() throws Exception {
@@ -59,7 +59,7 @@ class LoadValueSetsOntologyActionTest {
     try (StubCedar cedar = StubCedar.start()) {
       Iterator<String> answers = statuses.iterator();
       String[] last = {statuses.get(0)};
-      cedar.answer("POST", LOAD, 200, "{}");
+      cedar.answer("POST", LOAD, 202, "{\"jobId\": \"import-1\"}");
       cedar.answer("GET", STATUS, request -> {
         if (answers.hasNext()) {
           last[0] = answers.next();

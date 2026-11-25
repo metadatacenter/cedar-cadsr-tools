@@ -30,13 +30,15 @@ public class CedarServices {
   private static final Logger logger = LoggerFactory.getLogger(CedarServices.class);
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
-  public static void loadValueSetsOntology(CedarServer server, String apiKey) throws IOException {
+  /** Queues the import and returns the identifier of the job the resource server started for it. */
+  public static String loadValueSetsOntology(CedarServer server, String apiKey) throws IOException {
     String endpoint = CedarServerUtil.getLoadValueSetsOntologyEndpoint(server);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("POST", endpoint, apiKey);
     int responseCode = connection.getResponseCode();
-    if (responseCode == HttpURLConnection.HTTP_OK) {
-
+    if (responseCode == HttpURLConnection.HTTP_ACCEPTED) {
+      String response = ConnectionUtil.readResponseMessage(connection.getInputStream());
       connection.disconnect();
+      return JsonUtil.extractJsonFieldValueAsText(response, "jobId");
     } else {
       String message = "Error calling resource server to load the value sets ontology; response code = " + responseCode;
       logger.error(message);
@@ -45,8 +47,8 @@ public class CedarServices {
   }
 
   // Returns: "NOT_YET_INITIATED", "IN_PROGRESS", "COMPLETE", "ERROR"
-  public static String loadValueSetsOntologyStatus(CedarServer server, String apiKey) throws IOException {
-    String endpoint = CedarServerUtil.getLoadValueSetsOntologyStatusEndpoint(server);
+  public static String loadValueSetsOntologyStatus(String jobId, CedarServer server, String apiKey) throws IOException {
+    String endpoint = CedarServerUtil.getJobEndpoint(jobId, server);
     HttpURLConnection connection = ConnectionUtil.createAndOpenConnection("GET", endpoint, apiKey);
     int responseCode = connection.getResponseCode();
     if (responseCode == HttpURLConnection.HTTP_OK) {

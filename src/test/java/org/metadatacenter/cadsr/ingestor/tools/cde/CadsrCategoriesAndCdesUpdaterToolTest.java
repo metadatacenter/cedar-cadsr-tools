@@ -197,8 +197,8 @@ class CadsrCategoriesAndCdesUpdaterToolTest {
     cedar.answer("GET", "/resource/template-fields/eeeeeeee", 200,
         "{\"@id\": \"" + CHANGED_CDE + "\", \"schema:identifier\": \"3017383\", \"schema:name\": \"Old name\"}");
     cedar.answer("POST", "/resource/command/attach-categories", 200, "{}");
-    cedar.answer("POST", "/resource/command/load-valuesets-ontology", 200, "{}");
-    cedar.answer("GET", "/resource/command/load-valuesets-ontology-status", 200, "{\"importStatus\": \"COMPLETE\"}");
+    cedar.answer("POST", "/resource/command/load-valuesets-ontology", 202, "{\"jobId\": \"import-1\"}");
+    cedar.answer("GET", "/resource/jobs/import-1", 200, "{\"importStatus\": \"COMPLETE\"}");
     return createdCdes;
   }
 

@@ -91,8 +91,8 @@ class CedarServerUtilTest {
     assertEquals(resource + "/command/attach-categories", CedarServerUtil.getAttachCategoriesEndpoint(staging));
     assertEquals(resource + "/command/load-valuesets-ontology",
         CedarServerUtil.getLoadValueSetsOntologyEndpoint(staging));
-    assertEquals(resource + "/command/load-valuesets-ontology-status",
-        CedarServerUtil.getLoadValueSetsOntologyStatusEndpoint(staging));
+    assertEquals(resource + "/jobs/7d3f0a52-41e8-4c6b-9a2f-0e5d8c1b7a93",
+        CedarServerUtil.getJobEndpoint("7d3f0a52-41e8-4c6b-9a2f-0e5d8c1b7a93", staging));
     assertEquals("https://terminology.staging.metadatacenter.org/bioportal/integrated-search",
         CedarServerUtil.getIntegratedSearchEndpoint(staging));
   }

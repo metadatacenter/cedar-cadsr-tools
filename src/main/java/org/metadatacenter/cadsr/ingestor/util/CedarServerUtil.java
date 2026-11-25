@@ -118,9 +118,9 @@ public class CedarServerUtil {
     return serverUrl + "/command/load-valuesets-ontology";
   }
 
-  public static String getLoadValueSetsOntologyStatusEndpoint(CedarServer cedarServer) {
+  public static String getJobEndpoint(String jobId, CedarServer cedarServer) throws UnsupportedEncodingException {
     String serverUrl = getResourceServerUrl(cedarServer);
-    return serverUrl + "/command/load-valuesets-ontology-status";
+    return serverUrl + "/jobs/" + GeneralUtil.encodeIfNeeded(jobId);
   }
 
   public static String getAttachCategoriesEndpoint(CedarServer cedarServer) {

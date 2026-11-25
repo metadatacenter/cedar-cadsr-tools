@@ -42,18 +42,18 @@ public class LoadValueSetsOntologyAction implements CdeAction {
   @Override
   public String execute(CedarServer cedarEnvironment, String apiKey) {
     try {
-      CedarServices.loadValueSetsOntology(cedarEnvironment, apiKey);
+      String jobId = CedarServices.loadValueSetsOntology(cedarEnvironment, apiKey);
 
       Thread.sleep(initialWaitMillis);
 
-      String status = CedarServices.loadValueSetsOntologyStatus(cedarEnvironment, apiKey);
+      String status = CedarServices.loadValueSetsOntologyStatus(jobId, cedarEnvironment, apiKey);
 
       for (int statusCheckNumber = 1; statusCheckNumber < MAX_STATUS_CHECK_ATTEMPTS; statusCheckNumber++) {
         if (status.equals("COMPLETE") || status.equals("ERROR")) break;
 
         Thread.sleep(waitMillis);
 
-        status = CedarServices.loadValueSetsOntologyStatus(cedarEnvironment, apiKey);
+        status = CedarServices.loadValueSetsOntologyStatus(jobId, cedarEnvironment, apiKey);
       }
 
       return switch (status) {
